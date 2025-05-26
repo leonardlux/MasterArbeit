@@ -1,0 +1,8 @@
+# Papers and Latex documents
+*.pdf
+# Latex make files
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.gz

@@ -1,0 +1,26 @@
+Organisatorisch Fragen:
+
+group:
+	- Weekly group meeting, when?
+	- Journal club, when?
+
+prof:
+	--- was für präsentations software?
+
+version Management:
+	- any preffered Git hoster?
+
+Latex:
+	- iffTex 
+	- local variant
+
+
+
+
+Beantwortet:
+Homeoffice/Remote möglich
+80 pages sind maximum 
+Fixed 12 Months 
+	after 6 Months, 30-40 min talk	
+prof meeting every 2 weeks
+Supervisor, once a week meeting and preferred in person 

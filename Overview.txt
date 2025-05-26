@@ -1,0 +1,19 @@
+Idea:
+Find theoretical limit of coherent information under which error correction still possible.
+
+types of error correction (using teleportation): 
+	knill
+	steune
+
+find analytical mapping between coherent information and order parameter (from classical statistics)
+
+-> find phase transition (numerical simulation needed)
+-> limit of coherent information for eacht type of error correction
+
+need to now: (both in quantum info lecture)
+- how to work with gates 
+- open quantum systems 
+
+
+
+

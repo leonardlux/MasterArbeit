@@ -1,0 +1,86 @@
+\documentclass{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{braket} % imported to allow Bra-Ket formalism
+
+\usepackage{amsmath} % added for eq and eq* (numbered and unnumbered)
+
+\usepackage{xcolor} % added to mark questions in red
+
+
+\author{leo}
+
+\begin{document}
+
+
+% Short summary and explanation of the most important technical terms
+\section{Understood}
+
+% Everything following I need to look into
+\section{Needs more work!}
+
+\subsection{Quantum Computing}
+Basic concept controlling/manipultating qubits.
+Quantum phenomena (such as entanglement) enable more interesting algorithms than in classical computer with classical bits.
+
+\subsection{Qubits}
+Short for 'quantum bits' and the most basic unit of a quantum computer.\footnote{Possible realizations: photons, trapped ions, superconducting circuits, spins in semiconductors etc..}
+
+Mathematical notation using Dirac bra-ket notation.
+Computational basis given by $\{\ket{0}, \ket{1}\}$ (for single qubit case).
+Therefore the general qubit take the form of:
+\begin{equation*}
+    \ket{\Phi} = \alpha \ket{0} + \beta \ket{1}
+\end{equation*}
+
+For multi qubit systems, implicit labelling is assumed ($1,...,n$).
+\begin{equation*}
+    \ket{010} = \ket{0}_1 \otimes \ket{1}_2 \otimes \ket{0}_3
+\end{equation*}
+
+\subsubsection{Physical Qubits}
+\subsubsection{Logical Qubits}
+Logical qubits are constructed by using mulitple physical qubits in combinations with an encoding.
+This is done to implement QEC. \textcolor{red}{correct?}
+Logical quibits are indicated by an subscript l: $\ket{\Phi}_l$
+
+\subsubsection{Pauli Operator Notation}
+
+
+\subsection{Decoding}
+
+\subsubsection{Maximum Likelihood Decoding}
+\subsubsection{Optimal Thresshold}
+
+\subsubsection{Efficient Optimal Decoding}
+
+\subsection{Encoding}
+Process of storing information into multiple quits (physical to logical quit transition)
+
+\subsection{Quantum Error Correction (QEC)}
+Due to external noise, errors occour in calculations. (Active) quantum error correction needed.
+\subsubsection{Knill type QEC}
+\subsubsection{Steune type QEC}
+
+\subsection{Codes}
+\subsubsection{Surface Codes}
+\subsubsection{Stabilizer Codes}
+
+\subsection{Gates}
+\subsubsection{CNOT-Gates}
+controlled-NOT gates
+\subsubsection{Hadamard Gate (H)}
+
+\subsection{Coherent Information (CI)}
+of mixed state density operator, what is the equation and Physical meaning 
+
+\subsection{Leakage}
+
+\subsection{Qubit Loss (vs. Quantum erasure \& Quantum Error)}
+\subsection{Qubit Erasure}
+
+\subsection{Basic Math}
+
+
+
+
+\end{document}
