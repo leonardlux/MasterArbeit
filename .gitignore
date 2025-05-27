@@ -6,3 +6,7 @@
 *.fls
 *.log
 *.gz
+*.out
+# Images
+Notizen/notes/images/*
+*.img
