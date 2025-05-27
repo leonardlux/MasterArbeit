@@ -1,10 +1,30 @@
 \documentclass{article}
 \usepackage{graphicx} % Required for inserting images
+\graphicspath{{./images}}
+\usepackage{braket} % bra-ket notation
+\usepackage{amsmath} % added for eq and eq* (numbered and unnumbered)
+\usepackage{amsfonts}% BlackBoard C
+\usepackage{dsfont}% BlackBoard 1
+\usepackage{xcolor} % added to mark questions in red
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Leos Notes},
+    pdfpagemode=FullScreen,
+    }
+
 \author{leo}
 
 \begin{document}
 
-\section{Notes}
+% Start of topics
+\include{topics/0_math_basics/main}
 
+
+% ToDo list 
+\include{todo.tex}
 
 \end{document}

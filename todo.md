@@ -1,6 +1,6 @@
 # Thematischer Bezug
 
+
 # Anders
 
-1. Git einrichten und backups erstellen
-
+1. Latex Übersichtlich einrichten
