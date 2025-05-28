@@ -1,11 +1,160 @@
 \section{Basic Quantum Computing}
 
-\subsection{Qubits}
+\subsection{Physical and Logical Qubit}
 
-\subsection{Computational Basis}
+We increase the number of qubits used for our encoding to \textit{redundantly} store the information in the expaneded Hilbert space.
 
-\subsection{Quantum Advantage}
+The specific set of instruction on how the information of a single physical 
+qubit is encoded onto mulitple qubits is called:
+Quantum Error Correction Code (QEC code) or simply encoding.
 
-\subsection{Quantum Errors}
+The \textit{distance} $d$ is a property of this code which describes, 
+the minimal number of errors that will change one 
+codeword\footnote{A codeword is the set of physical qubits that describe the logical qubit} to another.
+In other words, the minimal amount of errors need for an error to go undeteced.
 
-\subsection{Redunant Encoding/Logical Qubit}
+A logical qubit is noted by a subscript $L$: $\ket{\Psi}_L$
+
+The distance is realted to the number of errors $t$ a code can correct
+\begin{equation}
+    d = 2t+1.
+\end{equation}
+
+\subsubsection{[[n,k,d]]-Notation}
+\begin{itemize}
+    \item n: total number of physical qubits per codeword
+    \item k: number of encoded qubits (length of the logical qubit)
+    \item d: code distance
+\end{itemize}
+ 
+\subsection{Computational Space/Basis}
+
+'Qubits can encode information in a superposition of their basis state $\rightarrow$ computational space scales as $2^n$.'
+
+\textcolor{red}{What exactly is the Computational space? what are its properties and what is the physical meaning of a \textit{computational} basis. 
+Is it just the fact that our quantum computer is acting on this space?}
+
+
+\textcolor{red}{What exactly is the difference to classical computing, the data stored also scales with $2^n$, where $n$ is the amount of bits.
+How can we say it as simple as said there?
+}
+
+
+\subsection{Digitasition of quantum errors}
+
+Due to bits beeing discrete in the classical case there is only one type of errors (bit-flips). 
+But the qubit can exist everywhere on the Bloch sphere, so in a conitinum. 
+Erros can therefore take also an infinte amout of forms.
+We focus on coherent (=unitary) rotations as an example
+\begin{equation}
+    U(\delta \theta, \delta \phi) \ket{\Psi}=
+    \cos\left(\frac{\theta + \delta \theta}{2}\right) \ket{0} +
+    e^{i(\phi + \delta \phi)} 
+    \sin\left(\frac{\theta + \delta \theta}{2}\right) \ket{1}.
+\end{equation} 
+
+Quantum errors can be digitazied using the Pauli matricies/operator. 
+To show this we express the rot. op. $U$ using the Pauli set/\textcolor{red}{basis?} 
+%$\{\mathds{1},{X},{Z},{XZ}\}$
+\footnote{We used that $XZ=Yc$, where $c$ is just a phase factor.}
+
+\begin{equation}
+    U(\delta \theta, \delta \phi)\ket{\Psi} = 
+    \alpha_1 \mathds{1} \ket{\Psi} +
+    \alpha_X X \ket{\Psi}+
+    \alpha_Z Z \ket{\Psi}+
+    \alpha_{XZ} XZ \ket{\Psi}
+\end{equation}
+
+Therefore any coherent rot.\footnote{This could also be generalized for arb. quantum processes} can be decomposed into a sum from the Pauli set. 
+
+Resulting from this QEC codes with the ability to correct errors described by the $X$- and $Z$-Pauli matricies will be able to correct any (coherent) error!
+
+This is the digitasition of errors for quantum computing.
+\subsection{Quantum error types}
+ there are only two fundamental error types, that need to be accounted for.
+
+\begin{enumerate}
+    \item Pauli $X$-type errors $=$ quantum bit-flips \\
+    $\rightarrow$ maps: $X\ket{0} = \ket{1}; X \ket{\Psi}= \alpha X \ket{0} + \beta X \ket{1} = \alpha  \ket{1} + \beta \ket{0}   $
+    \item Pauli $Z$-type errors $=$ phase-flips (no classical analogone)\\
+    $\rightarrow$ maps:  $Z \ket{\Psi}= \alpha Z \ket{0} + \beta Z \ket{1} = \alpha  \ket{0} - \beta \ket{1}   $
+\end{enumerate}
+
+
+\subsection{Challenges of QEC}
+\subsubsection{1. No cloning theorem}
+It is not possible to construct a unitary operator $U_{clone}$ which performs the operation
+\begin{equation}
+    U_{clone}(\ket{\Psi} \otimes \ket{0}) \rightarrow \ket{\Psi} \otimes\ket{\Psi}
+\end{equation}
+
+\subsubsection{2. Both bit- and phase-flips}
+QEC codes must be designed to detect both kinds ($X,Z$) of errors simultaneously!
+
+\subsubsection{3. Wavefct. collpase}
+We can not perform arbitrary measurments on the qubits. 
+Some measurments will lead to wavefct collapse and erase encoded information.
+\textcolor{red}{Better describe when the wavefct actually collapses}
+
+$\rightarrow$ stabilizer measurments
+
+\subsection{Encoding}
+
+While encoding, with an [[n,k,d]] code, we increase the size of the Hilbert space by adding $n-k=m$ redundancy qubits $\ket{0}_R$
+to create the logical qubit $\ket{\Psi}_L$. 
+Afterwards the data previously stroed solely in $\ket{\Psi}_D$ is distributed across the expanded Hilbert space.
+
+This Hilbert space can then be split up into two subspaces. 
+The \textit{codespace} $\mathcal{C}$ is the subspace on which the logical qubit is defined.
+The \textit{error subspace} $\mathcal{F}$ is the subspace, in which the logical qubit rotates to, when applying an error operator. 
+
+The two subspaces ($\mathcal{F} , \mathcal{C}$) are mutual orthogonal. 
+Therefore we can distinguish which subspace is occupid via projective measurments, 
+without compromising the encoded quantum information! 
+
+$\rightarrow$ projective measurments = stabilizer measurments
+
+\subsubsection{Example of Encoding and Spaces}
+For example if we start with one qubit, we start with 
+\begin{equation}
+    \ket{\Psi} \in \mathcal{H}_2 = \text{span}\{\ket{0},\ket{1} \}.
+\end{equation}
+After the encoding (by adding another qubit) we get a 4-dim Hilbert space 
+\begin{equation}
+    \ket{\Psi} \in \mathcal{H}_4 = \text{span}\{\ket{00},\ket{01},\ket{10},\ket{11} \}.
+\end{equation}
+
+This higher dimensional space can be used to redundantly encode the information.
+The logical qubit is defined within a 2-dim subspace, which is called the \textit{codespace} $\mathcal{C}$
+
+\begin{equation}
+    \ket{\Psi}_L \in \mathcal{C} = \text{span}\{\ket{00},\ket{11} \} \subset \mathcal{H}_4.
+\end{equation}
+
+Applying an error (e.g. bit-flip $X$) roatates the state in the \textit{error subspace} $\mathcal{F}$
+\begin{equation}
+    X_i \ket{\Psi}_L \in \mathcal{F} = \text{span}\{\ket{01},\ket{10} \} \subset \mathcal{H}_4.
+\end{equation} 
+
+
+\subsection{Stabilizer}
+\textcolor{red}{Clean up this section!!}
+Error can be deteced by performing $n-k=m$ stabilizer measurments $P_i$.
+\textcolor{red}{Add the commutation condition with error operators}
+
+An example for a stabilizer measurment for the previously shown encoding is 
+\begin{equation}
+    Z_1 Z_2 \ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{00}+ \beta \ket{11}) = +1 \ket{\Psi}_L
+\end{equation}
+
+\begin{equation}
+    Z_1 Z_2 X_1\ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{10}+ \beta \ket{01}) = -1 \ket{\Psi}_L
+\end{equation}
+
+A stabilizer measurments projects the all elements of the codespace onto the $+1$ eigenspace 
+and projects (some/in total all) elements of error space onto the $-1$ eigenspace. 
+
+The information encoded in the logical qubit ($\alpha/\beta$ coef.) is undisturbed!
+
+\subsubsection{Syndrome and Ancilla}
