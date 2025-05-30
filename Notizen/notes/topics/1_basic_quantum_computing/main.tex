@@ -99,10 +99,10 @@ Some measurments will lead to wavefct collapse and erase encoded information.
 
 $\rightarrow$ stabilizer measurments
 
-\subsection{Encoding}
+\subsection{Encoding (Codeapce and error subspace)}
 
-While encoding, with an [[n,k,d]] code, we increase the size of the Hilbert space by adding $n-k=m$ redundancy qubits $\ket{0}_R$
-to create the logical qubit $\ket{\Psi}_L$. 
+While encoding, with an $[[n,k,d]]$ code, we increase the size of the Hilbert space by adding $m=n-k$ redundancy qubits $\ket{0}_R$
+to create a logical qubit $\ket{\Psi}_L$. 
 Afterwards the data previously stroed solely in $\ket{\Psi}_D$ is distributed across the expanded Hilbert space.
 
 This Hilbert space can then be split up into two subspaces. 
@@ -115,7 +115,7 @@ without compromising the encoded quantum information!
 
 $\rightarrow$ projective measurments = stabilizer measurments
 
-\subsubsection{Example of Encoding and Spaces}
+\subsubsection{Example of Encoding with Spaces}
 For example if we start with one qubit, we start with 
 \begin{equation}
     \ket{\Psi} \in \mathcal{H}_2 = \text{span}\{\ket{0},\ket{1} \}.
@@ -138,8 +138,39 @@ Applying an error (e.g. bit-flip $X$) roatates the state in the \textit{error su
 \end{equation} 
 
 
-\subsection{Stabilizer}
-\textcolor{red}{Clean up this section!!}
+\subsection{Stabilizer}\label{sec:basic.qc.stabilizer}
+
+A \textit{stabilizer} $P_i$ is a 
+\hyperref[sec:basic.math.projection_operator]{projection operator} 
+that maps the states to the $\pm 1$ eigenspaces.
+The stabilizer of a $[[n,k,d]]$ code must satisfy
+\begin{enumerate}
+    \item must be a Pauli-group element. $P_i \in \mathcal{G}_n$ 
+    \item must \textit{stabilize}\footnote{Leaves the logical state unchanged} all logical states $\ket{\Psi}_L$ of the code \\
+    $\implies P_i \ket{\Psi}_L = (+1) \ket{\Psi}_L \forall \ket{\Psi}_L \in \mathcal{C} $ 
+    \item all stabilizer must commute\footnote{
+It is necessary that the stabilizer commute, so that they can be measured simultaneously/independent from each other. 
+    } with one another $[P_i,P_j]=0 \ \forall (i,j)$
+\end{enumerate}
+Therefore the stabilizers of an $[[n,k,d]]$ code form an \textit{Abelian subgroup} $\mathcal{S}$ of the Pauli group.
+
+\begin{equation}
+    \mathcal{S} = \{ P_i \in \mathcal{G}_n | P_i \ket{\Psi}_L = (+1) \ket{\Psi}_L \forall \ket{\Psi}_L\in \mathcal{C} \land [P_i,P_j]=0 \ \forall(i,j)\}
+\end{equation}
+\textcolor{red}{Do we wanna use each $P_i \in \mathcal{S}$, that is contained in the set above?!? -> no! minimal set?!}
+
+Importantly the product of two stabilizers is also a stabilizer $P_i \cdot P_j \in \mathcal{S}$, due to
+\begin{equation}
+    P_i \cdot P_j  \ket{\Psi}_L = P_i (+1) \ket{\Psi}_L = (+1) \ket{\Psi}_L.
+\end{equation}
+Therefore we need to make sure that the stabilizers form a \hyperref[sec:basic.math.minimal_set]{minimal set}. 
+\begin{equation}
+    \mathcal{S}= \langle G_1, G_2, ..., G_m\rangle
+\end{equation}
+
+
+
+\subsubsection{Example of Stabilizer Measurments}
 Error can be deteced by performing $n-k=m$ stabilizer measurments $P_i$.
 \textcolor{red}{Add the commutation condition with error operators}
 
