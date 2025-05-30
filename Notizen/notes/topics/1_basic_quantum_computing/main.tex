@@ -157,35 +157,169 @@ Therefore the stabilizers of an $[[n,k,d]]$ code form an \textit{Abelian subgrou
 \begin{equation}
     \mathcal{S} = \{ P_i \in \mathcal{G}_n | P_i \ket{\Psi}_L = (+1) \ket{\Psi}_L \forall \ket{\Psi}_L\in \mathcal{C} \land [P_i,P_j]=0 \ \forall(i,j)\}
 \end{equation}
-\textcolor{red}{Do we wanna use each $P_i \in \mathcal{S}$, that is contained in the set above?!? -> no! minimal set?!}
+\textcolor{red}{Do we wanna use each $P_i \in \mathcal{S}$, that is contained in the set above?!? -> no! minimal set -> by the convention used we have two different definitions of $\mathcal{S}$ or are they still equivalent.}
 
 Importantly the product of two stabilizers is also a stabilizer $P_i \cdot P_j \in \mathcal{S}$, due to
 \begin{equation}
     P_i \cdot P_j  \ket{\Psi}_L = P_i (+1) \ket{\Psi}_L = (+1) \ket{\Psi}_L.
 \end{equation}
-Therefore we need to make sure that the stabilizers form a \hyperref[sec:basic.math.minimal_set]{minimal set}. 
+Therefore we need to make sure that the set of $m=n-k$ stabilizers used in the \hyperref[sec:basic.qc.syndrome_extraction_process]{syndrome extraction process}
+form a \hyperref[sec:basic.math.minimal_set]{minimal set}. 
 \begin{equation}
     \mathcal{S}= \langle G_1, G_2, ..., G_m\rangle
 \end{equation}
 
+The important property of the stabilizer is, that they leave the logical qubits (states) unchanged ($+1$ eigenspace) 
+and project (some) elements of the error subspace to the -1 eigenspace.
+\footnote{
+    Each stabilizer might only project some states from the error subspace on the $-1$ eigenspace. 
+    But the set \textcolor{red}{SHOULD?!} project all elements from the error subspace to the $-1$ eigenspace. 
+} 
 
 
 \subsubsection{Example of Stabilizer Measurments}
-Error can be deteced by performing $n-k=m$ stabilizer measurments $P_i$.
+Errors can be deteced by performing $n-k=m$ stabilizer measurments $P_i$.
 \textcolor{red}{Add the commutation condition with error operators}
 
-An example for a stabilizer measurment for the previously shown encoding is 
+Some examples for a stabilizer (here $Z_1 Z_2$) measurments for the previously shown encoding on the codespace
 \begin{equation}
     Z_1 Z_2 \ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{00}+ \beta \ket{11}) = +1 \ket{\Psi}_L
 \end{equation}
-
+and on the error subspace
 \begin{equation}
-    Z_1 Z_2 X_1\ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{10}+ \beta \ket{01}) = -1 \ket{\Psi}_L
+    Z_1 Z_2 X_1\ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{10}+ \beta \ket{01}) = -1 \ket{\Psi}_L.
 \end{equation}
 
 A stabilizer measurments projects the all elements of the codespace onto the $+1$ eigenspace 
-and projects (some/in total all) elements of error space onto the $-1$ eigenspace. 
+and projects some (the set in total all) elements of error space onto the $-1$ eigenspace. 
+The stabilizers therefore should anticommute with the errors!
 
 The information encoded in the logical qubit ($\alpha/\beta$ coef.) is undisturbed!
 
-\subsubsection{Syndrome and Ancilla}
+To form a \hyperref[sec:basic.math.minimal_set]{minimal set} we need to choose
+\begin{equation}
+    \mathcal{S} = \langle Z_1 Z_2, Z_2 Z_3 \rangle.
+\end{equation}
+An set of stabilizers for the three-qubit code that does not form a minimal set is
+\begin{equation}
+    \mathcal{S}' = \{ Z_1 Z_2, Z_2 Z_3, Z_1 Z_3\}
+\end{equation}
+as we can use the first two operator to obtain the last one.
+
+\subsection{Syndrome Extraction Process}\label{sec:basic.qc.syndrome_extraction_process}
+
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{circuit_syndrome_extraction.png}
+    \end{center}
+    \caption{
+        Circuit illustrating the structur of an $[[n,k,d]]$ stabilizer code. 
+        A quantum data register $\ket{\Psi}_D$ is entangled with redundancy qubits $\ket{0}_R$ via an encoding operation to create a logical qubit $\ket{\Psi}_L$.
+        After encoding, a sequence of $m = n - k$ stabilizer checks $P_i$ are performed on the register, and each result copied to an ancilla qubit $A_i$.         
+        The subsequent measurement of the ancilla qubits provides an $m$-bit syndrome.
+    }
+
+    \label{fig:basic.qc.syndrome_extraction.circuit}
+\end{figure}
+
+Errors can be detected using the $m=n-k$ \hyperref[sec:basic.qc.stabilizer]{stabilizers} $P_i$, which extract $m$-bit syndrome using the $m$ ancilla qubits $\ket{0}_{A_i}$.
+This process is shown in figure \ref{fig:basic.qc.syndrome_extraction.circuit}.
+
+The corresponding equation to the circuit
+\begin{equation}
+    E \ket{\Psi}_L \ket{0}_{A_i} \rightarrow \frac{1}{2} (\mathds{1}^{\otimes n} + P_i) E \ket{\Psi}_L \ket{0}_{A_i} +  \frac{1}{2} (\mathds{1}^{\otimes n} - P_i) E   \ket{\Psi}_L \ket{1}_{A_i} 
+\end{equation}
+shows that the ancilla qubit $A_i$ returns '$0$' if the stabilizer $P_i$ and the error $E$ commute,
+and returns '$1$' if they anticommute! 
+
+The results of the $m$-stabilizer measurments are combined to give an $m$-bit syndrome.
+The syndrome allows to deduce the best recovery operation to restore the logical state.
+
+\subsection{Logical Operators of Stabilizer Codes}
+
+A $[[n,k,d]]$ code has $2k$ logical Pauli operators\footnote{Any product of log. op. $\bar{L}_i$ and stabilizer $P_i$ will also be a log. op.}. 
+Each logical qubit $i$ has logical Pauli-$X$ op. $\bar{X}_i$ and a logical-$Z$ op. $\bar{Z}_i$. 
+They allow the logical state to be modified without having to decode and reencode. 
+
+Each pair $\bar{X}_i$, $\bar{Z}_i$ satisfies:
+\begin{enumerate}
+    \item they commute with all the code stabilizers in $\mathcal{S}$
+    \item they anti-commute with one another, so that $\{ \bar{X}_i, \bar{Z_i}\}=0$
+\end{enumerate}
+
+\subsection{Decoding the Syndrome}
+
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{circuit_active_error_rec.png}
+    \end{center}
+    \caption{
+    Schematic of an active error correcting circuit with error process $E$, set of stabilizers $\mathcal{S}$, m-bit syndrome $S$ and recovery operation $R$.
+    The decoder determines the best recovery operation $\mathcal{R}$ to return to the logical state, based on the syndrome $S$.
+    }
+    \label{fig:basic.qc.qec_circuit}
+\end{figure}
+
+The relation $d = 2t+1$ tells us that if the distance $d\ge 3$ we can correct $t$ errors.
+Therefore we get propper error correcting codes, where we apply active recovery operations based on the detected syndrome.
+The general circuit schematic is shown in figure \ref{fig:basic.qc.qec_circuit}.
+
+We use the $m$-bit syndrome $S$ to find a recovery operation. 
+This process is called decoding: 
+decoding is the process in which we determine the best unitary operation $\mathcal{R}$ to return the state to the codespace based on the syndrome.
+
+The decoding step is a success if 
+\begin{equation}
+    \mathcal{R}E \ket{\Psi}_L = +1 \ket{\Psi}_L.
+\end{equation}
+This is trivially fullfiled for $\mathcal{R}E=\mathds{1}$ ($\mathcal{R}=E^\dagger$). 
+This is also fullfiled for $\mathcal{R}E=P_i \in \mathcal{S}$.
+Therefore there is no unique solution for $\mathcal{R}$ and we can design \textit{degenerate} quantum codes,
+where mulitple error map to/are recovered by the same syndrome.
+
+The decoding fails if the recovery operation maps the code state to another logical state
+\begin{equation}
+    \mathcal{R}E \ket{\Psi}_L = L\ket{\Psi}_L.
+\end{equation}
+In this case the state is returned to the codespace, 
+but the recovery operation a change in the encoded information!
+
+\subsubsection{Efficient Decoding Algorithms}
+Give a code syndrome $S$, the role of the decoder is to find the best recovery operation $\mathcal{R}$ to restore the encoded quantum information to the codespace.
+\textcolor{red}{ToDO}
+
+\subsection{Surface Codes}
+
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{surface_code_small.png}
+    \end{center}
+    \label{fig:basic.qc.surface_code_small}
+\end{figure}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{surface_code_big.png}
+    \end{center}
+    \label{fig:basic.qc.surface_code_big}
+\end{figure}
+General challenge in creating QEC codes is finding set of commuting stabilizers, 
+which enable error detection whitout disturbing the contained information.
+
+Surface codes belong to the broader family of \textit{topological codes}.
+There general design principal is, that the code is constructed by connecting repeated elements together. 
+This modular approach ensures scalibility whilst keeping commutativity.
+A more practical advantage is that surface codes require only nearest-neighbour interaction.
+
+An example of a surface code can be found in figure \ref{fig:basic.qc.surface_code_small}.
+And a scaled up version is visible in \ref{fig:basic.qc.surface_code_big}.
+
+The logical operators can be found on the edge of the lattice. 
+The Pauli-$X$ logical operator can be defined as the chain of Pauli-$X$ operator along the boundary along which the $Z$-stabilizers (shown in blue) are applied.
+The Pauli-$Z$ logical operator can be defined along the adjacend boundary!
+
+\subsubsection{Scaling of Surface Codes}
+The distance of a surface code can be increased by scaling the size of the lattice.
+In general the distance $d=\lambda$, will encode a \textit{single} logical qubit and have the code parameters
+\begin{equation}
+    [[n = \lambda^2 + (\lambda-1)^2, k=1 ]]
+\end{equation}
