@@ -285,11 +285,30 @@ In this case the state is returned to the codespace,
 but the recovery operation a change in the encoded information!
 
 \subsubsection{Efficient Decoding Algorithms}
-Give a code syndrome $S$, the role of the decoder is to find the best recovery operation $\mathcal{R}$ to restore the encoded quantum information to the codespace.
-\textcolor{red}{ToDO}
+
+The possible syndrome scales with the code size as $2^m = 2^(n-k)$.
+For example the surface code with $d=5$ ($[[41,1,5]]$) has $2^40\approx 10^12$ possible syndromes. 
+Therefore lookup tables become inefficent!
+
+Large scale codes use \textit{approximate interference techniques}.
+They determine the recovery operation which is \textit{most likely} to restores the encoded information to the codespace.
+These methods allow the recovery operation to be choosen in real-time!
+
+The frequency with which the decoder fails is called the logical error rate $p_L$. 
+And because the decoder introduces another point of failure for the QEC code, the choice of decoder can heavly influence the logical error rate of a QEC code. 
+
+\subsection{Code Threshold}
+The \textit{threshold theorem} for stabilizer codes states:
+Increasing the distance of a code results in a reduction of the logical error rate $p_L$ 
+if the physical error rate $p$ of individuals quibts is below a threshold $p<p_{th}$.
+
+Therefore we have a condition for when codes can be used to supress the logical errors and where the process of QEC codes becomes self defeating.
+
+Upper bounds for $p_{th}$ for a given code under a given noise model can be obtained using methods from statistical meachanics.
+More realistic threshold can be numerically estimated by simulating code cycles and decoding using efficient interference algorithms. 
 
 \subsection{Surface Codes}
-
+\textcolor{red}{Here I need more subtential infromation!}
 \begin{figure}[h]
     \begin{center}
         \includegraphics[width=0.8\textwidth]{surface_code_small.png}
@@ -323,3 +342,5 @@ In general the distance $d=\lambda$, will encode a \textit{single} logical qubit
 \begin{equation}
     [[n = \lambda^2 + (\lambda-1)^2, k=1 ]]
 \end{equation}
+
+
