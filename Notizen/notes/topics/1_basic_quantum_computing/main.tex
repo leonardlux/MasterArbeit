@@ -307,6 +307,26 @@ Therefore we have a condition for when codes can be used to supress the logical 
 Upper bounds for $p_{th}$ for a given code under a given noise model can be obtained using methods from statistical meachanics.
 More realistic threshold can be numerically estimated by simulating code cycles and decoding using efficient interference algorithms. 
 
+\subsection{Fault tolerance}
+
+A QEC code is said to be \textit{fault tolerant} if it can account for errors (of size up to the code distance) that occur at any location in the circuit.
+
+We previously assumed that the syndrom extraction and encoding operates without error (as seen in figure \ref{fig:basic.qc.qec_circuit}).
+Converting a code to be fault tolerant may lead to addition qubits needed, the reptations of syndrome extraction and a higher code threshold. 
+
+
+\subsection{Encoded computation}
+A \textit{universal quantum computer} is a device that can perform any unitary operation $U$ that evolves a quibt register from one state to another $U\ket{\Psi} = \ket{\Psi}'$.
+Any such operation $U$ can be efficetly compiled from a finite set of elementary gate, so called \textit{universal gate set}.
+
+It possible to fault tolerantly implement a subset of the gates of a universal gat set without having to intoduce additional qubits. 
+This is achvied by a definig logical operators with a property knows as \textit{transversality}, that gurantees errors will not spread uncontrollably through the circuit.
+A no-go theorem exists that prohibts the implementation of a full universal gate set in this way. 
+Therefore alternative techniques are required, but they typically impose high cost of additional qubits.
+
+
+
+
 \subsection{Surface Codes}
 \textcolor{red}{Here I need more subtential infromation!}
 \begin{figure}[h]
