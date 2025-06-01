@@ -7,6 +7,10 @@
 *.log
 *.gz
 *.out
+*.bbl
+*.bcf
+*.blg
+*.run.xml
 # Images
 Notizen/notes/images/*
 *.img

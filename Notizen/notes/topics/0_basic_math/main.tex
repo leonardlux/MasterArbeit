@@ -84,7 +84,7 @@ is an element of the four-qubit Pauli Group.
 
 The \textit{support} of a Pauli operator is given by the list of its non-identity elements.
 For example the support of the operator \ref{eq:basic.math.ex_pauli_op} is written as $X_2Y_4$.
-The indicees point to the qubit each element acts on.\footnote{This is completly stolen from QEC Introduction}
+The indicees point to the qubit each element acts on.\footnote{This is completly stolen from QEC Introduction} \cite{QECintro}
 
 
 \subsubsection{SU(2)}
@@ -188,6 +188,7 @@ And it transforms the computational basis into the eigenstates of the $X$-Operat
 \begin{equation}
     H\ket{1} = \frac{1}{\sqrt{2}} (\ket{0} - \ket{1}) = \ket{-}
 \end{equation}
+\cite{QECintro}
 
 \subsubsection{Control Gates (CNOT)}\label{sec:basic.math.gates.cnot}
 
@@ -203,7 +204,12 @@ This gate is marked with a black dot on the control qubit and a symbol with an e
 \subsection{No Cloning Theorem}\label{sec:basic.math.no_cloning_theorem}
 You can not simple clone a quantum state. 
 This hinders the application of usual error correction codes.
-\textcolor{red}{ToDo}
+
+The no-cloning theorem states, that it is not possible to construct a unitray operator $U_{clone}$, such that 
+\begin{equation}
+    U_{clone} (\ket{\Psi} \otimes \ket{0} ) \rightarrow \ket{\Psi} \otimes \ket{\Psi}.
+\end{equation}
+\cite{QECintro}
 
 \subsection{Wavefct. collapse/Measurments}\label{sec:basic.math.wavefct_collpase}
 Measurments prepare a quantum state/They force them into the corresponding eigentstate of the measurment.
@@ -218,4 +224,4 @@ Measurments prepare a quantum state/They force them into the corresponding eigen
 \subsection{Minimal set}\label{sec:basic.math.minimal_set}
 
 A minimal set $\mathcal{S}= \langle G_1,...,G_n\rangle$ is a set, 
-in which is is not possible to obtain one element $G_i \in \mathcal{S}$ as a product of any other elements  $G_i \ne G_j \cdot G_k \forall G_j,G_k\in\mathcal{S}$.
+in which is is not possible to obtain one element $G_i \in \mathcal{S}$ as a product of any other elements  $G_i \ne G_j \cdot G_k \forall G_j,G_k\in\mathcal{S}$.\cite{QECintro}
