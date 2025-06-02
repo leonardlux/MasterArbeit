@@ -13,36 +13,48 @@ the minimal number of errors that will change one
 codeword\footnote{A codeword is the set of physical qubits that describe the logical qubit} to another.
 In other words, the minimal amount of errors need for an error to go undeteced. \cite{QECintro}
 
-A logical qubit is noted by a subscript $L$: $\ket{\Psi}_L$
+This definition is equivalent with the definition, that the distance $d$ as the minimum weight of any logical operator. \cite{QECmemory}
 
-The distance is realted to the number of errors $t$ a code can correct
+A logical qubit is noted by a subscript $L$: $\ket{\Psi}_L$
+\textcolor{red}{alternative notation has it with an bar ontop}
+
+
+\subsection{Correctable Errors}
+The distance is realted to the number of errors $t$ a code can correct \cite{QECintro}
+\textcolor{red}{What exactly is this number of errors $t$, is it the max weight of an correctable error operator?}
 \begin{equation}
     d = 2t+1.
 \end{equation}
- \cite{QECintro}
-\subsubsection{[[n,k,d]]-Notation}
-\cite{QECintro}
-\begin{itemize}
-    \item n: total number of physical qubits per codeword
-    \item k: number of encoded qubits (length of the logical qubit)
-    \item d: code distance
-\end{itemize}
+Errors with weight at most $t$, have the property that their products have weight at most $2t<d$.
+Therefore the product of these operators can never be a logical operator, as those have weight $d$ or more. 
+If error $E_1$ occurs and our decoder picks another error with the same syndrome $E_2$, 
+we effectively get the state $E_2 E_1 \ket{\Psi}_L = E_{combined} \ket{\Psi}_L$, where both errors have weight $\leq t$.
+This state has a trivial syndrome, because all parity checks/stabilizers commute with $E_{combined}$.
+($E_2$ and $E_1$ have the same syndrome, therefore they either both anticommute or commute with the stabilizers.) 
+Thus $E_{combined}$ having weight $2t<d$ cannot be logical operator but the parity checks only show trivial results. \cite{QECmemory}
+Therefore the state is still in the codespace (and no logical operator could have occured).
+
  
 \subsection{Computational Space/Basis}
-
 'Qubits can encode information in a superposition of their basis state $\rightarrow$ computational space scales as $2^n$.' \cite{QECintro}
 
 \textcolor{red}{What exactly is the Computational space? what are its properties and what is the physical meaning of a \textit{computational} basis. 
 Is it just the fact that our quantum computer is acting on this space?}
-
 
 \textcolor{red}{What exactly is the difference to classical computing, the data stored also scales with $2^n$, where $n$ is the amount of bits.
 How can we say it as simple as said there?
 }
 
 
-\subsection{Digitasition of quantum errors}
+\section{Basics of Quantum Error Correction (QEC)}
+The goal of quantum error correction (QEC) is to preserve not a single macroscopic quantum state but the macroscopic state in a small subspace. \cite{QECmemory}
 
+We can destinguish between active and passive QEC (or self correction).
+In the latter quantum information is encoded in physical degrees of freedom which are naturally protected or have litte decoherence. \cite{QECmemory}
+We will focus on the active kind.
+
+
+\subsection{Digitisation of quantum errors}
 Due to bits beeing discrete in the classical case there is only one type of errors (bit-flips). 
 But the qubit can takes state everywhere on the Bloch sphere, so in a conitinuum. 
 Errors can therefore take also an infinte amount of forms.
@@ -81,18 +93,28 @@ There are only two fundamental error types, that need to be accounted for \cite{
     \item Pauli $Z$-type errors $=$ phase-flips (no classical analogone)\\
     $\rightarrow$ maps:  $Z \ket{\Psi}= \alpha Z \ket{0} + \beta Z \ket{1} = \alpha  \ket{0} - \beta \ket{1}   $
 \end{enumerate}
+\textcolor{red}{What about erasure errors?}
+
+
+\subsubsection{Erasure Errors}
+Erasure errors are errors where certain, known qubits are lost or are known to have an error and are therfore considerd lost. 
+For codes with distance $d$, erasure errors on a subset up to size $d-1$ can be recovered. \cite{QECmemory}
 
 
 \subsection{Challenges of QEC}
 Taken from \cite{QECintro}
+
+
 \subsubsection{1. No cloning theorem}
 It is not possible to construct a unitary operator $U_{clone}$ which performs the operation
 \begin{equation}
     U_{clone}(\ket{\Psi} \otimes \ket{0}) \rightarrow \ket{\Psi} \otimes\ket{\Psi}
 \end{equation}
 
+
 \subsubsection{2. Both bit- and phase-flips}
 QEC codes must be designed to detect both kinds ($X,Z$) of errors simultaneously!
+
 
 \subsubsection{3. Wavefct. collpase}
 We can not perform arbitrary measurments on the qubits. 
@@ -101,19 +123,45 @@ Some measurments will lead to wavefct collapse and erase encoded information.
 
 $\rightarrow$ stabilizer measurments
 
-\subsection{Encoding (Codespace and Error Subspace)}
 
-While encoding, with an $[[n,k,d]]$ code, we increase the size of the Hilbert space by adding $m=n-k$ redundancy qubits $\ket{0}_R$
+\section{Active QEC}
+By the active gathering of error information, entropy is effectively removed from the computation and dumped into the ancilla degrees of freedom, which are supplied in known states to collect the error information. \cite{QECmemory}
+
+
+\subsection{QEC Code/Encoding}
+The QEC code describes how the to represent the quantum information in the state space of many physical/elementary qubits. \cite{QECmemory}
+\textcolor{red}{Is the QEC code only the encoding or also contains the chosen decoding ?}
+
+
+\subsubsection{Codespace and Error Subspace}
+While encoding, with an \hyperref[sssec:nkd_notation]{$[[n,k,d]]$ code}, we increase the size of the Hilbert space by adding $m=n-k$ redundancy qubits $\ket{0}_R$
 to create a logical qubit $\ket{\Psi}_L$. 
 Afterwards the data previously stroed solely in $\ket{\Psi}_D$ is distributed across the expanded Hilbert space.
 This Hilbert space can then be split up into two subspaces. 
-The \textit{codespace} $\mathcal{C}$ is the subspace on which the logical qubit is defined.
+The \textit{codespace} $\mathcal{C}$ is the subspace on which the logical qubit is defined. \cite{QECintro}
+This subspace is spanned by the code words, which are the 'long' version of the logical qubits/states.
+
 The \textit{error subspace} $\mathcal{F}$ is the subspace, in which the logical qubit rotates to, when applying an error operator. 
 The two subspaces ($\mathcal{F} , \mathcal{C}$) are mutual orthogonal. 
 Therefore we can distinguish which subspace is occupid via projective measurments, 
 without compromising the encoded quantum information!  \cite{QECintro}
 
 $\rightarrow$ projective measurments = stabilizer measurments
+
+
+\subsubsection{[[n,k,d]]-Notation}\label{sssec:nkd_notation}
+Taken from \cite{QECintro}.
+\begin{itemize}
+    \item n: total number of physical qubits per codeword (also known as block size of the code \cite{QECmemory})
+    \item k: number of encoded qubits (length of the logical qubit)
+    \item d: code distance
+\end{itemize}
+
+
+\subsubsection{Code Concatenation}
+Code concatenation is the procedure in which we take the elementary qubits of the code words of a code $C$ and replace them by encoded qubits of a new code $C'$. \cite{QECmemory}
+\textcolor{red}{Should I add an example ?!}
+
 
 \subsubsection{Example of Encoding with Spaces}
 Taken from \cite{QECintro}: 
@@ -125,14 +173,11 @@ After the encoding (by adding another qubit) we get a 4-dim Hilbert space
 \begin{equation}
     \ket{\Psi} \in \mathcal{H}_4 = \text{span}\{\ket{00},\ket{01},\ket{10},\ket{11} \}.
 \end{equation}
-
 This higher dimensional space can be used to redundantly encode the information.
 The logical qubit is defined within a 2-dim subspace, which is called the \textit{codespace} $\mathcal{C}$
-
 \begin{equation}
     \ket{\Psi}_L \in \mathcal{C} = \text{span}\{\ket{00},\ket{11} \} \subset \mathcal{H}_4.
 \end{equation}
-
 Applying an error (e.g. bit-flip $X$) roatates the state in the \textit{error subspace} $\mathcal{F}$
 \begin{equation}
     X_i \ket{\Psi}_L \in \mathcal{F} = \text{span}\{\ket{01},\ket{10} \} \subset \mathcal{H}_4.
@@ -140,7 +185,6 @@ Applying an error (e.g. bit-flip $X$) roatates the state in the \textit{error su
 
 
 \subsection{Stabilizer}\label{sec:basic.qc.stabilizer}
-
 A \textit{stabilizer} 
 $P_i$ is a 
 \hyperref[sec:basic.math.projection_operator]{projection operator} 
@@ -155,7 +199,6 @@ It is necessary that the stabilizer commute, so that they can be measured simult
     } with one another $[P_i,P_j]=0 \ \forall (i,j)$
 \end{enumerate}
 Therefore the stabilizers of an $[[n,k,d]]$ code form an \textit{Abelian subgroup} $\mathcal{S}$ of the Pauli group. \cite{QECintro}
-
 \begin{equation}
     \mathcal{S} = \{ P_i \in \mathcal{G}_n | P_i \ket{\Psi}_L = (+1) \ket{\Psi}_L \forall \ket{\Psi}_L\in \mathcal{C} \land [P_i,P_j]=0 \ \forall(i,j)\}
 \end{equation}
@@ -192,7 +235,6 @@ and on the error subspace
 \begin{equation}
     Z_1 Z_2 X_1\ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{10}+ \beta \ket{01}) = -1 \ket{\Psi}_L.
 \end{equation}
-
 A stabilizer measurments projects the all elements of the codespace onto the $+1$ eigenspace 
 and projects some (the set in total all) elements of error space onto the $-1$ eigenspace. 
 The stabilizers therefore should anticommute with the errors! 
@@ -209,6 +251,7 @@ An set of stabilizers for the three-qubit code that does not form a minimal set 
 \end{equation}
 as we can use the first two operator to obtain the last one. 
 
+
 \subsection{Syndrome Extraction Process}\label{sec:basic.qc.syndrome_extraction_process}
 
 \begin{figure}[h]
@@ -222,7 +265,6 @@ as we can use the first two operator to obtain the last one.
         The subsequent measurement of the ancilla qubits provides an $m$-bit syndrome.
         Stolen from \cite{QECintro}.
     }
-
     \label{fig:basic.qc.syndrome_extraction.circuit}
 \end{figure}
 
@@ -241,9 +283,9 @@ and returns '$1$' if they anticommute!
 The results of the $m$-stabilizer measurments are combined to give an $m$-bit syndrome.
 The syndrome allows to deduce the best recovery operation to restore the logical state.
 
-\subsection{Logical Operators of Stabilizer Codes}
 
-A $[[n,k,d]]$ code has $2k$ logical Pauli operators\footnote{Any product of log. op. $\bar{L}_i$ and stabilizer $P_i$ will also be a log. op.}. 
+\subsection{Logical Operators of Stabilizer Codes}
+A $[[n,k,d]]$ code has $2k$ logical Pauli operators, which are nonunique as we can mulitply them trivially with the stabilizer and obtain equivalent operators. \cite{QECintro} \cite{QECmemory} 
 Each logical qubit $i$ has logical Pauli-$X$ op. $\bar{X}_i$ and a logical-$Z$ op. $\bar{Z}_i$. 
 They allow the logical state to be modified without having to decode and reencode. \cite{QECintro}
 
@@ -252,9 +294,10 @@ Each pair $\bar{X}_i$, $\bar{Z}_i$ satisfies:
     \item they commute with all the code stabilizers in $\mathcal{S}$
     \item they anti-commute with one another, so that $\{ \bar{X}_i, \bar{Z_i}\}=0$
 \end{enumerate}
+They therefore realize the algebra of the Pauli operators acting on the $k$-qubits. \cite{QECmemory}
+
 
 \subsection{Decoding the Syndrome}
-
 \begin{figure}[h]
     \begin{center}
         \includegraphics[width=0.8\textwidth]{circuit_active_error_rec.png}
@@ -266,7 +309,6 @@ Each pair $\bar{X}_i$, $\bar{Z}_i$ satisfies:
     }
     \label{fig:basic.qc.qec_circuit}
 \end{figure}
-
 The relation $d = 2t+1$ tells us that if the distance $d\ge 3$ we can correct $t$ errors.
 Therefore we get propper error correcting codes, where we apply active recovery operations based on the detected syndrome.
 The general circuit schematic is shown in figure \ref{fig:basic.qc.qec_circuit}. \cite{QECintro}
@@ -291,8 +333,8 @@ The decoding fails if the recovery operation maps the code state to another logi
 In this case the state is returned to the codespace, 
 but the recovery operation a change in the encoded information! \cite{QECintro}
 
-\subsubsection{Efficient Decoding Algorithms}
 
+\subsubsection{Efficient Decoding Algorithms}
 The possible syndrome scales with the code size as $2^m = 2^(n-k)$.
 For example the surface code with $d=5$ ($[[41,1,5]]$) has $2^40\approx 10^12$ possible syndromes. 
 Therefore lookup tables become inefficent! \cite{QECintro}
@@ -304,6 +346,7 @@ These methods allow the recovery operation to be choosen in real-time! \cite{QEC
 The frequency with which the decoder fails is called the logical error rate $p_L$. 
 And because the decoder introduces another point of failure for the QEC code, the choice of decoder can heavly influence the logical error rate of a QEC code.  \cite{QECintro}
 
+
 \subsection{Code Threshold}
 The \textit{threshold theorem} for stabilizer codes states:
 Increasing the distance of a code results in a reduction of the logical error rate $p_L$ 
@@ -313,8 +356,8 @@ Therefore we have a condition for when codes can be used to supress the logical 
 Upper bounds for $p_{th}$ for a given code under a given noise model can be obtained using methods from statistical meachanics.
 More realistic threshold can be numerically estimated by simulating code cycles and decoding using efficient interference algorithms. \cite{QECintro}
 
-\subsection{Fault tolerance}
 
+\subsection{Fault tolerance}
 A QEC code is said to be \textit{fault tolerant} if it can account for errors (of size up to the code distance) that occur at any location in the circuit.
 We previously assumed that the syndrom extraction and encoding operates without error (as seen in figure \ref{fig:basic.qc.qec_circuit}).
 Converting a code to be fault tolerant may lead to addition qubits needed, the reptations of syndrome extraction and a higher code threshold. \cite{QECintro}
@@ -328,8 +371,6 @@ It possible to fault tolerantly implement a subset of the gates of a universal g
 This is achvied by a definig logical operators with a property knows as \textit{transversality}, that gurantees errors will not spread uncontrollably through the circuit.
 A no-go theorem exists that prohibts the implementation of a full universal gate set in this way. 
 Therefore alternative techniques are required, but they typically impose high cost of additional qubits. \cite{QECintro}
-
-
 
 
 \subsection{Surface Codes}
@@ -360,6 +401,7 @@ And a scaled up version is visible in \ref{fig:basic.qc.surface_code_big}. \cite
 The logical operators can be found on the edge of the lattice. 
 The Pauli-$X$ logical operator can be defined as the chain of Pauli-$X$ operator along the boundary along which the $Z$-stabilizers (shown in blue) are applied.
 The Pauli-$Z$ logical operator can be defined along the adjacend boundary! \cite{QECintro}
+
 
 \subsubsection{Scaling of Surface Codes}
 The distance of a surface code can be increased by scaling the size of the lattice.

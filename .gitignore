@@ -11,6 +11,7 @@
 *.bcf
 *.blg
 *.run.xml
+*.toc
 # Images
 Notizen/notes/images/*
 *.img

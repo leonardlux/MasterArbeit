@@ -1,5 +1,6 @@
 \section{Mathematical basics and Notation of quantum computing}
 
+
 \subsection{States}\label{sec:basic.math.states}
 A state is a mathematical entity that embodies the knowledge of the quantum system.
 The most basic kind of state is a qubit (2-level state).
@@ -20,6 +21,7 @@ For multi qubit systems, implicit labelling is assumed ($1,...,n$).
 \begin{equation*}
     \ket{010} = \ket{0}_1 \otimes \ket{1}_2 \otimes \ket{0}_3
 \end{equation*}
+
 
 \subsection{Bloch-Sphere}\label{sec:basic.math.bloch_sphere}
 Based on $|\alpha|^2 + |\beta|^2=1$, one can represent this state using a Bloch-Sphere, with the equation:
@@ -55,8 +57,8 @@ But the true physics is only relevant in the projective space: $\mathbb{C}P^{2^N
 \href{https://quantumcomputing.stackexchange.com/questions/27059/what-is-the-actual-hilbert-space-of-a-n-qubit-system}{stackexchange source}
 
 
-
 \subsection{General Operators}
+
 
 \subsection{Pauli Operators}\label{sec:basic.math.pauli_operator}
 The Pauli group on a signle-quibt $G_1$ is a 16-elements group consisting of the Pauli matricies: 
@@ -86,11 +88,13 @@ The \textit{support} of a Pauli operator is given by the list of its non-identit
 For example the support of the operator \ref{eq:basic.math.ex_pauli_op} is written as $X_2Y_4$.
 The indicees point to the qubit each element acts on.\footnote{This is completly stolen from QEC Introduction} \cite{QECintro}
 
+The \textit{weight} of a Pauli operator is the number of qubits on which it acts nontrivially. \cite{QECmemory}
 
 \subsubsection{SU(2)}
 $SU(2)$ is the group of the operators for a qubit, not the state itself!
 We only need 2 generators to construct this group.
 \textcolor{red}{Should I care about that?}
+
 
 \subsubsection{Commutators}
 The elements of the Pauli group have eigenvalues ${\pm 1,\pm i}$.
@@ -115,8 +119,8 @@ The pauli operator which act on two different qubit allways commute!
 The complete result is that Pauli operators that act on mulitple qubits commute if they interact non-trivially on an even number of qubits.
 If the numer is odd they anticommute.
 
-\subsubsection{Eigenstates}
 
+\subsubsection{Eigenstates}
 Each Pauli Operator has a corresponding eigenstate, which is shown on the Bloch sphere (fig. \ref{fig:bloch_sphere}).
 
 We first once again define the kets in the same basis:
@@ -141,8 +145,8 @@ For the moment we dont care about the $Y$ Pauli op. beacuse it can be constructe
 
 We use $\ket{0},\ket{1}$ as a computational basis \textcolor{red}{What is a Computational basis exactly??}. 
 
-\subsubsection{Associated Errors}
 
+\subsubsection{Associated Errors}
 If an $X$ Operator is erronous applied, it leads to a bitshift. 
 \begin{equation}
     X\ket{0} = \ket{1}
@@ -154,7 +158,6 @@ The erronous application of the $Z$ Pauli op. is called a \textit{phaseshift err
 
 
 \subsection{Projection Operators}\label{sec:basic.math.projection_operator}
-
 A projection operator fullfills the condition $P^2=P$.
 We will later see that projection operators are so called \hyperref[sec:basic.qc.stabilizer]{stabilizer}\textcolor{red}{The wording here seems to be wrong}.
 
@@ -167,6 +170,7 @@ We use a circuit notation to represent the operations we are doing.
 
 \subsubsection{Pauli Gates (X,Y,Z)}\label{sec:basic.math.gates.paui}
 These are type of single qubit gates. And they are just realized by applying the pauli operators. 
+
 
 \subsubsection{Hadamard Gates (H)}\label{sec:basic.math.gates.hadamard}
 The Hadamard gate take the following form.
@@ -190,8 +194,8 @@ And it transforms the computational basis into the eigenstates of the $X$-Operat
 \end{equation}
 \cite{QECintro}
 
-\subsubsection{Control Gates (CNOT)}\label{sec:basic.math.gates.cnot}
 
+\subsubsection{Control Gates (CNOT)}\label{sec:basic.math.gates.cnot}
 \textcolor{red}{Add circuit diagramm}
 A controlled gate is a gate whose action is conditional of a 'control' qubit.
 The control link is marked by a black dot and a connection to the gate which act on the target state. 
@@ -211,9 +215,11 @@ The no-cloning theorem states, that it is not possible to construct a unitray op
 \end{equation}
 \cite{QECintro}
 
+
 \subsection{Wavefct. collapse/Measurments}\label{sec:basic.math.wavefct_collpase}
 Measurments prepare a quantum state/They force them into the corresponding eigentstate of the measurment.
 \textcolor{red}{ToDo}
+
 
 \subsection{Entanglement}
 \begin{equation}
@@ -225,3 +231,9 @@ Measurments prepare a quantum state/They force them into the corresponding eigen
 
 A minimal set $\mathcal{S}= \langle G_1,...,G_n\rangle$ is a set, 
 in which is is not possible to obtain one element $G_i \in \mathcal{S}$ as a product of any other elements  $G_i \ne G_j \cdot G_k \forall G_j,G_k\in\mathcal{S}$.\cite{QECintro}
+
+
+\subsection{How to not change information contained in the state}
+The quantum information is contained in the $\alpha,\beta$ coefficients of each state.
+All operators which commute with the logicals operators $\bar{X},\bar{Z}$ do not change the quantum information. \cite{QECmemory}
+\textcolor{red}{Check if correct!}
