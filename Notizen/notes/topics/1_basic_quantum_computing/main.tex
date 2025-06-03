@@ -16,12 +16,13 @@ In other words, the minimal amount of errors need for an error to go undeteced. 
 This definition is equivalent with the definition, that the distance $d$ as the minimum weight of any logical operator. \cite{QECmemory}
 
 A logical qubit is noted by a subscript $L$: $\ket{\Psi}_L$
-\textcolor{red}{alternative notation has it with an bar ontop}
+(Note\footnote{
+    There exists also an alternative notation, where the logical state are marked with an bar on top, similar to the logical opreators $\bar{\ket{\Psi}}$. 
+})
 
 
 \subsection{Correctable Errors}
-The distance is realted to the number of errors $t$ a code can correct \cite{QECintro}
-\textcolor{red}{What exactly is this number of errors $t$, is it the max weight of an correctable error operator?}
+The distance is realted to the total weight\footnote{This is identical to the number of errors if we only consider weight one errors.} of errors $t$ a code can correct \cite{QECintro}
 \begin{equation}
     d = 2t+1.
 \end{equation}
@@ -37,9 +38,7 @@ Therefore the state is still in the codespace (and no logical operator could hav
  
 \subsection{Computational Space/Basis}
 'Qubits can encode information in a superposition of their basis state $\rightarrow$ computational space scales as $2^n$.' \cite{QECintro}
-
-\textcolor{red}{What exactly is the Computational space? what are its properties and what is the physical meaning of a \textit{computational} basis. 
-Is it just the fact that our quantum computer is acting on this space?}
+Computational space is just the conventional name for the definition of the 'main' axis and the corresponding space.
 
 \textcolor{red}{What exactly is the difference to classical computing, the data stored also scales with $2^n$, where $n$ is the amount of bits.
 How can we say it as simple as said there?
@@ -67,7 +66,7 @@ We focus on coherent (=unitary) rotations as an example
 \end{equation} 
 
 Quantum errors can be digitazied using the Pauli matricies/operator. 
-To show this we express the rot. op. $U$ using the Pauli set/\textcolor{red}{basis?} 
+To show this we express the rot. op. $U$ using the Pauli set
 $\{\mathds{1},{X},{Z},{XZ}\}$
 \footnote{We used that $XZ=Yc$, where $c$ is just a phase factor.}
 
@@ -93,16 +92,23 @@ There are only two fundamental error types, that need to be accounted for \cite{
     \item Pauli $Z$-type errors $=$ phase-flips (no classical analogone)\\
     $\rightarrow$ maps:  $Z \ket{\Psi}= \alpha Z \ket{0} + \beta Z \ket{1} = \alpha  \ket{0} - \beta \ket{1}   $
 \end{enumerate}
-\textcolor{red}{What about erasure errors?}
 
 
 \subsubsection{Erasure Errors}
 Erasure errors are errors where certain, known qubits are lost or are known to have an error and are therfore considerd lost. 
-For codes with distance $d$, erasure errors on a subset up to size $d-1$ can be recovered. \cite{QECmemory}
+For codes with distance $d$, erasure errors on a subset up to size $d-1$ can be recovered. 
+We can normaly only recover $t$ errors, but due to the additional information, which qubits are affected, we can improve the ability of our QEC by a factor of $2$. \cite{QECmemory}
+
+
+\subsubsection{Leakage Errors}
+A leakage error occurs if a state that is not supposed to be reachable is reached. 
+For exmaple in our qubit system with states $\ket{0},\ket{1}$ we would get a leakage error if the state would reach $\ket{2}$.
+We do not take those kinds of errors into account.
 
 
 \subsection{Challenges of QEC}
 Taken from \cite{QECintro}
+\textcolor{red}{Use math basis to shorten this section even more.}
 
 
 \subsubsection{1. No cloning theorem}
@@ -130,7 +136,8 @@ By the active gathering of error information, entropy is effectively removed fro
 
 \subsection{QEC Code/Encoding}
 The QEC code describes how the to represent the quantum information in the state space of many physical/elementary qubits. \cite{QECmemory}
-\textcolor{red}{Is the QEC code only the encoding or also contains the chosen decoding ?}
+The notational 'code' contains both an encoding and a decoder.
+The decoder is genereally meant to be the optimized one for each code, but if other options are chosen one says that they have code X with decoder Y.
 
 
 \subsubsection{[[n,k,d]]-Notation}\label{sssec:nkd_notation}
@@ -173,7 +180,7 @@ Stabilizer codes are a straightforward quantum generalization of classical binar
 
 The main idea behind stabilizer codes is, to encode $k$ logical qubits into $n$ physical qubits.
 In this process we generate a subspace called the codespace $\mathcal{L} \subseteq (\mathbb{C}^2)^{\otimes n}$,
-\textcolor{red}{It there the possiblity, that the codespace spans the complete space ?! no right?!} 
+\footnote{It is only not a proper subset if the code is trivial and therfore not error correcting.}
 which is spanned by the states $\ket{\Psi}$ that are invariant under the action of a stabilizer group $\mathcal{S}$. \cite{QECmemory}
 \begin{equation}
     \mathcal{L} = \{ \ket{\Psi} \in (\mathbb{C}^2)^{\otimes n}: S\ket{\Psi}=\ket{\Psi}  \forall S \in \mathcal{S}\}
@@ -273,7 +280,7 @@ They allow the logical state to be modified without having to decode and reencod
 Each pair $\bar{X}_i$, $\bar{Z}_i$ satisfies:
 \begin{enumerate}
     \item they commute with all the code stabilizers in $\mathcal{S}$ 
-    \item they anti-commute with one another, so that $\{ \bar{X}_i, \bar{Z_i}\}=0$ \textcolor{red}{\cite{QECmemory} does not demand this condition in the formalism part, only 1. and 3.?! is this enough?!}
+    \item they anti-commute with one another, so that $\{ \bar{X}_i, \bar{Z_i}\}=0$ \footnote{Using the approach form \cite{QECmemory}, one does not need this condition.}
     \item they should not be generated by the partiy checks temselves \cite{QECmemory}
 \end{enumerate}
 They therefore realize the algebra of the Pauli operators acting on the $k$-qubits. \cite{QECmemory}
@@ -377,10 +384,7 @@ The decoding fails if the recovery operation maps the code state to another logi
 In this case the state is returned to the codespace, 
 but the recovery operation a change in the encoded information! \cite{QECintro}
 
-\textcolor{red}{
-    According to \cite{QECmemory} all Erros that follow $E=E'P,\ P \in \mathcal{C}(\mathcal{S})$ share the same syndrome.
-}
-
+According to \cite{QECmemory} all erros that are connected by an element of the centralizer $E=E'P,\ P \in \mathcal{C}(\mathcal{S})$ share the same syndrome.
 
 
 \subsubsection{Efficient Decoding Algorithms}
@@ -412,14 +416,11 @@ We can associate a total error probability, based on some error model, with such
 
 There is a discrete number of classes $[E\bar{P}]$, where $\bar{P}\in \mathcal{C}(\mathcal{S}) \setminus \mathcal{S}$ are logical operator. \cite{QECmemory}
 
+All these discrete equivalence classes belonging to the same error share the syndrome. 
 
 
 \subsubsection{Maximum-Likelihood Decoding}
-\textcolor{red}{The error is unknown to the maximum likelihood decoder, so how does he choose the correct equivalence class?}
-
-\textcolor{red}{How does maximum likelihood decoder uses the syndrome.}
-
-Given syndrome $s$ and error $E$, the maximum-likelihood decoder (MLD) capmare the probabilities 
+Given syndrome $s$ and error $E$, the maximum-likelihood decoder (MLD) calculates the probabilities 
 \begin{equation}
     \text{Prob}([E\bar{P}])\ \forall \bar{P}.
 \end{equation}

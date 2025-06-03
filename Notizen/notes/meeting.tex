@@ -13,27 +13,35 @@
     \item Physical and logical qubits 
     \item Digitisation of quantum errors
     \item Quantum error types  
-    \subitem Is there anything special about erasure errors? no!
+    \subitem \textcolor{red}{Is there anything special about erasure errors? }
+    \subitem \textcolor{green}{Yes, there we know which qubits are affected, therefore we have more info, therfore can correct $d-1$ errors instead of only $t$ ($2$)}
     \subitem \textcolor{red}{What is special about leakage errors? Why is teleportation needed?}
+    \subitem \textcolor{green}{Leakage is regarding the space, so the qubit becomes a triplet ...}
     \item correctable Errors $d=2t+1$ 
-    \subitem  \textcolor{red}{$t$ is the weight of the maximal recoverable error?}
+    \subitem \textcolor{red}{$t$ is the weight of the maximal recoverable error?}
+    \subitem \textcolor{green}{Correct, $t$ is the maximal possible recoverable weight.} 
     \item Computational spaces/basis
     \subitem \textcolor{red}{this is just a conventional name for the basis on which we compute ?}
+    \subitem \textcolor{green}{yes}
     \item  QEC code 
     \subitem \textcolor{red}{formalism: does the code include: encoder and decoder?}
+    \subitem \textcolor{green}{yes and no. Yes each code has an optimized decoder, but one can use others.}
     \item Basics of code concatenation
     \item Stabilizer codes \ref{sec:basic.qc.stabilizer} 
-    \subitem \textcolor{red}{ Here i have some questions }
-    \subitem Stabilizer Group \textcolor{red}{$\langle \rangle$, what exactly is the notation behind this, set of generators/minimal set}
+    \subitem Stabilizer Group 
+    \subitem \textcolor{red}{$\langle \rangle$, what exactly is the notation behind this, set of generators/minimal set}
+    \subitem \textcolor{green}{its essentialy the same} 
     \subitem Centralizer, 
     \subitem Codespace and Error Subspace
     \subitem \textcolor{red}{Codespace is proper subset right? $\subset (\mathbb{C}^2)^{\otimes n}$}
+    \subitem \textcolor{green}{Not if the codespace is trivial... so for working codes yes.}
     \subitem Recovery Operation
     \subitem \textcolor{red}{Recover by reapplying error?}
+    \subitem \textcolor{green}{Yes!}
     \subitem Logical Operators, Syndrom Extraction (general), Decoder
     \subitem Maximum-Likelihood Decoding
-    \subitem \textcolor{red}{How does the MLD gets to error equivalence classes from syndromes}
-    \subitem \textcolor{red}{General connection between errors (equivalence classes) and syndromes}
+    \subitem \textcolor{red}{How does the MLD gets to error equivalence classes from syndromes. General connection between errors (equivalence classes) and syndromes}
+    \subitem \textcolor{green}{all equivalence classes have the same snydrome, also all $[E\bar{P}]$}
     \item concept of: Code thresholds
     \item concept of: fault tolerance  
     \item general concept of encoded universal computation 
@@ -46,8 +54,8 @@
 \subsection{Topics I might need spend time on/have skipped}
 \begin{itemize}
     \item General encoding circuit for stabilizer codes
-    \item Error models
-    \item universal computing 
+    \item Error models \textcolor{green}{We assume a error model where there are uncorrelated errors occur. What is the exact name.}
+    \item universal computing  \textcolor{green}{not so interisting.}
     \item Formalism of subsystem stabilizer codes
-    \item much of it is in QEC memories other chapters 
+    \item much of it is in QEC memories other chapters \textcolor{green}{do the other papers first}
 \end{itemize}
