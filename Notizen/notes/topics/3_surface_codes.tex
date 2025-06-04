@@ -1,0 +1,36 @@
+\section{Surface Codes}
+\textcolor{red}{Here I need more subtential infromation!}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{surface_code_small.png}
+    \end{center}
+    \label{fig:basic.qc.surface_code_small}
+\end{figure}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{surface_code_big.png}
+    \end{center}
+    \label{fig:basic.qc.surface_code_big}
+\end{figure}
+General challenge in creating QEC codes is finding set of commuting stabilizers, 
+which enable error detection whitout disturbing the contained information.
+
+Surface codes belong to the broader family of \textit{topological codes}.
+There general design principal is, that the code is constructed by connecting repeated elements together. 
+This modular approach ensures scalibility whilst keeping commutativity.
+A more practical advantage is that surface codes require only nearest-neighbour interaction. \cite{QECintro}
+
+An example of a surface code can be found in figure \ref{fig:basic.qc.surface_code_small}.
+And a scaled up version is visible in \ref{fig:basic.qc.surface_code_big}. \cite{QECintro}
+
+The logical operators can be found on the edge of the lattice. 
+The Pauli-$X$ logical operator can be defined as the chain of Pauli-$X$ operator along the boundary along which the $Z$-stabilizers (shown in blue) are applied.
+The Pauli-$Z$ logical operator can be defined along the adjacend boundary! \cite{QECintro}
+
+
+\subsection{Scaling of Surface Codes}
+The distance of a surface code can be increased by scaling the size of the lattice.
+In general the distance $d=\lambda$, will encode a \textit{single} logical qubit and have the code parameters \cite{QECintro}
+\begin{equation}
+    [[n = \lambda^2 + (\lambda-1)^2, k=1 ]]
+\end{equation}

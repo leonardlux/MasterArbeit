@@ -1,0 +1,316 @@
+\section{Stabilizer Codes}
+Stabilizer codes are a straightforward quantum generalization of classical binary \hyperref[sec:basic.math.linear_codes]{linear codes}. \cite{QECmemory}
+
+
+\subsection{Encoding and Codespace}\label{sec:basic.qc.stabilizer}
+The main idea behind stabilizer codes is, to encode $k$ logical qubits into $n$ physical qubits.
+In this process we generate a subspace called the codespace $\mathcal{L} \subseteq (\mathbb{C}^2)^{\otimes n}$,
+\footnote{It is only not a proper subset if the code is trivial and therfore not error correcting.}
+which is spanned by the states $\ket{\Psi}$ that are invariant under the action of a stabilizer group $\mathcal{S}$. \cite{QECmemory}
+\begin{equation}
+    \mathcal{L} = \{ \ket{\Psi} \in (\mathbb{C}^2)^{\otimes n}: S\ket{\Psi}=\ket{\Psi}  \forall S \in \mathcal{S}\}
+\end{equation}
+
+We use the stabilizer to differentiate the states in the codespace from the state in the error subspace\footnote{
+    This state is just defined as the orthogonal space.
+} by the space the stabilizers projects the states to ($\pm1$ eigenspace).
+\textcolor{red}{What is the exact definition of the error subspace.}
+
+\paragraph{Advantage of this definition}
+The advantage of this stabilizer formalism is that instead of specifying the code space by a basis of $2^n$-dimensional vectors we specify the codespace by the generators of the stabilizer group, which fix/stabilize these vectors. 
+If there are $m=n-k$ linear independet generators (partiy checks/stabilizers) then the codespace $\mathcal{L}$ is $2^k$-dimensional (encodes $k$-qubits).
+This description only requires us to specify only $n$ linearly independet partiy checks/stabilizers. \cite{QECmemory}
+
+\paragraph{Codespace and Error Subspace}\label{sec:codespace_error_subspace}
+\textcolor{red}{Are codespace and error subspace unique to stabilizer codes?}
+While encoding, with an \hyperref[sssec:nkd_notation]{$[[n,k,d]]$ code}, we increase the size of the Hilbert space by adding $m=n-k$ redundancy qubits $\ket{0}_R$
+to create a logical qubit $\ket{\Psi}_L$. 
+Afterwards the data previously stroed solely in $\ket{\Psi}_D$ is distributed across the expanded Hilbert space.
+This Hilbert space can then be split up into two subspaces. 
+The \textit{codespace} $\mathcal{L}$ is the subspace on which the logical qubit is defined. \cite{QECintro}
+This subspace is spanned by the code words (written out version of the logical qubits/states).
+
+The \textit{error subspace} $\mathcal{F}$ is the subspace, in which the logical qubit rotates to, when applying an error operator. 
+The two subspaces ($\mathcal{F} , \mathcal{L}$) are mutual orthogonal. 
+Therefore we can distinguish which subspace is occupid via projective measurments, 
+without compromising the encoded quantum information!  \cite{QECintro}
+
+$\rightarrow$ projective measurments = stabilizer measurments
+
+
+
+\subsubsection{Stabilizer Group}
+The stabilizer group $\mathcal{S}$ is an Abelian subgroup of the Pauli group $\mathcal{P}_n$, with $-\mathds{1} \notin \mathcal{S}$.
+For any stabilizer group $\mathcal{S}$ one can always find a set of generators
+\begin{equation}
+    \mathcal{S} = \langle S_1, ..., S_m \rangle
+\end{equation}
+such that $S_i\in \mathcal{P}_n$ are Hermitian Pauli operators. \textcolor{red}{are there non Hermitian Pauli operator?!} 
+These generators specify our codespace and are called \textit{stabilizers}! \cite{QECmemory}
+
+\paragraph{Stabilizer (Operator)}
+A \textit{stabilizer} 
+$S$ is a 
+\hyperref[sec:basic.math.projection_operator]{projection operator} 
+hat maps the states to the $\pm 1$ eigenspaces. 
+The stabilizer of a $[[n,k,d]]$ code 
+\begin{enumerate}
+    \item is a Pauli-group element $S_i \in \mathcal{P}_n$.
+    \item \textit{stabilizes}\footnote{
+        Leaves the logical state unchanged and therefore does not change the contained information.
+        } all logical states $\ket{\Psi}_L$ of the code. \\
+    $\implies S_i \ket{\Psi}_L = (+1) \ket{\Psi}_L \forall \ket{\Psi}_L \in \mathcal{L} $ 
+    \item commutes\footnote{
+It is physically necessary that the stabilizer commute, so that they can be measured simultaneously/independent from each other. 
+    } with all other stabilizers $[S_i,S_j]=0 \ \forall (i,j)$.
+\end{enumerate}
+Therefore the stabilizers of an $[[n,k,d]]$ code form an \textit{Abelian subgroup} $\mathcal{S}$ of the Pauli group (\cite{QECintro}) as demanded by the definition.
+\begin{equation}
+    \mathcal{S} = \{ S_i \in \mathcal{P}_n : S_i \ket{\Psi}_L = (+1) \ket{\Psi}_L \forall \ket{\Psi}_L\in \mathcal{C} \land [S_i,S_j]=0 \ \forall(i,j)\}
+\end{equation}
+Importantly the product of two stabilizers is also a stabilizer $S_i \cdot S_j \in \mathcal{S}$, due to
+\begin{equation}
+    S_i \cdot S_j  \ket{\Psi}_L = S_i (+1) \ket{\Psi}_L = (+1) \ket{\Psi}_L.
+\end{equation}
+Therefore we need to make sure that the set of $m=n-k$ stabilizers used in the \hyperref[sec:basic.qc.syndrome_extraction_process]{syndrome extraction process}
+form a \hyperref[sec:basic.math.minimal_set]{minimal set}\footnote{
+    This is equivalent with demaning that we only measure a set of generators of the stabilizer group.
+}. 
+\begin{equation}
+    \mathcal{S}= \langle S_1, S_2, ..., S_m\rangle
+\end{equation}
+
+The important property of the stabilizer is, that they leave the logical qubits (states) unchanged ($+1$ eigenspace) 
+and project (some) elements of the error subspace to the -1 eigenspace\footnote{
+    Each stabilizer might only project some states from the error subspace on the $-1$ eigenspace. 
+    But the set \textcolor{red}{SHOULD?!} project all elements from the error subspace to the $-1$ eigenspace. 
+}. \cite{QECintro}
+
+
+\subsubsection{Centralizer of $\mathcal{S}$ in $\mathcal{P}_n$}
+The set of operators in $\mathcal{P}_n$ which commutes with (all elements of) $\mathcal{S}$ is called the \textit{centralizer} of $\mathcal{S}$ in $\mathcal{P}_n$, defined as 
+\begin{equation}
+    \mathcal{C}(S) = \{ P \in \mathcal{P}_n | \forall S \in \mathcal{S}, PS = SP\}.
+\end{equation}
+We thus have $\mathcal{C}(\mathcal{S}) = \langle \mathcal{S}, \bar{X}_1, \bar{Z}_1, ..., \bar{X}_k, \bar{Z}_k\rangle$, 
+therefore the logical operators of the codes are elements of 
+\begin{equation}
+    \bar{P} \in \mathcal{C}(\mathcal{S})\setminus \mathcal{S}.
+\end{equation}
+Based on this we can redefine the distance as
+\begin{equation}
+    d = \min_{P \in \mathcal{C}(\mathcal{S})\setminus\mathcal{S}} |P|
+\end{equation}
+i.e. the minimum weight of any logical operator.
+completly stolen from \cite{QECmemory}.
+
+\paragraph{Logical Operators of Stabilizer Codes}
+A $[[n,k,d]]$ code has $2k$ logical Pauli operators, which are nonunique as we can mulitply them trivially with the stabilizer and obtain equivalent operators. \cite{QECintro},\cite{QECmemory} 
+Each logical qubit $i$ has a logical Pauli-$X$ op. $\bar{X}_i$ and a logical-$Z$ op. $\bar{Z}_i$. 
+They allow the logical state to be modified without having to decode and reencode. \cite{QECintro}
+
+Each pair $\bar{X}_i$, $\bar{Z}_i$ satisfies:
+\begin{enumerate}
+    \item they commute with all the code stabilizers in $\mathcal{S}$ 
+    \item they anti-commute with one another, so that $\{ \bar{X}_i, \bar{Z_i}\}=0$ \footnote{Using the approach form \cite{QECmemory}, one does not need this condition.}
+    \item they should not be generated by the partiy checks temselves \cite{QECmemory}
+\end{enumerate}
+They therefore realize the algebra of the Pauli operators acting on the $k$-qubits. \cite{QECmemory}
+
+
+
+
+
+
+
+\newpage
+\subsection{Syndrome and Decoder}
+In the process of decoding we extract the error information in form of a $m$-bit syndrome from the circuit. 
+We then use a decoder to calculate the optimal recovery operation, based on the syndrome, 
+to return the erronous state back to the codespace,
+without applying a logical operator in the process.
+
+The relation $d = 2t+1$ tells us that if the distance $d\ge 3$ we can correct $t$ errors.
+Therefore we get propper error correcting codes\footnote{Otherwise we might only get error detection codes.}
+, where we apply active recovery operations based on the detected syndrome.
+The general circuit schematic is shown in figure \ref{fig:basic.qc.qec_circuit}. \cite{QECintro}
+
+
+\subsubsection{Equivalence Classes of Errors}
+Multiple errors can be restored by the same recovery operation.
+These errors $E$ are related by the projection operators and form an equivalence class of errors $[E]$\footnote{
+    $[E]$ is a coset of the gorup $\mathcal{S}$ in $\mathcal{P}_n$. 
+} consisting of
+\begin{equation}
+    E' = ES, \  S \in \mathcal{S}.
+\end{equation}
+
+We can associate a total error probability, based on some error model, with such a class 
+\begin{equation}
+    \text{Prob}([E]) = \sum_{S\in S} \text{Prob}(ES).
+\end{equation}
+
+There is a discrete number of classes $[E\bar{P}]$, where $\bar{P}\in \mathcal{C}(\mathcal{S}) \setminus \mathcal{S}$ are logical operators. \cite{QECmemory}
+
+
+\subsubsection{Syndrome}
+The \textit{syndrome} $s$ (of an error $s(E)$) is the vector corresponding to the eigenvalues of the generators of $\mathcal{S}$, where each component can be defined as 
+\begin{equation}
+    s_i(E) (E\ket{\Psi}) = S_i (E \ket{\Psi}), S_i \in \text{Generators}(\mathcal{S}).
+\end{equation}
+The syndrome allows to deduce the best recovery operation to restore the logical state.
+
+All errors $E,E'$ that share a equivalence class, 
+or where the equivalence classes are connected by logical operators,
+share the same syndrome.
+
+\begin{equation}
+        s(E) = s(E')\  \forall E' \in [E\bar{P}],\bar{P}\in \mathcal{C}(\mathcal{S}) \setminus \mathcal{S}
+\end{equation}
+
+Note the eigenvalues might be mapped with an offset ($-1\rightarrow 0$) depending on the syndrome extraction process.
+
+\paragraph{Syndrome Extraction Process}\label{sec:basic.qc.syndrome_extraction_process}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{circuit_syndrome_extraction.png}
+    \end{center}
+    \caption{
+        Circuit illustrating the structur of an $[[n,k,d]]$ stabilizer code. 
+        A quantum data register $\ket{\Psi}_D$ is entangled with redundancy qubits $\ket{0}_R$ via an encoding operation to create a logical qubit $\ket{\Psi}_L$.
+        After encoding, a sequence of $m = n - k$ stabilizer checks $S_i$ are performed on the register, and each result copied to an ancilla qubit $A_i$.         
+        The subsequent measurement of the ancilla qubits provides an $m$-bit syndrome.
+        Stolen from \cite{QECintro}.
+    }
+    \label{fig:basic.qc.syndrome_extraction.circuit}
+\end{figure}
+The $m$-bit syndorme can be extracted using the $m=n-k$ generators of $\mathcal{S}$ refered to as $S_i$
+and the $m$ ancilla qubits $\ket{0}_{A_i}$.
+This process is shown in figure \ref{fig:basic.qc.syndrome_extraction.circuit}. \cite{QECintro}
+
+The corresponding equation to the circuit
+\begin{equation}
+    E \ket{\Psi}_L \ket{0}_{A_i} \rightarrow \frac{1}{2} (\mathds{1}^{\otimes n} + S_i) E \ket{\Psi}_L \ket{0}_{A_i} +  \frac{1}{2} (\mathds{1}^{\otimes n} - S_i) E   \ket{\Psi}_L \ket{1}_{A_i} 
+\end{equation}
+shows that the ancilla qubit $A_i$ returns $0$ if the stabilizer $S_i$ and the error $E$ commute,
+and returns $1$ if they anticommute.
+
+The results of the $m$-stabilizer measurments are combined to give an $m$-bit syndrome.
+
+
+\subsubsection{Decoding the Syndrome}
+\begin{figure}[h]
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{circuit_active_error_rec.png}
+    \end{center}
+    \caption{
+    Schematic of an active error correcting circuit with error process $E$, set of stabilizers $\mathcal{S}$, m-bit syndrome $S$ and recovery operation $R$.
+    The decoder determines the best recovery operation $\mathcal{R}$ to return to the logical state, based on the syndrome $S$.
+    Stolen from \cite{QECintro}.
+    }
+    \label{fig:basic.qc.qec_circuit}
+\end{figure}
+We use the $m$-bit syndrome $S$ to find a unitary recovery operation $\mathcal{R}$, 
+which returns the state to the codespace.
+This process is called \textit{decoding}.
+
+The decoding step is a success if 
+\begin{equation}
+    \mathcal{R}E \ket{\Psi}_L = +1 \ket{\Psi}_L.
+\end{equation}
+This is trivially fullfiled for $\mathcal{R}E=\mathds{1}$ ($\mathcal{R}=E^\dagger$). 
+This is also fullfiled for $\mathcal{R}E=S_i \in \mathcal{S}$.
+Therefore there is no unique solution for $\mathcal{R}$ and we can design \textit{degenerate} quantum codes,
+where mulitple error map to/are recovered by the same syndrome. \cite{QECintro}
+
+The decoding fails if the recovery operation maps the code state to another logical state
+\begin{equation}
+    \mathcal{R}E \ket{\Psi}_L = L\ket{\Psi}_L.
+\end{equation}
+In this case the state is returned to the codespace, 
+but the recovery operation a change in the encoded information! \cite{QECintro}
+
+According to \cite{QECmemory} all errors that are connected by an element of the centralizer $E=E'P,\ P \in \mathcal{C}(\mathcal{S})$ share the same syndrome.
+
+\paragraph{Efficient Decoding Algorithms}
+The possible syndrome scales with the code size as $2^m = 2^{n-k}$.
+For example the surface code with $d=5$ ($[[41,1,5]]$) has $2^{40}\approx 10^{12}$ possible syndromes. 
+Therefore lookup tables become inefficent! \cite{QECintro}
+
+Large scale codes use \textit{approximate interference techniques}.
+They determine the recovery operation which is \textit{most likely} to restores the encoded information to the codespace.
+These methods allow the recovery operation to be choosen in real-time! \cite{QECintro}
+
+The frequency with which the decoder fails is called the logical error rate $p_L$. 
+And because the decoder introduces another point of failure for the QEC code, the choice of decoder can heavly influence the logical error rate of a QEC code.  \cite{QECintro}
+
+
+\subsubsection{Maximum-Likelihood Decoding}
+Given syndrome $s$ and error $E$, the maximum-likelihood decoder (MLD) calculates the probabilities 
+\begin{equation}
+    \text{Prob}([E\bar{P}])\ \forall \bar{P}.
+\end{equation}
+It then chooses the recovery operation which belongs to the equivalence class with the maximal likelihood $\max(\text{Prob}([E\bar{P}]))$.
+This procedure is succefull if 
+\begin{equation}
+     \text{Prob}([E])>\text{Prob}([E\bar{P}])\ \forall \bar{P}.
+\end{equation}
+In this case the correct equivalence class has the highest probability and is therefore choosen. \cite{QECmemory}
+
+To note how efficient this is: $\text{Prob}([E\bar{P}])$ is a sum over the number of elements in $\mathcal{S}$, which is itself exponential in $n$. \cite{QECmemory}
+
+
+\subsection{Examples}
+\textcolor{red}{Write a summary of some important codes here!}
+
+\subsubsection{Example of Encoding with Spaces}
+Taken from \cite{QECintro}: 
+For example if we start with one qubit, we start with 
+\begin{equation}
+    \ket{\Psi} \in \mathcal{H}_2 = \text{span}\{\ket{0},\ket{1} \}.
+\end{equation}
+After the encoding (by adding another qubit) we get a 4-dim Hilbert space 
+\begin{equation}
+    \ket{\Psi} \in \mathcal{H}_4 = \text{span}\{\ket{00},\ket{01},\ket{10},\ket{11} \}.
+\end{equation}
+This higher dimensional space can be used to redundantly encode the information.
+The logical qubit is defined within a 2-dim subspace, which is called the \textit{codespace} $\mathcal{L}$
+\begin{equation}
+    \ket{\Psi}_L \in \mathcal{L} = \text{span}\{\ket{00},\ket{11} \} \subset \mathcal{H}_4.
+\end{equation}
+Applying an error (e.g. bit-flip $X$) roatates the state in the \textit{error subspace} $\mathcal{F}$
+\begin{equation}
+    X_i \ket{\Psi}_L \in \mathcal{F} = \text{span}\{\ket{01},\ket{10} \} \subset \mathcal{H}_4.
+\end{equation} 
+
+
+\subsubsection{Example of Stabilizer Measurments}
+Taken from \cite{QECintro}.
+Errors can be deteced by performing $n-k=m$ stabilizer measurments $S_i$.
+\textcolor{red}{Add the commutation condition with error operators}
+
+Some examples for a stabilizer (here $Z_1 Z_2$) measurments for the previously shown encoding on the codespace
+\begin{equation}
+    Z_1 Z_2 \ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{00}+ \beta \ket{11}) = +1 \ket{\Psi}_L
+\end{equation}
+and on the error subspace
+\begin{equation}
+    Z_1 Z_2 X_1\ket{\Psi}_L = Z_1 Z_2 (\alpha \ket{10}+ \beta \ket{01}) = -1 \ket{\Psi}_L.
+\end{equation}
+A stabilizer measurments projects the all elements of the codespace onto the $+1$ eigenspace 
+and projects some (the set in total all) elements of error space onto the $-1$ eigenspace. 
+The stabilizers therefore should anticommute with the errors! 
+
+The information encoded in the logical qubit ($\alpha/\beta$ coef.) is undisturbed!
+
+To form a \hyperref[sec:basic.math.minimal_set]{minimal set} we need to choose
+\begin{equation}
+    \mathcal{S} = \langle Z_1 Z_2, Z_2 Z_3 \rangle.
+\end{equation}
+An set of stabilizers for the three-qubit code that does not form a minimal set is
+\begin{equation}
+    \mathcal{S}' = \{ Z_1 Z_2, Z_2 Z_3, Z_1 Z_3\}
+\end{equation}
+as we can use the first two operator to obtain the last one. 
+
+

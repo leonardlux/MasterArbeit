@@ -1,24 +1,24 @@
-\section{Mathematical basics and Notation of quantum computing}
+\section{Mathematical Basics and Notation}
 
 
 \subsection{States}\label{sec:basic.math.states}
 A state is a mathematical entity that embodies the knowledge of the quantum system.
-The most basic kind of state is a qubit (2-level state).
-Short for 'quantum bits' and the most basic unit of a quantum computer.\footnote{
+We gonna use qubit states (2-level states).
+Short for 'quantum bits' and they form the most basic unit of a quantum computer.\footnote{
     Possible realizations: photons, trapped ions, superconducting circuits, 
 spins in semiconductors etc..}
 
-Mathematical notation using Dirac bra-ket notation. 
-Computational basis given by $\{\ket{0}, \ket{1}\}$ (eigenstates of Pauli Z Op. for single qubit case).
-Therefore the general qubit take the form of:
+The mathematical notation is the Dirac bra-ket notation. 
+The computational basis is given by $\{\ket{0}, \ket{1}\}$ (eigenstates of Pauli Z Op. for single qubit case).
+Therefore the general qubit takes the form 
 \begin{equation*}
-    \ket{\Phi} = \alpha \ket{0} + \beta \ket{1}
+    \ket{\Phi} = \alpha \ket{0} + \beta \ket{1}.
 \end{equation*}
 
 
-For multi qubit systems, implicit labelling is assumed ($1,...,n$).
+For multi qubit systems, implicit labelling is assumed ($1,...,n$)
 \begin{equation*}
-    \ket{010} = \ket{0}_1 \otimes \ket{1}_2 \otimes \ket{0}_3
+    \ket{010} = \ket{0}_1 \otimes \ket{1}_2 \otimes \ket{0}_3.
 \end{equation*}
 
 
@@ -38,14 +38,13 @@ where $\theta$ and $\phi$ are the angles in sperical coordinate system (fig. \re
 \end{figure}
 
 A nice explanation why the bloch sphere appears can be found in this \href{https://www.youtube.com/watch?v=KEzmw6cKOlU}{video}.
-The Bloch sphere is the complex projective line $\mathbb{C}P^1$ \footnote{therfore homomorphic to $S^2$, not SU(2)}
+The Bloch sphere is the complex projective line $\mathbb{C}P^1$. \footnote{therfore homomorphic to $S^2$, not SU(2)}
 
 
 \subsection{Hilbert Spaces of a Qubit}\label{sec:basic.math.hilbert_space}
 One qubit is represented by $\mathbb{C}^2$. 
 (With normalization condition $\rightarrow$ in the end not a real vector room (addition under closure).)
-But the physics aspects lives only on the Bloch sphere due the normalization condition
-
+But the physics aspects lives only on the Bloch sphere due the normalization condition. 
 Therefore the physics is located in the Projective Hilbert Space $\mathbb{C}P^1$.
 
 We can still calculate multiple Cubits using the tensor product of multiple Hilbert spaces:
@@ -60,7 +59,7 @@ But the true physics is only relevant in the projective space: $\mathbb{C}P^{2^N
 
 
 \subsection{Pauli Operators}\label{sec:basic.math.pauli_operator}
-The Pauli group on a signle-quibt $G_1$ is a 16-elements group consisting of the Pauli matricies: 
+The Pauli group on a single-qubit $\mathcal{P}_1$ is a 16-elements group consisting of the Pauli matricies: 
 \begin{equation}
 \mathds{1} = 
 \begin{pmatrix}1&0\\0&1\end{pmatrix},
@@ -73,18 +72,18 @@ Z = \sigma_z =
 \label{eq:basic.math.pauli_matricies}
 \end{equation}
 muliplied each by $\pm1$ and $\pm i$. 
-It is therfore closed under multiplication. 
+It is closed under multiplication. 
 
-The general Pauli Group $G$ consists of all operators that are formed from tensor products of the elements of $G_1$. 
+The general Pauli group $\mathcal{P}$ consists of all operators that are formed from tensor products of the elements of $\mathcal{P}_1$. 
 For example, the operator
 \begin{equation}
-    \mathds{1} \otimes X \otimes \mathds{1} \otimes Y \in G
+    \mathds{1} \otimes X \otimes \mathds{1} \otimes Y \in \mathcal{P}_4
     \label{eq:basic.math.ex_pauli_op}
 \end{equation}
-is an element of the four-qubit Pauli Group. 
+is an element of the four-qubit Pauli group. 
 
 The \textit{support} of a Pauli operator is given by the list of its non-identity elements.
-For example the support of the operator \ref{eq:basic.math.ex_pauli_op} is written as $X_2Y_4$.
+For example the support of the operator (eq. \ref{eq:basic.math.ex_pauli_op}) is written as $X_2Y_4$.
 The indicees point to the qubit each element acts on.\footnote{This is completly stolen from QEC Introduction} \cite{QECintro}
 
 The \textit{weight} $|P|$ of a Pauli operator $P=P_1 \otimes... \otimes P_n \in \mathcal{P}_n $ is 
@@ -94,7 +93,7 @@ $P_i$ that are unequal to $\mathds{1}$. \cite{QECmemory}
 \subsubsection{SU(2)}
 $SU(2)$ is the group of the operators for a qubit, not the state itself!
 We only need 2 generators to construct this group.
-\textcolor{red}{I could spent some time on this.}
+\textcolor{red}{I need to spent some time on this.}
 
 
 \subsubsection{Commutators}
@@ -111,20 +110,19 @@ Another important property is:
 
 Therefore we only need 2 Pauli operator to construct the Pauli group.
 \begin{equation}
-    X_1 Z_1 = - Z_1 X_1 = -2 i Y_1
+    X Z = - Z X = -2 i Y = c Y, \ c \in \mathbb{C}
 \end{equation}
-In the following we will often use the Pauli $XZ$ Operator to replace the $Y$ Operator 
+In the following we will often use the Pauli $XZ$ operators to replace the $Y$ operator.
 
-The pauli operator which act on two different qubit allways commute!
-
-The complete result is that Pauli operators that act on mulitple qubits commute if they interact non-trivially on an even number of qubits.
+Pauli operators which act on two different qubit will always commute!
+Pauli operators that act on mulitple qubits commute if they interact non-trivially on an even number of qubits.
 If the numer is odd they anticommute.
 
 
 \subsubsection{Eigenstates}
 Each Pauli Operator has a corresponding eigenstate, which is shown on the Bloch sphere (fig. \ref{fig:bloch_sphere}).
 
-We first once again define the kets in the same basis:
+We first once again define the kets in the same basis as the pauli matricies
 
 \begin{equation}
    \ket{0}  \doteq  \left(\begin{array}{c} 1 \\ 0 \end{array}\right), \ket{1} \doteq \left(\begin{array}{c} 0 \\ 1 \end{array}\right),
@@ -142,9 +140,9 @@ We first once again define the kets in the same basis:
    X \ket{\pm} = \pm1 \ket{\pm} 
 \end{equation}
 
-For the moment we dont care about the $Y$ Pauli op. beacuse it can be constructed from $XZ$.
+We don't care about the $Y$ Pauli operator beacuse it can be constructed from $XZ$ operators.
 
-We use $\ket{0},\ket{1}$ as a computational basis.
+Conventionaly we use $\ket{0},\ket{1}$ as computational basis.
 
 
 \subsubsection{Associated Errors}
@@ -152,9 +150,12 @@ If an $X$ Operator is erronous applied, it leads to a bitshift.
 \begin{equation}
     X\ket{0} = \ket{1}
 \end{equation}
-Types of erros applying the $X$ Op. are called \textit{bitshift errors}.
+Types of erros applying the $X$ Op. are called \textit{bitflip errors}.
 
-The erronous application of the $Z$ Pauli op. is called a \textit{phaseshift error}, because 
+The erronous application of the $Z$ Pauli op. is called a \textit{phaseflip error}, because 
+\begin{equation}
+    Z \ket{\pm} = \ket{\mp}.
+\end{equation}
 
 
 \subsection{Projection Operators}\label{sec:basic.math.projection_operator}
@@ -166,11 +167,12 @@ We will later see that projection operators are so called \hyperref[sec:basic.qc
 \subsection{Gates}\label{sec:basic.math.gates}
 Gates just represent the application of operators to the qubits. 
 We use a circuit notation to represent the operations we are doing.
-\textcolor{red}{Explain more?}
+\textcolor{red}{I need to spent time on getting used to those!}
 
 
 \subsubsection{Pauli Gates (X,Y,Z)}\label{sec:basic.math.gates.paui}
 These are type of single qubit gates. And they are just realized by applying the pauli operators. 
+\textcolor{red}{Add some example to get to know the instantly!}
 
 
 \subsubsection{Hadamard Gates (H)}\label{sec:basic.math.gates.hadamard}
@@ -217,9 +219,9 @@ The no-cloning theorem states, that it is not possible to construct a unitray op
 \cite{QECintro}
 
 
-\subsection{Wavefct. collapse/Measurments}\label{sec:basic.math.wavefct_collpase}
-Measurments prepare a quantum state/They force them into the corresponding eigentstate of the measurment.
-\textcolor{red}{ToDo}
+\subsection{Wavefct. collapse/Measurements}\label{sec:basic.math.wavefct_collpase}
+Measurements prepare a quantum state/force them into the corresponding eigentstate of the measurement.
+Therefore the parts of the quantum information contained in the state are destroyed.
 
 
 \subsection{Entanglement}
@@ -230,10 +232,11 @@ Measurments prepare a quantum state/They force them into the corresponding eigen
 
 \subsection{Minimal set}\label{sec:basic.math.minimal_set}
 
-A minimal set $\mathcal{S}= \langle s_1,...,s_m\rangle$ is a set, 
-in which is is not possible to obtain one element $G_i \in \mathcal{S}$ as a product of any other elements  $G_i \ne G_j \cdot G_k \forall G_j,G_k\in\mathcal{S}$.\cite{QECintro}
+A minimal set $\mathcal{S}= \langle S_1,...,S_m\rangle$ is a set, 
+in which is is not possible to obtain one element $S_i \in \mathcal{S}$ 
+as a product of any other elements  $S_i \ne S_j \cdot S_k \forall (i,k)$. \cite{QECintro}
 
-The elements $s_1, ..., s_m$ are by this notation the generators of the group.
+The elements $S_1, ..., S_m$ are by this notation the generators of the group $\mathcal{S}$.
 
 
 
@@ -245,3 +248,12 @@ All operators which commute with the logicals operators $\bar{X},\bar{Z}$ do not
 
 \subsection{Linear codes}\label{sec:basic.math.linear_codes}
 A linear code is an error-correcting code for which any linear combination of codewords is also a codeword. \href{https://en.wikipedia.org/wiki/Linear_code}{Source: Wikipedia} 
+
+\subsection{Computational Space/Basis}
+'Qubits can encode information in a superposition of their basis state $\rightarrow$ computational space scales as $2^n$.' \cite{QECintro}
+Computational space is just the conventional name for the definition of the 'main' axis and the corresponding space.
+
+\textcolor{red}{What exactly is the difference to classical computing, the data stored also scales with $2^n$, where $n$ is the amount of bits.
+How can we say it as simple as said there?
+This might be two times in this summary
+}
