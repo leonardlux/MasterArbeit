@@ -77,14 +77,13 @@ Before we can talk about error correction we need to understand what errors can 
 \textcolor{red}{
     This does not yet explain everything I would like it to explain. 
     Why is it enough to reapply error to correct it?!} 
-\href{https://quantumcomputing.stackexchange.com/questions/35211/digitization-of-errors-in-qec}{Hier ist die Frage die ich hatte.}
 
-Due to bits beeing discrete in the classical case there is only one type of errors (bit-flips). 
-But the qubit can takes state everywhere on the Bloch sphere, so in a continuum. 
+Due to classical bits beeing discrete there is only one type of errors (bit-flips). 
+But the qubit can takes state everywhere on the Bloch sphere (continuum of states). 
 Errors can therefore take also an infinte amount of forms.
-For the derivation we focus on coherent (=unitary) rotations as an example
+For the derivation we focus on coherent (=unitary) rotations as an example for the error $E$ but it holds for arbitrary transformation
 \begin{equation}
-    U(\delta \theta, \delta \phi) \ket{\Psi}=
+    E(\delta \theta, \delta \phi) \ket{\Psi}=
     \cos\left(\frac{\theta + \delta \theta}{2}\right) \ket{0} +
     e^{i(\phi + \delta \phi)} 
     \sin\left(\frac{\theta + \delta \theta}{2}\right) \ket{1}.
@@ -96,11 +95,12 @@ $\{\mathds{1},{X},{Z},{XZ}\}$
 \footnote{We used that $XZ=Yc$, where $c$ is just a phase factor.}
 
 \begin{equation}
-    U(\delta \theta, \delta \phi)\ket{\Psi} = 
-    \alpha_1 \mathds{1} \ket{\Psi} +
-    \alpha_X X \ket{\Psi}+
-    \alpha_Z Z \ket{\Psi}+
-    \alpha_{XZ} XZ \ket{\Psi}
+    E(\delta \theta, \delta \phi)\ket{\Psi} = 
+    e_1 \mathds{1} \ket{\Psi} +
+    e_X X \ket{\Psi}+
+    e_Z Z \ket{\Psi}+
+    e_{XZ} XZ \ket{\Psi}
+    \label{eq:error_digitization}
 \end{equation}
 
 Therefore any coherent rot.\footnote{
@@ -111,6 +111,20 @@ described by the $X$- and $Z$-Pauli matricies,
 will be able to correct any (coherent) error!
 This is the digitasition of errors for quantum computing. \cite{QECintro}
 
+\paragraph{For stabilizer measurments}
+By applying stabilizer measurments (\textcolor{red}{
+    On what do we apply the stabilizer measurments, Ancilla or Physical qubits.
+    }) we force the state to collapse to a specific state. 
+If we use the density matrix picture the state $E \ket{\Psi} \bra{\Psi} E^\dagger$, 
+with $E$ from eq. \ref{eq:error_digitization}. 
+
+One would normaly expect to see cross terms of the kind $X \ket{\Psi} \bra{\Psi} Z$ in the density matrix.
+But if we apply the stabilizer measurments, we force the state to collapse to specific states of the form
+$\sigma_i \ket{\Psi} \bra{\Psi} \sigma_i, \ \sigma_i \in \mathcal{P}_1$. 
+Therefore we can just reapply the same Pauli opeartors to recover the correct state.
+
+\href{https://quantumcomputing.stackexchange.com/questions/35211/digitization-of-errors-in-qec}{Source}
+\textcolor{red}{Is this correct?(do the math!)}
 
 \subsubsection{Quantum error types}
 Base on digitasition there are two fundamental error types that can occur on each qubit, 

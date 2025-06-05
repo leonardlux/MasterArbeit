@@ -16,6 +16,7 @@
     - concept of optimal threshold (and the statistical mech. mapping)
 
 - (Quantum data processing and error correction)[https://arxiv.org/abs/quant-ph/9604022]
+    - (newer version)[https://journals.aps.org/pra/abstract/10.1103/PhysRevA.54.2629]
     - concept of coherent information
 
 - (Demonstration of Fault-Tolerant Steane Quantum Error Correction)[https://journals.aps.org/prxquantum/abstract/10.1103/PRXQuantum.5.030326]
