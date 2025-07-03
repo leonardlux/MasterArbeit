@@ -170,11 +170,13 @@ The distance is related to the total weight\footnote{
 \begin{equation}
     d = 2t+1.
 \end{equation}
-If erasure erros occur, we can correct up to $d-1$ erased qubits, 
+For erasure errors we can correct up to $d-1$ erased qubits, 
 due to the additional knowledge of which qubits are affected. 
 We can correct the erasure error by initializing the qubits in a maximally mixed state 
 and then performing the usual error correction process.\cite{QECmemory}
 We can not correct leakage errors due to our assumption of qubits.
+
+We can detect errors up to weight $d-1$. \footnote{This is taken from the lecture.}
 
 \paragraph{Derivation}
 Errors with weight at most $t$, have the property that their products have weight at most $2t<d$.

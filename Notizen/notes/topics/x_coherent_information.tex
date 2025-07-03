@@ -1,0 +1,119 @@
+\section{Coherent Information}
+
+\subsection{Superoperator}
+The \textit{superoperator} $\varepsilon^Q$ evolves the system $Q$ in time to $Q'$ \cite{qDataProcessing}
+\begin{equation}
+    \rho^{Q'} = \varepsilon^Q(\rho^Q).
+\end{equation}
+
+The three conditions are equivalent \cite{qDataProcessing}:
+\begin{enumerate}
+    \item $\varepsilon^Q$ is a trace-preserving, \textit{completly positive}\footnote{
+        A map is called \textit{completly positive} if it maps all positive elements to positive elements.
+    } linear map on density operators of $Q$.
+    \item $\varepsilon^Q$ has a \textit{unitary repr.}
+    \item $\varepsilon^Q$ has a normalized \textit{operator-sum repr.}
+\end{enumerate}  
+
+\paragraph{Operator-Sum repr.}
+The superoperator $\rho^Q$ can be repr. (without additional quantum systems) in an 'intrinsic' way,  
+using the \textit{operator-sum repr.} which itself uses a collection of normalized operators $A_\mu^Q$,
+which act on the Hilber space $\mathcal{H}_Q$ describing $Q$.  \cite{qDataProcessing}
+\begin{equation}
+    \rho^{Q'} = \varepsilon^Q (\rho^{Q}) = \sum_\mu A_\mu^Q\rho^{Q} {A_\mu^Q}^\dagger 
+\end{equation}
+with normalization 
+\begin{equation}
+    \sum_\mu A_\mu^Q {A_\mu^Q}^\dagger  = \mathds{1}^Q
+\end{equation} 
+
+\textcolor{red}{I might wanna add the reasons and math concepts behind the Enviorment (give unitary repr of $\varepsilon^{Q}$ ) and Reference System (purify inital state).}
+
+
+\subsection{Fidelity}
+The \textit{fidelity} is a measure how close a state $\rho$ is to another state $\ket{\Psi}$, defined as 
+\begin{equation}
+    F = \bra{\Psi} \rho \ket{\Psi}.
+\end{equation}
+It is equal to unity for $\rho=\ket{\Psi}\bra{\Psi}$. \cite{qDataProcessing}
+
+\paragraph{Entanglement Fidelity}
+The \textit{entanglement fidelity} $F_e$, defined as 
+\begin{equation}
+    F_e = \bra{\Psi^{RQ}} \rho^{RQ'} \ket{\Psi^{RQ}},
+\end{equation}
+quantifies how much of the initial entangled state $\ket{\Psi^{RQ}}$ is preserved after the dynamics of the system $Q$.
+This quantity depends only on the intrinsic quantities of system $Q$!
+Therefore the choice of the reference system is irrelevant. \cite{qDataProcessing}
+
+Entanglement fidelity $F_e$ is a lower bound for the average fidelity $\bar{F}$ for an ensemble of pure states
+\begin{equation}
+    F_e \le \bar{F}.
+\end{equation}
+$F_e=1$ only if $\bar{F}=1$, which is only the case if $F=1$ for each component $\ket{\phi^Q}$ of the pure states $\rho^Q$. 
+Another connection between the pure state fidelity $F$ and the entanglement fidelity $F_e$ is:
+Let $\nu \ge 0$ and suppose $F \ge 1-\nu$ for all $\ket{\phi^Q}$ in the support of $\rho^Q$.
+Then 
+\begin{equation}
+    F_e \ge 1- \frac{3 \nu}{2}
+\end{equation}
+can be shown. \cite{qDataProcessing}
+
+The entanglement fidelity $F_e$ , which depends only on intrinsic quantities of system $Q$,
+($\rho^Q, \varepsilon^Q$), thus has some useful relations to the other fidelities of the system Q. 
+We might informally summarize these by saying that a high entanglement fidelity $F_e$ 
+implies a high ensemble average fidelity $\bar{F}$ 
+and a high minimum fidelity on the supporting subspace of $\rho^Q$ implies that the entanglement fidelity $F_e$ cannot be too much lower. \cite{qDataProcessing}
+
+\textcolor{red}{add derivation?}
+
+
+\subsection{Entropy Exchange}
+The \textit{entropy exchange} $S_e$ is defined as
+\begin{equation}
+    S_e = S(\rho^{RQ'}) = S(\rho^{E'}) = S(W),
+\end{equation}
+with $S(\rho)$ as the van Neumann entropy of a denstiy operator, in base 2,
+\begin{equation}
+    S(\rho)= - \text{Tr}(\rho)\cdot\log(\rho).
+\end{equation}
+Where $W$ is a density operator with components (in an orthonormal basis)
+\begin{equation}
+    W_{\mu\nu} = \text{Tr}(A_\mu^Q\rho^Q{A_\nu^Q}^\dagger).
+\end{equation}
+$S_e$ is an \textit{intrinsic property} of $Q$, only depending on $\rho^Q$ and $\varepsilon^Q$.
+
+We can interpret the entropy exchange in terms of the refrence state picture, 
+as the entorpy of the joint $RQ$ system after the evolution.
+Or equivalent as the entropy of the enviorment, if the enviorments start out in a pure state. 
+It is \textit{not} (in general) equal to the changes in the entropy of the system $Q$ or the actual physical enviorment of $Q$. 
+It is a measure of information exchanged between $Q$ and the resto of the world during $\varepsilon^Q$.\footnote{
+    It therefore limits the information that an eavesdropper might acquire in a quantum cryptographic protocol.
+} \cite{qDataProcessing}
+
+\paragraph{Quantum Fano inequality}
+The quantum Fano inequality states that for a system $Q$ describes by a Hilbert space of complex dimension $d$ 
+and entanglement fidelity $F_e$
+\begin{equation}
+    h(F_e) +(1-F_e) \log(d^2-1) \ge S_e
+\end{equation} 
+with
+\begin{equation}
+    h(p) = -p \log(p) -(1-p) \log(1-p)
+\end{equation}
+holds.
+Therefore for $F_e=1\implies S_e=0$. 
+
+\subsection{Coherent Quantum Information}
+
+\textit{Coherent (qunatum) information} $I_e$ is defined as 
+\begin{equation}
+    I_e = S(\rho^{Q'}) - S(\rho^{RQ'}) = S(\rho^{Q'}) - S_e
+\end{equation}
+
+
+\paragraph{Von Neumann Entropy}
+The \textit{Von Neumann entropy} of a density operator $\rho$ is defined as 
+\begin{equation}
+    S(\rho) = - \text{Tr}(\rho) \log(\rho).
+\end{equation}
