@@ -2,14 +2,9 @@
 
 ## Ausformulierte Fragen:
 
-### QEC Intro paper:
-
-1. What are weight one-logical Operator?
-    + weight = amount of 'normal' operator needed (so length while written as support)
-2. Computational Basis and conjugate basis 
-    + just relational designations?
+1. difference:  phenomenological noise model vs circuit-level noise model
 
 
+## organisatorisches 
 
-
-
+1. konnte nicht das orginale steane paper lesen, kein zugang durch rwth aachen  
