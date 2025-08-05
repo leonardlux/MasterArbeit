@@ -64,7 +64,7 @@ def apply_gates(name, targets,simulator):
     elif name == 'TICK':
         pass
     else:
-        raise ValueError(f"Unsupported gate: {gate}")
+        raise ValueError(f"Unsupported gate: {name}")
         
         
 def apply_error(name,probabilities,targets,simulator):
