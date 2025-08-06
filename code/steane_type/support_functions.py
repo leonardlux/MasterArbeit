@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import stim
 import pymatching
 
+from scipy.optimize import curve_fit
+
 def count_logical_errors(circuit: stim.Circuit, num_shots: int) -> int:
     # Sample the circuit.
     sampler = circuit.compile_detector_sampler()
@@ -68,3 +70,41 @@ def plot_factory_set(
     plt.show()
 
     return noise_set, log_error_probs, y_errs
+
+def clean_array(x,*args):
+    """
+    cleans out NaNs and infs from the x array,
+    and applies the same mask to all args
+    """
+    mask = np.logical_and(np.logical_not(np.isnan(x)),np.isfinite(x))
+    return x[mask], *[arg[mask] for arg in args] 
+
+
+def determine_slope(
+        noise,
+        log_prob,
+        plot=False,
+        plotpath="",):
+    def linear(x,a,b):
+        return a*x + b
+    
+    # clean out NaNs and infite values, after log
+    y, x= clean_array(np.log(log_prob), np.log(noise))
+    # fit to curve on log scale
+    popt, pcov = curve_fit(linear,x,y)
+    exponent = popt[0]
+    const = popt[1]
+    
+    if plot:
+        plt.figure()
+        plt.plot(noise,log_prob,label="data points")
+        plt.plot(noise,np.exp(linear(np.log(noise),exponent,const)),label=f"fit: exp = {exponent:.4}")
+        plt.xlabel('Physical error rate')
+        plt.ylabel('Logical error rate')
+        plt.legend(loc = 'upper left')
+        plt.yscale('log')
+        plt.xscale('log')
+        plt.show()
+        if plotpath!= "":
+            plt.savefig(plotpath)
+    return exponent

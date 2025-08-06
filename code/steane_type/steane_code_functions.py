@@ -193,16 +193,26 @@ def log_cnot(circuit, control_log_qubit, target_log_qubit):
 # create a steane cicuit for arbitrary distance d (only odd at the moment!)
 def create_surface_steane_ciruit(
         distance=3,
-        aux_log_0=True,
-        aux_log_p=True,
+        fix_Z_errors=True,
+        fix_X_errors=True,
         detectors=True, # might want to get rid of those for tableau
+        basic_errors =True,
+        noise=0,
+        always_both_errors= False,
         ):
 
     circuit = stim.Circuit()
 
     # init general qubit 
     circuit, log_data_qubit = initialize_qubit(circuit, distance, state="0")
-    if aux_log_p:
+
+    if basic_errors:
+        if fix_Z_errors or always_both_errors:
+            circuit.append("Z_ERROR",log_data_qubit["data"],noise)
+        if fix_X_errors or always_both_errors:
+            circuit.append("X_ERROR",log_data_qubit["data"],noise)
+    
+    if fix_X_errors:
         # |p> qubit
         circuit, aux_p_qubit = initialize_qubit(circuit, distance, state="+")
         #- entangle (CdataNOTaux)
@@ -232,7 +242,7 @@ def create_surface_steane_ciruit(
                     "DETECTOR",
                     [stim.target_rec(x) for x in rel_index]
                 ) 
-    if aux_log_0:
+    if fix_Z_errors:
         # |0> qubit
         #- initalize
         circuit, aux_0_qubit = initialize_qubit(circuit, distance, state="0")
@@ -284,8 +294,9 @@ def create_surface_steane_ciruit(
             for measure_set in log_data_qubit["Z_stab_measure"]:
                 rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)]
             # also take into account the previous Z_detectors  measurements on the |+> data qubit
-            for measure_set in aux_p_qubit["Z_stab_measure"]:
-                rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)]
+            if fix_X_errors:
+                for measure_set in aux_p_qubit["Z_stab_measure"]:
+                    rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)]
             # the following is used if the end measurements is not taken as stabilizer measurement
             # for j in rel_Z_stabilizers[i]: 
             #     rel_index = [*rel_index, aux_p_qubit["data_measure"][j] - circuit.num_measurements]
