@@ -180,10 +180,21 @@ def initialize_qubit(
 
     return circuit, log_qubit
 
+def log_cnot(circuit, control_log_qubit, target_log_qubit):
+    for q_control, q_target in zip(control_log_qubit["data"],target_log_qubit["data"]):
+                circuit.append(
+                    "CNOT",
+                    [q_control,q_target],
+                    tag="entangle_CNOT",
+                )
+    return circuit
+
 
 # create a steane cicuit for arbitrary distance d (only odd at the moment!)
 def create_surface_steane_ciruit(
         distance=3,
+        aux_log_0=True,
+        aux_log_p=True,
         detectors=True, # might want to get rid of those for tableau
         ):
 
@@ -191,80 +202,70 @@ def create_surface_steane_ciruit(
 
     # init general qubit 
     circuit, log_data_qubit = initialize_qubit(circuit, distance, state="0")
+    if aux_log_p:
+        # |p> qubit
+        circuit, aux_p_qubit = initialize_qubit(circuit, distance, state="+")
+        #- entangle (CdataNOTaux)
+        circuit = log_cnot(circuit, log_data_qubit, aux_p_qubit)
+        #- measure 
+        prev_measure = circuit.num_measurements 
+        circuit.append("MR",aux_p_qubit["data"])
+        aux_p_qubit["data_measure"] += list(np.arange(prev_measure,circuit.num_measurements)) #TODO: needed ?
+        
+        if detectors: 
+            rel_Z_stabilizers, _ = create_stabilizers(distance)
+            # create general stabilizers without any offset to construct propper stab form measurements
+            # |p> qubit  => z stabilisers
+            # we construct the z stabilisers from the measurements taken on the data qubits
+            # we save the result to construct detectors easily
 
-    # |p> qubit
-    circuit, aux_p_qubit = initialize_qubit(circuit, distance, state="+")
-    #- entangle (CdataNOTaux)
-    for q_data, q_aux in zip(log_data_qubit["data"],aux_p_qubit["data"]):
-            circuit.append(
-                "CNOT",
-                [q_data,q_aux],
-                tag="entangle_CNOT",
-            )
-    #- measure 
-    prev_measure = circuit.num_measurements 
-    circuit.append("MR",aux_p_qubit["data"])
-    aux_p_qubit["data_measure"] += list(np.arange(prev_measure,circuit.num_measurements)) #TODO: needed ?
-    
-    if detectors: 
-        rel_Z_stabilizers, _ = create_stabilizers(distance)
-        # create general stabilizers without any offset to construct propper stab form measurements
-        # |p> qubit  => z stabilisers
-        # we construct the z stabilisers from the measurements taken on the data qubits
-        # we save the result to construct detectors easily
+            # construct stabilizers, using abs index of measurements
+            set_of_stab_measure = [np.array([prev_measure + x for x in stabilizer]) for stabilizer in rel_Z_stabilizers]
+            aux_p_qubit["Z_stab_measure"].append(set_of_stab_measure)
 
-        # construct stabilizers, using abs index of measurements
-        set_of_stab_measure = [np.array([prev_measure + x for x in stabilizer]) for stabilizer in rel_Z_stabilizers]
-        aux_p_qubit["Z_stab_measure"].append(set_of_stab_measure)
+            for i, _ in enumerate(rel_Z_stabilizers): 
+                rel_index = []
+                # construct detectors using recent measurement and the propagation of the previous ones
+                for measure_set in aux_p_qubit["Z_stab_measure"]:
+                    rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)] 
+                circuit.append(
+                    "DETECTOR",
+                    [stim.target_rec(x) for x in rel_index]
+                ) 
+    if aux_log_0:
+        # |0> qubit
+        #- initalize
+        circuit, aux_0_qubit = initialize_qubit(circuit, distance, state="0")
+        #- entangle (CauxNOTdata)
+        circuit = log_cnot(circuit, aux_0_qubit, log_data_qubit)
+        #- measure 
+        circuit.append("H", aux_0_qubit["data"])
+        prev_measure = circuit.num_measurements
+        circuit.append("MR",aux_0_qubit["data"])
+        if detectors: 
+            _, rel_X_stabilizers = create_stabilizers(d=distance) 
+            # create general stabilizers without any offset to target the correct measurements
+            # |0> qubit  => x stabilisers
+            # we construct the X stabilisers from the measurements taken on the data qubits
+            # we need to propagate the stabilizer of init onto the second measurement
 
-        for i, _ in enumerate(rel_Z_stabilizers): 
-            rel_index = []
-            # construct detectors using recent measurement and the propagation of the previous ones
-            for measure_set in aux_p_qubit["Z_stab_measure"]:
-                rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)] 
-            circuit.append(
-                "DETECTOR",
-                [stim.target_rec(x) for x in rel_index]
-            ) 
+            # construct new detectors from measurements
+            set_of_stab_measure = [np.array([prev_measure + x for x in stabilizer]) for stabilizer in rel_X_stabilizers]
+            aux_0_qubit["X_stab_measure"].append(set_of_stab_measure)
 
-    # |0> qubit
-    #- initalize
-    circuit, aux_0_qubit = initialize_qubit(circuit, distance, state="0")
-    #- entangle (CauxNOTdata)
-    for q_data, q_aux in zip(log_data_qubit["data"],aux_0_qubit["data"]):
-            circuit.append(
-                "CNOT",
-                [q_aux,q_data],
-                tag="entangle_CNOT",
-            )
-    #- measure 
-    circuit.append("H", aux_0_qubit["data"])
-    prev_measure = circuit.num_measurements
-    circuit.append("MR",aux_0_qubit["data"])
-    if detectors: 
-        _, rel_X_stabilizers = create_stabilizers(d=distance) 
-        # create general stabilizers without any offset to target the correct measurements
-        # |0> qubit  => x stabilisers
-        # we construct the X stabilisers from the measurements taken on the data qubits
-        # we need to propagate the stabilizer of init onto the second measurement
-
-        # construct new detectors from measurements
-        set_of_stab_measure = [np.array([prev_measure + x for x in stabilizer]) for stabilizer in rel_X_stabilizers]
-        aux_0_qubit["X_stab_measure"].append(set_of_stab_measure)
-
-        for i, _ in enumerate(rel_X_stabilizers):
-            rel_index = []
-            # init stabilizer and measurements
-            for measure_set in aux_0_qubit["X_stab_measure"]:
-                rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)] 
-            # propagation from the log_data_qubit stabilizers
-            for measure_set in log_data_qubit["X_stab_measure"]:
-                rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)]
-            
-            circuit.append(
-                "DETECTOR",
-                [stim.target_rec(x) for x in rel_index]
-            ) 
+            for i, _ in enumerate(rel_X_stabilizers):
+                rel_index = []
+                # init stabilizer and measurements
+                for measure_set in aux_0_qubit["X_stab_measure"]:
+                    rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)] 
+                # propagation from the log_data_qubit stabilizers
+                for measure_set in log_data_qubit["X_stab_measure"]:
+                    rel_index = [*rel_index, *(measure_set[i]-circuit.num_measurements)]
+                
+                circuit.append(
+                    "DETECTOR",
+                    [stim.target_rec(x) for x in rel_index]
+                ) 
 
 
     # measure data qubits

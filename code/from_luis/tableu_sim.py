@@ -1,5 +1,5 @@
 import numpy as np
-
+import stim
 
 all_gates = ["C_XYZ", "C_ZYX", "H", "H_YZ", "I","Y","SQRT_Y","SQRT_Y_DAG", "CX", "CY","CZ","XCX", "XCY", "XCZ", "YCX", "YCY", "YCZ", "R", "RX", "RY","M", "MX", "MY","X","Y","Z", "MPP", "R"]
 
@@ -9,17 +9,11 @@ all_errors = ["DEPOLARIZE1", "DEPOLARIZE2", "X_ERROR", "Z_ERROR","PAULI_CHANNEL_
 
 ANNOTATION_OPS = {"OBSERVABLE_INCLUDE", "DETECTOR", "SHIFT_COORDS", "QUBIT_COORDS"}
 
-import stim
 
 #FIXME: be careful with the *target, it can mess up the order
 
-
-
 def apply_gates(name, targets,simulator):
 
-    #pl = leak_info[0]
-    #bits0 = leak_info[1]
-    
     if name == 'H':
         simulator.h(*targets)
     elif name == 'S':
@@ -47,6 +41,7 @@ def apply_gates(name, targets,simulator):
             simulator.measure(target.value)
             
     elif name == 'MX':
+        # first apply hadamard and then measure
         simulator.h(*targets)
         for target in targets:
             simulator.measure(target.value)

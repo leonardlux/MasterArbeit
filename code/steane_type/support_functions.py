@@ -38,6 +38,8 @@ def plot_factory_set(
     cm = 1/2.54  # centimeters in inches
     plt.figure()
     plt.subplots(figsize=(20*cm, 10*cm))
+    log_error_probs = []
+    y_errs = []
     for cur_circ_factory in factory_set:
         log_error_prob = []
         for noise in noise_set:
@@ -45,10 +47,13 @@ def plot_factory_set(
             num_errors_sampled = count_logical_errors(circuit, num_shots)
             log_error_prob.append(num_errors_sampled / num_shots)
         log_error_prob = np.array(log_error_prob)
+        log_error_probs.append(log_error_prob)
+        y_err = (log_error_prob*(1-log_error_prob)/num_shots)**(1/2)
+        y_errs.append(y_err)
         plt.errorbar(
             noise_set,
             log_error_prob,
-            yerr=(log_error_prob*(1-log_error_prob)/num_shots)**(1/2),
+            yerr=y_err,
             label=cur_circ_factory(0,name=True),
             )
     plt.loglog()
@@ -61,3 +66,5 @@ def plot_factory_set(
     if filename != "":
         plt.savefig(plot_path + filename +".pdf")
     plt.show()
+
+    return noise_set, log_error_probs, y_errs
