@@ -27,6 +27,51 @@ def count_logical_errors(circuit: stim.Circuit, num_shots: int) -> int:
             num_errors += 1
     return num_errors
 
+# helper function
+def clean_array(x,*args):
+    """
+    cleans out NaNs and infs from the x array,
+    and applies the same mask to all args
+    """
+    mask = np.logical_and(np.logical_not(np.isnan(x)),np.isfinite(x))
+    return x[mask], *[arg[mask] for arg in args] 
+
+# funciton to determin slope
+def determine_slope(
+        noise,
+        log_prob,
+        yerr=[],
+        plot=False,
+        plotpath="",):
+
+    def linear(x,a,b):
+        return a*x + b
+    
+    # clean out NaNs and infite values, after log
+    y, x= clean_array(np.log(log_prob), np.log(noise))
+
+    # fit to curve on log scale
+    popt, pcov = curve_fit(linear,x,y)
+    exponent = popt[0]
+    const = popt[1]
+    
+    if plot:
+        plt.figure()
+        if len(yerr)!=0:
+            plt.errorbar(noise,log_prob,yerr=yerr,label="data points")
+        else:
+            plt.plot(noise,log_prob,label="data points")
+        plt.plot(noise,np.exp(linear(np.log(noise),exponent,const)),label=f"fit: exp = {exponent:.4}")
+        plt.xlabel('Physical error rate')
+        plt.ylabel('Logical error rate')
+        plt.legend(loc = 'upper left')
+        plt.yscale('log')
+        plt.xscale('log')
+        plt.show()
+        if plotpath!= "":
+            plt.savefig(plotpath)
+    return exponent, const
+
 # function that given a set of circuit factories, plots there logical error rate
 
 def plot_factory_set(
@@ -35,7 +80,8 @@ def plot_factory_set(
         noise_set = np.logspace(-2,-0.1),
         filename = "",
         reference_lines=False,
-        plot_path="/home/leo/Documents/MasterArbeit/code/steane_type/plots/"
+        acc_ref_lines=False,
+        plot_path="/home/leo/Documents/MasterArbeit/code/steane_type/plots/",
     ):
     cm = 1/2.54  # centimeters in inches
     plt.figure()
@@ -58,10 +104,25 @@ def plot_factory_set(
             yerr=y_err,
             label=cur_circ_factory(0,name=True),
             )
+        if acc_ref_lines:
+            cutoff = int(len(noise_set)/2)
+            exponent, const = determine_slope(noise_set[:cutoff],log_error_prob[:cutoff],plot=False)
+            x = noise_set
+            y = np.exp((np.log(noise_set)*exponent + const))
+            plt.plot(
+                x,
+                y,
+                label=f"fit {cur_circ_factory(0,name=True)}: exp = {exponent:.4}",
+                linestyle="dotted",
+                alpha=0.5,
+                )
+
+
     plt.loglog()
     if reference_lines:
         plt.plot(noise_set,noise_set**2,label="$p^2$")
         plt.plot(noise_set,noise_set,label="$p$",c="green")
+
     plt.xlabel("physical error rate")
     plt.ylabel("logical error rate per shot")
     plt.legend()
@@ -71,40 +132,5 @@ def plot_factory_set(
 
     return noise_set, log_error_probs, y_errs
 
-def clean_array(x,*args):
-    """
-    cleans out NaNs and infs from the x array,
-    and applies the same mask to all args
-    """
-    mask = np.logical_and(np.logical_not(np.isnan(x)),np.isfinite(x))
-    return x[mask], *[arg[mask] for arg in args] 
 
 
-def determine_slope(
-        noise,
-        log_prob,
-        plot=False,
-        plotpath="",):
-    def linear(x,a,b):
-        return a*x + b
-    
-    # clean out NaNs and infite values, after log
-    y, x= clean_array(np.log(log_prob), np.log(noise))
-    # fit to curve on log scale
-    popt, pcov = curve_fit(linear,x,y)
-    exponent = popt[0]
-    const = popt[1]
-    
-    if plot:
-        plt.figure()
-        plt.plot(noise,log_prob,label="data points")
-        plt.plot(noise,np.exp(linear(np.log(noise),exponent,const)),label=f"fit: exp = {exponent:.4}")
-        plt.xlabel('Physical error rate')
-        plt.ylabel('Logical error rate')
-        plt.legend(loc = 'upper left')
-        plt.yscale('log')
-        plt.xscale('log')
-        plt.show()
-        if plotpath!= "":
-            plt.savefig(plotpath)
-    return exponent

@@ -19,3 +19,4 @@ Notizen/notes/images/*
 *.jpeg
 *.svg
 *__pycache__
+*.odp
