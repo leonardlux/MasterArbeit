@@ -20,3 +20,8 @@ Notizen/notes/images/*
 *.svg
 *__pycache__
 *.odp
+*.png
+
+# other
+*.zip
+*.h5
