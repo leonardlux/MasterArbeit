@@ -22,7 +22,7 @@ def index_qubits_surface_code(distance: int = 3, offset: int = 0):
 
     return index_physical, index_X_ancilla, index_Z_ancilla 
 
-def index_stab_targets(distance: int = 3, offset: int = 0):
+def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
     if distance%2!=1:
         raise ValueError(f"Odd number expected, got {distance}")
     d = distance
@@ -62,64 +62,84 @@ def index_stab_targets(distance: int = 3, offset: int = 0):
             targets_Z.append(targets)
     return targets_X, targets_Z
 
-def generate_surface_code_log_qubit(distance: int = 3, offset=0, state: str ="0"):
+def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: str = "0", final_tag: str = "" ):
     """
-    Docstring for generate_surface_code_log_qubit
+    This function adds a log qubit, encoded in surface code, to the circuit. 
+    In this process it:
+    1. resets the needed physical qubits
+    2. uses ancillas to measure the qubits in the correct bases
     
     :param distance: distance of the surface code 
     :type distance: int
-    :param offset: starting index of the first log. qubit 
+    :param offset: starting index of the first phy. qubit 
     :param state: string which is either "0" for |0> or "p" for |+> 
     :type state: str
+    :param final_tag: tag that will be assigned to physical data index after init 
+    :type final_tag: str
     """
+    marker_tag = "l_qubit_init"
+
     circuit = stim.Circuit()
 
     index_physical, index_X_ancilla, index_Z_ancilla = index_qubits_surface_code(distance, offset)
     # init qubits by resetting them to 0 (technicly useless, but goal here is to do the implicit obvious)
     if state == "0": # |0>
-        circuit.append("R", index_physical, tag="init")
+        circuit.append("R", index_physical, tag=marker_tag)
     elif state == "p": # |+>
-        circuit.append("R", index_physical, tag="init")
-        circuit.append("H", index_physical, tag="init")
+        circuit.append("R", index_physical, tag=marker_tag)
+        circuit.append("H", index_physical, tag=marker_tag)
     else:
         raise ValueError(f"does not know state {state}, expected: '0' for |0> or 'p' for |+>")
-    circuit.append("R", index_X_ancilla, tag="init")
-    circuit.append("R", index_Z_ancilla, tag="init")
+    circuit.append("R", index_X_ancilla, tag=marker_tag)
+    circuit.append("R", index_Z_ancilla, tag=marker_tag)
 
     # Initalize all physical qubits into a log. state by measurement of stabilizer gen. 
     targets_X, targets_Z = index_stab_targets(distance, offset)
     # Plaquette-/X-stabilizers
-    circuit.append("H", index_X_ancilla)
+    circuit.append("H", index_X_ancilla, tag=marker_tag)
     for i_ancilla ,targets in zip(index_X_ancilla,targets_X):
         for i_target in targets:
-            circuit.append("CNOT", [i_ancilla, i_target])
-    circuit.append("H", index_X_ancilla)
-    circuit.append("MR", index_X_ancilla) # <- result (re)defines the codespace/generators of stabilizers! 
+            circuit.append("CNOT", [i_ancilla, i_target], tag=marker_tag)
+    circuit.append("H", index_X_ancilla, tag=marker_tag)
+    circuit.append("MR", index_X_ancilla, tag=marker_tag) # <- result (re)defines the codespace/generators of stabilizers! 
     # Site-/Z-stabilizers
     for i_ancilla ,targets in zip(index_Z_ancilla,targets_Z):
         for i_target in targets:
-            circuit.append("CNOT", [i_target, i_ancilla])
-    circuit.append("MR", index_Z_ancilla) # <- result (re)defines the codespace/generators of stabilizers!
+            circuit.append("CNOT", [i_target, i_ancilla], tag=marker_tag)
+    circuit.append("MR", index_Z_ancilla, tag=marker_tag) # <- result (re)defines the codespace/generators of stabilizers!
+
+    # Add Idendity operators to annotate the circuit
+    circuit.append("I", index_physical, tag=final_tag)
+
     return circuit
 
-def generate_steane_set_up(distance: int = 3):
+def generate_steane_circuit(distance: int = 3):
+    """
+    This function generates the the steane type EC.
+    
+    :param distance: Distance of the used log. qubits 
+    :type distance: int
+    """
     d = distance
     offset_per_log_qubit = (d**2 + (d-1)**2 + 2*d*(d-1)) # num. of all phy. qubits per log. qubit
     # init. all qubits in correct state!
-    circuit_log_data = generate_surface_code_log_qubit(
+    circuit_log_data = generate_surface_code_log_qubit_circuit(
         distance, 
         offset=0,
         state="0",
+        final_tag="psi_data"
         )
-    circuit_aux_0 = generate_surface_code_log_qubit(
+    circuit_aux_0 = generate_surface_code_log_qubit_circuit(
         distance, 
         offset = offset_per_log_qubit,
-        state="0"
+        state="0",
+        final_tag="0_data"
         )
-    circuit_aux_p = generate_surface_code_log_qubit(
+    circuit_aux_p = generate_surface_code_log_qubit_circuit(
         distance, 
         offset = 2*offset_per_log_qubit,
         state="p",
+        final_tag="p_data"
         )
     circuit = circuit_log_data + circuit_aux_0 + circuit_aux_p
 
@@ -216,7 +236,3 @@ def generate_steane_set_up(distance: int = 3):
 
 
     return circuit
-
-diagram = generate_steane_set_up(distance=3).diagram("timeline-svg")
-with open('new_test_circ.svg', 'w') as f:
-    f.write(str(diagram))
