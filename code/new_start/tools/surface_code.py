@@ -1,5 +1,5 @@
-import numpy as np 
-import stim
+import numpy as np # type: ignore 
+import stim # type: ignore
 
 
 def index_qubits_surface_code(distance: int = 3, offset: int = 0):

@@ -1,5 +1,4 @@
-import stim 
-import numpy as np
+import stim  # type: ignore
 
 def add_noise(
         circuit,
