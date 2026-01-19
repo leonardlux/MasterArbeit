@@ -7,7 +7,7 @@ from scipy.optimize import curve_fit
 from tools.error_models import add_noise
 
 # TODO: update this function ?! decompose it into parts?!
-def count_logical_errors_using_MWPM(circuit, num_shots: int, probability: bool = False) -> int:
+def count_logical_errors_using_MWPM(circuit, num_shots: int, probability: bool = False, shortest_error: bool = False) -> int:
     """
     This funciton generates data from circuit and applies Minimum Weight Perfect Matching to decode the syndrome.
     It then return the amount of errors.
@@ -27,6 +27,13 @@ def count_logical_errors_using_MWPM(circuit, num_shots: int, probability: bool =
     # Configure a decoder using the circuit.
     detector_error_model = circuit.detector_error_model(decompose_errors=True)
     matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
+    
+    if shortest_error:
+        # Check the lowest weight error:
+        error = detector_error_model.shortest_graphlike_error()
+        print("The shortest possible error (found by stim) is formed by:")
+        print(error)
+        print(f"And it hast the lenght: {len(error)}")
 
     # Run the decoder.
     predictions = matcher.decode_batch(detection_events)
