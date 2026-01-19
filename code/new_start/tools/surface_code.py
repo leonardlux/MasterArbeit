@@ -113,7 +113,7 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
 
     return circuit
 
-def generate_steane_circuit(distance: int = 3):
+def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False):
     """
     This function generates the the steane type EC.
     
@@ -225,13 +225,15 @@ def generate_steane_circuit(distance: int = 3):
     
     # Detector on |Psi> from observable measurement
     # TODO: I just need this if I want to make something fault tolerant, correct?
+    # TODO: Actually destroys pymatching if this detector is active!! WHY?!
     # I might need to take the Z_stab measurement on |+>_L into account
-    circuit = add_detectors(
-        circuit,
-        targets_Z,
-        [offset_ancilla_psi_Z],
-        [offset_data_psi],
-        )
+    if final_log_detector:
+        circuit = add_detectors(
+            circuit,
+            targets_Z,
+            [offset_ancilla_psi_Z],
+            [offset_data_psi],
+            )
 
     # Logical Observable (check in notes) 
     targets = []
