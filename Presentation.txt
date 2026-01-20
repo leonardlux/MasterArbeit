@@ -1,0 +1,60 @@
+Presentation:
+
+- Goal:
+Title: Finding the "threshold(s)" for "steane type ec"
+
+- Introduce basics: (4 pages)
+
+Surface Code (unrotated, for reasons) 		(1 Page)
+Noise model and the occurence noise, circuit noise 
+Basic EC measuring multiple times stabilizer
+
+Basics of Steane Type EC			(2 Pages)
+-> WHY steane,one shot, fault tolearance 
+
+Threshold(s) 		(1 Page)
+-> differents between finding a threshold and finding a optimal one (ala ML)
+-> why is it difficult and why is the optimal one more interesting?
+
+-> Why did nobody do this before?
+ - nn interaction
+ - expensive in qubits 
+
+
+- inital approach:
+
+apply a ML Decoder for surface code (not ML on steane type ec) to steane type ec circuit => hope for the best
+						(1 Page)	
+						
+-> introduce the eff ML Decoder workings on surface codes (only bit flips -> to phase flips) (how thorougly)
+						(2-x pages)
+-> steps to use this ML on the steane type 
+	-> error propagation			(1 Page)
+	-> explain assumptions and following limitations think about that one again
+- is it ML decoding for steane type?
+						(1-2 Page)
+-> show some results if we apply it to steane type ec (bit flips and phase flips only)
+	-> limitations already
+						(1 Page) = 11 pages
+
+explain why it might not work (not decode in ML style)
+						(1 page)
+
+future steps: 					(1 page)
+- some smart idea to adapt this process to apply it to steane type EC?
+- use the non bit flip adapted ML Decoder 
+	-> alread some problems with changing error rates? is it though?
+	
+
+Questions: 
+Which error model(s)?
+-> Circuit level
+-> basic only for testing
+
+Valid to assume fault tolerant encoding of qubits or should i do something about that?
+
+
+
+
+
+
