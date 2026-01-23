@@ -5,9 +5,16 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 from tools.error_models import add_noise
+from tools.ml_decoder import ML_Decoder
 
 # TODO: update this function ?! decompose it into parts?!
-def count_logical_errors_using_MWPM(circuit, num_shots: int, probability: bool = False, shortest_error: bool = False) -> int:
+def count_logical_errors_using_MWPM(
+        circuit, 
+        num_shots: int, 
+        probability: bool = False, 
+        shortest_error: bool = False, 
+        **kwargs, # just here to ignore the stuff other logical error counter need
+        ) -> int:
     """
     This funciton generates data from circuit and applies Minimum Weight Perfect Matching to decode the syndrome.
     It then return the amount of errors.
@@ -49,6 +56,29 @@ def count_logical_errors_using_MWPM(circuit, num_shots: int, probability: bool =
         return num_errors/num_shots
     return num_errors
 
+def count_logical_errors_using_ML(
+        circuit, 
+        num_shots: int, 
+        distance: int, 
+        error_rate: float, 
+        probability: bool = False,
+    ) -> int:
+    ## TODO care about Z errors
+    # Sample the circuit.
+    sampler = circuit.compile_detector_sampler()
+    detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
+
+
+    # init ML decoder
+    X_decoder = ML_Decoder(distance, error_rate)
+    num_errors = 0
+    for obs, d_event in zip(observable_flips,detection_events): 
+        pred = X_decoder.decode_syndrome(d_event[-distance*(distance-1):], detector_pauli="Z")
+        if obs != pred:
+            num_errors += 1
+    if probability:
+        return num_errors/num_shots
+    return num_errors 
 
 # funciton to determin slope
 def determine_slope(
@@ -99,7 +129,7 @@ def plot_diff_noise_level(
         circuits:list,
         noise_model_fct,
         noise_set = np.logspace(-2,-0.1),
-        labels = None,
+        distances = None,
         num_shots = 10_000, 
         count_log_error_fct = count_logical_errors_using_MWPM,
         filename = "",
@@ -108,9 +138,9 @@ def plot_diff_noise_level(
         reference_lines = False,
     ):
 
-    if not labels:
+    if not distances:
         legend = False
-        labels = [""] * len(circuits)
+        distances = [""] * len(circuits)
     else:
         legend = True
     cm = 1/2.54 # to convert inches to cm
@@ -130,7 +160,13 @@ def plot_diff_noise_level(
                 noise_model_fct(noise),
                 )
             log_error_prob.append(
-                count_log_error_fct(noisy_circuit, num_shots, probability = True) 
+                count_log_error_fct(
+                    noisy_circuit, 
+                    num_shots, 
+                    probability = True,
+                    error_rate = noise,
+                    distance = distances[i]
+                    ) 
                 )
         
         log_error_prob = np.array(log_error_prob)
@@ -143,7 +179,7 @@ def plot_diff_noise_level(
             noise_set,
             log_error_prob,
             yerr=y_err,
-            label=labels[i],
+            label=f"d={distances[i]}",
             )
         
         # TODO: add fitted reference lines!
@@ -155,7 +191,7 @@ def plot_diff_noise_level(
             plt.plot(
                 x,
                 y,
-                label=f"fit {labels[i]}: exp = {exponent:.4}",
+                label=f"fit d={distances[i]}: exp = {exponent:.4}",
                 linestyle="dotted",
                 alpha=0.5,
                 )

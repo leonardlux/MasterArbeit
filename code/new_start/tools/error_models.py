@@ -45,29 +45,30 @@ def add_noise(
     return noisy_circuit
 
 # Automatic construct  
-def construct_basic_noise_model(noise: float):
+def construct_basic_noise_model(noise: float, X_errors = True, Z_errors = False):
     """
     construct_basic_error_model, constructs a noise model where there are only error after initilazation of the main data qubit.
     
     :param noise: define the error rate of the occuring errors 
     :type noise: float
     """
-    noise_model = {
-         "inital_X_errors": {
+    noise_model = {} 
+    if X_errors:
+        noise_model["inital_X_errors"] = { 
             "operator": {"I"}, 
             "error_position": "following", 
             "error": "X_ERROR", 
             "noise": noise, 
             "specific_tag": {"psi_data"}, 
-        },
-       "inital_Z_errors": {
+        }
+    if Z_errors:
+        noise_model["inital_Z_errors"] = {
             "operator": {"I"}, 
             "error_position": "following", 
             "error": "Z_ERROR", 
             "noise": noise, 
             "specific_tag": {"psi_data"}, 
-        },
-    }
+        }
     return noise_model
 
 """

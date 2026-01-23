@@ -1,15 +1,5 @@
 import numpy as np
 import scipy as sc
-
-## Input Syndrome to some fixed Pauli
-"""
-input syndrome is a list of length (d*(d-1)) with boolean entries representing the dectetor values
-
-I need to construct the physical qubits surface code (shape) to generate the error.
-
-TODO: What is the difference between X and Y errors?!
-
-"""
 ## Matrix definition
 
 # Matrix A
@@ -39,53 +29,51 @@ def gen_m_0(d):
     m_0[-1][0] = -1
     return m_0
 
-# Identity Matrix
-def gen_identity(d):
-    v = 2*d * [1]
-    i = sc.sparse.diags_array(v).toarray()
-    return i 
+# # Identity Matrix NOT NEEDED
+# def gen_identity(d):
+#     v = 2*d * [1]
+#     i = sc.sparse.diags_array(v).toarray()
+#     return i 
 
 
 class ML_Decoder():
     def __init__(self, d, error_rate):
         self.distance = d
         self.d = d
-        self.er = error_rate
+        self.er = error_rate # TODO: adapt for X and Z errors
         pass
 
-    # method to generate a fitting pauli string(fitting to the detector)
-    def __syndrome_to_some_pauli(self,detector_list):
-        """
-        Docstring for syndrome_to_pauli
-        
-        :param detector_list: list of detector events as an array of length (d*(d-1)) 
-        :param distance: distance of the surface code 
-        :return: list of pauli string, (not shaped) ordered by qubit/edge index 
-        """
-        if len(detector_list) != self.d * (self.d-1):
-            raise ValueError("dector list has unexpected length")
+    # How to I integrate those cleanly?
+    def rotate_X_stab(self, detector_list):    
+        detector_list = np.multiply(detector_list,1) # Boolean to int
+        syndrome_array = np.zeros((self.d, self.d-1)) # syndrome array is the shaped and correctly ordered detector
+        for col in range(self.d-1):
+            for row in range(self.d):
+                syndrome_array[row,-1* (col + 1)] = detector_list[ col * self.d + row ]
+        return syndrome_array 
+    
+    def format_Z_stab(self, detector_list):
+        detector_list = np.multiply(detector_list,1) # Boolean to int
+        syndrome_array = np.reshape(detector_list, (self.d, self.d-1))
+        return syndrome_array
 
 
-        # TODO generalize to Z-Errors! start with X-errors
-        # goal: generate the pauli error string
-
-        # reshape the detector list to the correct form 
-        reshape_X = (self.d-1,self.d) #TODO this way seems counter intuitive
-        reshape_Z = (self.d,self.d-1) 
-        shape = reshape_Z
-        detector_ordered = np.reshape(detector_list, shape) 
-
+    # method to generate a fitting pauli string (fitting to the detector)
+    def syndrome_to_some_pauli(self, syndrome_array, add_logical: bool = False):
         # generate the pauli string from detector outputs
         # start with Horizontal ones (notation from eff ML paper)
 
         # not the same indexing as python !
         f = np.zeros((self.d,self.d)) # at this step only horizontal errors are taken into account
         #TODO optimize this step:
-        for i, row in enumerate(detector_ordered):
+        for i, row in enumerate(syndrome_array):
             for j, detector in enumerate(row):
                 if detector:
                     for jt in range(j+1):
-                        f[i,jt] = (f[i,jt]+1)%2
+                        f[i,jt] = (f[i,jt] + 1)%2
+        if add_logical:
+            # add logical operator by adding stabilizers to the first row 
+            f[0,:] = (f[0,:] + 1) % 2  
 
         # add the vertical qubits erros to pauli string in 0 state (no error)
         f = np.concatenate((f,np.zeros((self.d,self.d-1))),axis=1)
@@ -93,14 +81,15 @@ class ML_Decoder():
         f = f.flatten()
         f = f[:-(self.d-1)] # last row of verticals does not exists!
         self.f = f 
+        self.__calc_weights()
         return f
     
-    def calc_weights(self,):
+    def __calc_weights(self,):
         # TODO I am assuming global equal error rates (not local to qubits!)
         self.weights = self.er**(1-2*self.f) * (1-self.er)**(-1+2*self.f) 
 
     ## Algorithm 1 
-    def simulate_horizontal(self,j,m,gamma):
+    def __simulate_horizontal(self,j,m,gamma):
         qubit_indices = j + (2 * self.d - 1) * np.arange(0,self.d)
         # subset of weights relevant 
         ws = self.weights[qubit_indices]
@@ -127,7 +116,7 @@ class ML_Decoder():
         return m, gamma
 
 
-    def simulate_vertical(self,j,m,gamma):
+    def __simulate_vertical(self,j,m,gamma):
         qubit_indices = self.d + j + (2 * self.d - 1) * np.arange(self.d - 1)  
         # subset of weights relevant 
         ws = self.weights[qubit_indices]
@@ -153,17 +142,16 @@ class ML_Decoder():
         m = a - b @ x
         return m, gamma
     
-    def coset_probability(self,detector_list):
-        self.__syndrome_to_some_pauli(detector_list)
-        self.calc_weights()
-        
+    def coset_probability(self,):
+        # it uses the weight indirectly over the object
+
         m = gen_m_0(self.d)
         gamma = 2**(self.d - 1)
 
         for j in range(self.d - 1):
-            m, gamma = self.simulate_horizontal(j,m,gamma)
-            m, gamma = self.simulate_vertical(j,m,gamma)
-        m, gamma = self.simulate_horizontal(self.d - 1,m,gamma) # d-1 due to 0 <= i < d and not 1<=i<=d
+            m, gamma = self.__simulate_horizontal(j,m,gamma)
+            m, gamma = self.__simulate_vertical(j,m,gamma)
+        m, gamma = self.__simulate_horizontal(self.d - 1,m,gamma) # d-1 due to 0 <= i < d and not 1<=i<=d
 
         # calc error probability of the arb choosen error 
         n = self.d**2 + (self.d - 1)**2
@@ -172,6 +160,34 @@ class ML_Decoder():
 
         coset_prob = pauli_error_prob * np.sqrt(gamma / 2) * (np.linalg.det((m + gen_m_0(self.d))))**(1/4)
         return coset_prob
+    
+
+    
+    def decode_syndrome(self, detector_list, detector_pauli):
+        if detector_pauli.upper() == "X":
+            syndrome_array = self.rotate_X_stab(detector_list)
+        elif detector_pauli.upper() == "Z":
+            syndrome_array = self.format_Z_stab(detector_list)
+        else:
+            raise ValueError("unexpected detector")
+
+        # prob of coset without logical error 
+        self.syndrome_to_some_pauli(syndrome_array)
+        prob_coset_1 = self.coset_probability() 
+
+        # prob of coset with logical error 
+        self.syndrome_to_some_pauli(syndrome_array,add_logical=True)
+        prob_coset_error = self.coset_probability() 
+
+        if prob_coset_1 > prob_coset_error:
+            return False # no observable flip predicted 
+        elif prob_coset_1 < prob_coset_error:
+            return True # observable flip predicted
+        else: 
+            print("unexpected")
+            return 0
+        
+
 
 
 ### Tests 
@@ -188,11 +204,11 @@ if __name__ == "__main__":
         False, False,
         False, False,
     ]
-    distance = 5
-    syndrome_list = syndrome_list5
-    error_rate = 0.1
+    detector_pauli = "X"
+    distance = 3
+    syndrome_list = syndrome_list3
+    # error rate -> 0 => coset probability -> 1
+    # TODO check if this is reasonable 
+    error_rate = 0.5 
     decoder = ML_Decoder(distance, error_rate)
-    print(decoder.coset_probability(syndrome_list))
-
-    # Seems to work ... now I need to implement it 
-
+    print(decoder.decode_syndrome(syndrome_list,detector_pauli))
