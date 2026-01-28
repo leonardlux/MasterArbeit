@@ -1,0 +1,100 @@
+\documentclass[border=3.14mm,tikz]{standalone}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{tikz}
+\usetikzlibrary{quantikz2}
+\usepackage{amsmath}
+
+
+\begin{document}
+
+
+
+\tikzset{ noisy/.style={fill=red!20}
+}
+
+
+% Quantum Memory
+
+\begin{quantikz}
+    \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[]{Recovery}&\rstick{$\ket{\Psi '}_L$}
+\end{quantikz}
+
+
+%CNOTs and Error Propagation
+\begin{quantikz}
+&\gate[1,style={noisy},label style=red]{E_X}&\ctrl{1}&& \\
+&&\targ{}&&
+\end{quantikz}
+
+\begin{quantikz}
+&&\ctrl{1}&\gate[1,style={noisy},label style=red]{E_X}& \\
+&&\targ{}&\gate[1,style={noisy},label style=red]{E_X}&
+\end{quantikz}
+
+
+\begin{quantikz}
+&&\ctrl{1}&& \\
+&\gate[1,style={noisy},label style=red]{E_Z}&\targ{}&&
+\end{quantikz}
+
+\begin{quantikz}
+&&\ctrl{1}&\gate[1,style={noisy},label style=red]{E_Z}& \\
+&&\targ{}&\gate[1,style={noisy},label style=red]{E_Z}&
+\end{quantikz}
+
+\begin{quantikz}[wire types={b,b},classical gap=0.07cm]
+    \lstick{$\ket{\Psi}_L$}&\targ{}&&\gate[]{Z_i}& \\
+    \lstick{$\ket{0}_L$}&\ctrl{-1}&\gate[]{H}&\meter{}\wire[u][1]{c} \\
+\end{quantikz}
+
+
+
+\begin{quantikz}[wire types={b,b},classical gap=0.07cm]
+    \lstick{$\ket{\Psi}_L$}&\ctrl{1}&\gate[]{X_i}& \\
+    \lstick{$\ket{+}_L$}&\targ{}&\meter{}\wire[u][1]{c} \\
+\end{quantikz}
+
+
+\begin{quantikz}[wire types={b,b,b},classical gap=0.07cm]
+    \lstick{$\ket{\Psi}_L$}&\ctrl{1}&\targ{}&\gate[]{X_i}&\gate[]{Z_i}&  \\
+    \lstick{$\ket{+}_L$}&\targ{}&&\meter{}\wire[u][1]{c} \\
+    \lstick{$\ket{0}_L$}&&\ctrl{-2}&\gate[]{H}&\meter{}\wire[u][2]{c} \\
+\end{quantikz}
+
+% Stim implementation
+\begin{quantikz}[wire types={b,b,b},classical gap=0.07cm]
+    \lstick{$\ket{0}_L$}&\gate[1,style={noisy},label style=red]{E_{X,Z}}&\ctrl{1}&\targ{}&&\meter{Ob.}&\setwiretype{c} & & \gate[2]{\text{Log. Error Detector}}\\
+    \lstick{$\ket{+}_L$}&&\targ{}&&&\meter{}&\setwiretype{c} & \gate[2]{\text{MWPM Decoder}} &\\
+    \lstick{$\ket{0}_L$}&&&\ctrl{-2}&\gate[]{H}&\meter{}&\setwiretype{c}& \\
+\end{quantikz}
+
+
+
+\section{Depolarizing 2 Gate}
+
+
+
+\begin{quantikz}
+    &\ctrl{1}&\gate[style={fill=red!20}]{\text{Dep}_2}\wire[d][1]{q}& \\
+    &\targ{}&\gate[style={fill=red!20}]{\text{Dep}_2}&
+\end{quantikz}
+
+\section{Concept vs Implementation}
+
+\begin{quantikz}[wire types={b,b,b},classical gap=0.07cm]
+    \lstick{$\ket{0}_L$}&\ctrl{1}&\targ{}&&\meter{Ob.}&\setwiretype{c} &\gate[3]{\text{MWPM Decoder}} & \gate[2]{\text{Log. Error Detector}}\\
+    \lstick{$\ket{+}_L$}&\targ{}&&&\meter{}&\setwiretype{c} &  &\\
+    \lstick{$\ket{0}_L$}&&\ctrl{-2}&\gate[]{H}&\meter{}&\setwiretype{c}& \\
+\end{quantikz}
+
+\begin{quantikz}[wire types={b,b,b},classical gap=0.07cm]
+    \lstick{$\ket{0}_L$}&\ctrl{1}&\targ{}&\gate[]{X_i}&\gate[]{Z_i}&  \\
+    \lstick{$\ket{+}_L$}&\targ{}&&\meter{}\wire[u][1]{c} \\
+    \lstick{$\ket{0}_L$}&&\ctrl{-2}&\gate[]{H}&\meter{}\wire[u][2]{c} \\
+\end{quantikz}
+
+
+
+
+
+\end{document}

@@ -12,6 +12,8 @@
 *.blg
 *.run.xml
 *.toc
+*.snm
+*.nav
 # Images
 Notizen/notes/images/*
 *.img
