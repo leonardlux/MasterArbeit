@@ -207,16 +207,3 @@ def plot_diff_noise_level(
     plt.show()
 
     return 
-
-
-    plt.loglog()
-
-    plt.xlabel("physical error rate")
-    plt.ylabel("logical error rate per shot")
-    plt.legend()
-    if filename != "":
-        plt.savefig(plot_path + filename +".pdf")
-    plt.show()
-
-    return noise_set, log_error_probs, y_errs
-

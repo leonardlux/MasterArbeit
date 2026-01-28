@@ -20,7 +20,6 @@ Threshold(s) 		(1 Page)
  - nn interaction
  - expensive in qubits 
 
-
 - inital approach:
 
 apply a ML Decoder for surface code (not ML on steane type ec) to steane type ec circuit => hope for the best
@@ -49,12 +48,4 @@ future steps: 					(1 page)
 Questions: 
 Which error model(s)?
 -> Circuit level
--> basic only for testing
-
 Valid to assume fault tolerant encoding of qubits or should i do something about that?
-
-
-
-
-
-
