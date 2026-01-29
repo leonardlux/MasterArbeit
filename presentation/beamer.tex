@@ -1,4 +1,13 @@
 \documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{braket}
+\usepackage{color}
+\usepackage{bbold}
+\usepackage{graphicx} % Required for inserting images
+
+\usepackage{tikz}
+\usetikzlibrary{quantikz2}
+
 \usetheme{Antibes}
 
 \title{Finding Thresholds for Steane Type Error Correction}
@@ -10,6 +19,10 @@
 
 
 \begin{document}
+
+\tikzset{ noisy/.style={fill=red!20}
+}
+
 % Title page
 \begin{frame}
 \titlepage
@@ -22,25 +35,159 @@
 \end{frame}
 
 \section{Components of the Title}
+
+% 1. Slide (Error Correction)
 \subsection{Error Correction}
 \begin{frame}
     \frametitle{Error Correction (EC)}
     \begin{itemize}
-        \item Protect quantum information against noise
-        \item Quantum memory 
+        \item Goal: Protect quantum information against noise 
+        \item My Case: Quantum memory
+        \begin{itemize}
+            \item Goal: Conserve arbitrary input state
+            \item Under computational noise
+        \end{itemize}
     \end{itemize}
-    
+    \begin{block}{Quantum Memory Circuit}
+        \begin{center}
+            \begin{quantikz}
+                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[]{Recovery}&\rstick{$\ket{\Psi '}_L$}
+            \end{quantikz}
+        \end{center}
+    \end{block}
 \end{frame}
-\subsection{Error Correction}
-\subsection{Error Models}
-\subsection{Stabilizer Codes}
-\subsection{Stabilizer Codes}
-\subsection{Maximum Likelihood Decoder}
-\subsection{Surface Codes}
-\subsection{Specific MLD}
-\subsection{Concept of Fault Tolerance}
-\subsection{Steane Type EC}
 
+% 2. Slide  (Error Models)
+
+\subsubsection{Error Models}
+\begin{frame}
+    \frametitle{Error Models}    
+    \begin{itemize}
+        \item Pauli Errors  
+        \item Circuit level noise:
+        \begin{itemize}
+            \item Single qubit gates \& init.: Depolarizing single qubit noise ($Depo1$) 
+            \item Two qubits gates (CNOT): Depolarizing two qubit noise ($Depo2$) 
+            \item Before $Z$-Measurements: $X$-Errors 
+
+        \end{itemize}
+    \end{itemize}
+
+% % columns
+%     \begin{columns}
+%     \begin{column}{0.5\textwidth}
+
+%     \end{column}
+%     \begin{column}{0.5\textwidth}  %%<--- here
+%         \begin{center}
+%         \includegraphics[width=0.5\textwidth]{image1.jpg}
+%         \end{center}
+%     \end{column}
+%     \end{columns}
+%     % Depo 1
+
+
+
+\end{frame}
+
+% Slide: Error Equations
+\begin{frame}
+    \begin{block}{Measurement Error}
+        \begin{equation}
+            \varepsilon_{E_X}(\rho) = (1-p) \rho + p \cdot X \rho X
+        \end{equation}
+    \end{block}
+    
+    % Depo 1
+    \begin{block}{Depolarizing Errors}
+        \begin{equation}
+            \varepsilon_{Depo1}(\rho) = (1-p) \rho + \frac{p}{3} \sum^3_{i=1} E_i \rho E_i
+        \end{equation}
+        \begin{equation*}
+            E_i \in \{ X, Y, Z \}
+        \end{equation*}
+
+    % Depo 2
+        \begin{equation}
+            \varepsilon_{Depo 2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
+        \end{equation}
+        \begin{equation*}
+            E_i \in \{E_k \otimes E_l | E_k,E_l \in \{\mathbb{1},X,Y,Z\} \} \setminus \{\mathbb{1}\otimes\mathbb{1} \}
+        \end{equation*}
+    \end{block}
+\end{frame}
+
+% Slide: Circuit examples Errors
+\begin{frame}
+    \begin{block}{Example Quantum Circuits}
+        \begin{quantikz}[,classical gap=0.07cm]
+            \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\\
+            \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+        \begin{quantikz}[,classical gap=0.07cm]
+            \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&\\
+            \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+    \end{block}
+\end{frame}
+
+% Slide: Stabilizer Codes
+% Definitions 
+\subsubsection{Stabilizer Codes}
+\begin{frame}{Stabilizer Codes}
+    Definitions:
+    \begin{itemize}
+        \item Stabilizer group: 
+            $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
+        \item Codespace:  
+            $\mathcal{H}_0$
+        \begin{itemize}
+            \item Error subspaces:
+                $\mathcal{H}_s = \{ \ket{\Psi} \in \mathcal{H} \ |\ g^{(i)}\ket{\Psi} = (-1)^{s_i} \ket{\Psi} \}$ \\
+            \item Syndrome:
+    $s \in \{0,1 \}^m \ \text{s.t.} \ g^{(i)} \ket{\Psi}= (-1)^{s_i} \ket{\Psi} $
+        \end{itemize}
+        \item Centralizer:  
+            $\mathcal{C}(\mathcal{G}) = \{ f\in \mathcal{P}_n | f\cdot g = g \cdot f \  \forall g \in \mathcal{G} \} $
+        \item Cosets: 
+            $f\mathcal{G} = \{f\cdot g|\  g\in \mathcal{G}\}$
+        \begin{itemize}
+            \item Cosets of Stabilizer in the Centralizer: 
+            $\bar{X},\bar{Y},\bar{Z} \in \mathcal{C}(\mathcal{G}) \setminus \mathcal{G}$
+        \end{itemize}
+   \end{itemize} 
+\end{frame}
+
+% Stabilizer Coder structure
+\begin{frame}{Structure of Stabilizer Codes}
+    \textcolor{red}{Add image of structure here}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=0.8\linewidth]{sketch.jpg}
+        \end{center}
+    \end{figure}
+\end{frame}
+
+% Process of Error correction for surface code
+% This can just be said!
+% \begin{frame}{Process of Error Correction}
+%     \begin{enumerate}
+%         \item Measure stabilizer generators $g^{(i)}$ 
+%         \item get syndrome $s$ 
+%         \item decode syndrome to get correction
+%         \item apply correction
+%     \end{enumerate}
+% \end{frame}
+
+% ML Decoder
+\subsubsection{Maximum Likelihood Decoder}
+\begin{frame}{Maximum Likelihood Decoder}
+    \begin{itemize}
+        \item Decoder: given syndrome, return recovery operation 
+    \end{itemize} 
+\end{frame}
 
 
 \end{document}

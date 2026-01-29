@@ -19,27 +19,39 @@
     \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[]{Recovery}&\rstick{$\ket{\Psi '}_L$}
 \end{quantikz}
 
+% Basic Example of Circuit level noise
+
+\begin{quantikz}[,classical gap=0.07cm]
+    \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\\
+    \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+\end{quantikz}
+
+\begin{quantikz}[,classical gap=0.07cm]
+    \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&\\
+    \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+\end{quantikz}
+
 
 %CNOTs and Error Propagation
 \begin{quantikz}
-&\gate[1,style={noisy},label style=red]{E_X}&\ctrl{1}&& \\
+&\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
 &&\targ{}&&
 \end{quantikz}
 
 \begin{quantikz}
-&&\ctrl{1}&\gate[1,style={noisy},label style=red]{E_X}& \\
-&&\targ{}&\gate[1,style={noisy},label style=red]{E_X}&
+&&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
+&&\targ{}&\gate[1,style={noisy},]{E_X}&
 \end{quantikz}
 
 
 \begin{quantikz}
 &&\ctrl{1}&& \\
-&\gate[1,style={noisy},label style=red]{E_Z}&\targ{}&&
+&\gate[1,style={noisy},]{E_Z}&\targ{}&&
 \end{quantikz}
 
 \begin{quantikz}
-&&\ctrl{1}&\gate[1,style={noisy},label style=red]{E_Z}& \\
-&&\targ{}&\gate[1,style={noisy},label style=red]{E_Z}&
+&&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
+&&\targ{}&\gate[1,style={noisy},]{E_Z}&
 \end{quantikz}
 
 \begin{quantikz}[wire types={b,b},classical gap=0.07cm]
@@ -69,17 +81,10 @@
 \end{quantikz}
 
 
-
-\section{Depolarizing 2 Gate}
-
-
-
 \begin{quantikz}
     &\ctrl{1}&\gate[style={fill=red!20}]{\text{Dep}_2}\wire[d][1]{q}& \\
     &\targ{}&\gate[style={fill=red!20}]{\text{Dep}_2}&
 \end{quantikz}
-
-\section{Concept vs Implementation}
 
 \begin{quantikz}[wire types={b,b,b},classical gap=0.07cm]
     \lstick{$\ket{0}_L$}&\ctrl{1}&\targ{}&&\meter{Ob.}&\setwiretype{c} &\gate[3]{\text{MWPM Decoder}} & \gate[2]{\text{Log. Error Detector}}\\
@@ -92,9 +97,5 @@
     \lstick{$\ket{+}_L$}&\targ{}&&\meter{}\wire[u][1]{c} \\
     \lstick{$\ket{0}_L$}&&\ctrl{-2}&\gate[]{H}&\meter{}\wire[u][2]{c} \\
 \end{quantikz}
-
-
-
-
 
 \end{document}

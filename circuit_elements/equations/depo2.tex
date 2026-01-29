@@ -2,16 +2,17 @@
 \usepackage{amsmath}
 \usepackage{braket}
 \usepackage{color}
+\usepackage{bbold}
 
 \begin{document}
 
 
 \begin{equation*}
-    \varepsilon_{Depo 2} = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
+    \varepsilon_{Depo 2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
 \end{equation*}
 
 \begin{equation*}
-    E_i \in \{\sigma_k \otimes \sigma_l, \forall k,l \in \{0,1,2,3\} \} \setminus \{\sigma_0 \otimes \sigma_0\}
+    E_i \in \{E_k \otimes E_l | E_k,E_l \in \{\mathbb{1},X,Y,Z\} \} \setminus \{\mathbb{1}\otimes\mathbb{1} \}
 \end{equation*}
 
 \end{document}
