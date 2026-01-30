@@ -54,12 +54,17 @@
 &&\targ{}&\gate[1,style={noisy},]{E_Z}&
 \end{quantikz}
 
-\begin{quantikz}[wire types={b,b},classical gap=0.07cm]
-    \lstick{$\ket{\Psi}_L$}&\targ{}&&\gate[]{Z_i}& \\
-    \lstick{$\ket{0}_L$}&\ctrl{-1}&\gate[]{H}&\meter{}\wire[u][1]{c} \\
+% Simple Steane Type EC
+% Z-Errors
+\begin{quantikz}
+    \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&&\gate{Z_R}&\\
+    \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
 \end{quantikz}
-
-
+% X-Errors
+\begin{quantikz}
+    \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\ctrl{1}&&&\gate{X_R}&\\
+    \lstick{$\ket{+}_L$}&\qwbundle{n}&\targ{}&\meter{Z}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
+\end{quantikz}
 
 \begin{quantikz}[wire types={b,b},classical gap=0.07cm]
     \lstick{$\ket{\Psi}_L$}&\ctrl{1}&\gate[]{X_i}& \\

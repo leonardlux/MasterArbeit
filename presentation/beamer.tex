@@ -91,7 +91,7 @@
 
 % Slide: Error Equations
 \begin{frame}
-    \begin{block}{Measurement Error}
+    \begin{block}{$Z$-Measurement Error}
         \begin{equation}
             \varepsilon_{E_X}(\rho) = (1-p) \rho + p \cdot X \rho X
         \end{equation}
@@ -220,6 +220,11 @@
     \end{columns}
 \end{frame}
 
+\subsubsection{Effective MLD}
+\begin{frame}{Effective MLD}
+    \textcolor{red}{Explain the proper function}
+\end{frame}
+
 \subsubsection{Fault Tolerance}
 \begin{frame}{Fault Tolerance (FT)}
     \begin{block}{Definition Fault Tolerance}
@@ -255,16 +260,76 @@
         \end{center}
 
     \end{block}  
+    \textcolor{red}{Should I write down equations?}
 \end{frame}
 
 \subsection{Steane Type Error Correction}
-
 \begin{frame}{Steane Type Error Correction}
     \begin{itemize}
         \item $\neq$ Steane Code
+    \end{itemize}
+    \begin{block}{Steane Type Error Correction Circuits}
+        \begin{center}
+        % Simple Steane Type EC
+        % Z-Errors
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&&\gate{Z_R}&\\
+            \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
+        \end{quantikz}
+        % X-Errors
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\ctrl{1}&&&\gate{X_R}&\\
+            \lstick{$\ket{+}_L$}&\qwbundle{n}&\targ{}&\meter{Z}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
+        \end{quantikz}
+        \end{center}
+    \end{block} 
+\end{frame}
+
+\begin{frame}
+    \begin{itemize}
+        \item Components:
+        \begin{itemize}
+            \item logical ancilla qubits $\ket{0}_L,\ket{+}_L$ 
+            \item logical encoding with transversal $\overline{\mathrm{CNOT}}$
+            \item transversal syndrome measurement
+        \end{itemize}
+        \item Principal:
+        \begin{itemize}
+            \item Error propagation through $\mathrm{CNOT}$s 
+            \begin{itemize}
+                \item trivial operation on logical states
+            \end{itemize}
+            \item Transversal measurements $\rightarrow$ syndrome reconstruction 
+        \end{itemize}
+        \item Points of interest:
+        \begin{itemize}
+            \item Oneshot (syndrome readout) \textcolor{red}{Explain this better}
+            \item Fault tolerant by design 
+            \item More (physical) qubits needed
+            \item More than next neighbour interaction needed
+        \end{itemize}
+
+    \end{itemize}
+\end{frame}
+
+\subsection{Threshold}
+\begin{frame}{Threshold}
+     \begin{itemize}
+        \item why is it interesting 
+        \item find physical error rate under which we can arbitrary limit the logical error rate
+        \item by increasing the code distance
+        \item dependent on: encoding, error model, circuit layout
+        \item How to find it 
+        \item What is the optimal threshold
+     \end{itemize}
+\end{frame}
+
+\section{Method}
+\begin{frame}{Method}
+    Final Goal: Determine the optimal threshold of Steane Type EC using an ML Decoder
+    \begin{itemize}
         \item 
     \end{itemize}
-    
 \end{frame}
 
 \end{document}
