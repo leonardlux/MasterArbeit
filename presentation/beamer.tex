@@ -84,7 +84,6 @@
 %         \end{center}
 %     \end{column}
 %     \end{columns}
-%     % Depo 1
 
 
 
@@ -156,6 +155,8 @@
         \begin{itemize}
             \item Cosets of Stabilizer in the Centralizer: 
             $\bar{X},\bar{Y},\bar{Z} \in \mathcal{C}(\mathcal{G}) \setminus \mathcal{G}$
+            \item Cosets of Centralizer:
+            $f(s)\mathcal{C}(\mathcal{G})= \mathcal{C}_{\mathbb{1}}^{s} \cup \mathcal{C}_{X}^{s} \cup\mathcal{C}_{Y}^{s} \cup\mathcal{C}_{Z}^{s} $ 
         \end{itemize}
    \end{itemize} 
 \end{frame}
@@ -185,9 +186,111 @@
 \subsubsection{Maximum Likelihood Decoder}
 \begin{frame}{Maximum Likelihood Decoder}
     \begin{itemize}
-        \item Decoder: given syndrome, return recovery operation 
+        \item Decoder: given syndrome $\rightarrow$ returns recovery operation 
+        \item Maximum likelihood (ML): returns most propable recovery 
+        \item Principal:  
+        \begin{enumerate}
+            \item given $s \rightarrow f(s)$ 
+            \item determine probabilities $\pi$ of the relevant cosets of the stabilizer:
+            $ \pi(\mathcal{C}) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
+            \item choose recovery operation $r$ with the highest likelihood of success: 
+            $r \in {C}_{ML} = \arg\max_\mathcal{C}(\pi(\mathcal{C})) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
+        \end{enumerate}
+        \item Reason why it is hard? \textcolor{red}{Find some good and clean argumentation}
+    \end{itemize} 
+    \textcolor{red}{Add similiar picture as above to explain function}
+\end{frame}
+
+\subsubsection{Surface Code}
+\begin{frame}{Surface Code}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \item Stabilizer code
+            \item $[[d^2 + (d-1)^2,1,d]]$
+            \item Transversal $\overline{\mathrm{CNOT}}$
+            \item with measurement errors: $d$ rounds of syndrome measurement needed 
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%<--- here
+        \begin{center}
+        \includegraphics[width=0.5\textwidth]{sketch_surface_code.png}
+        \end{center}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\subsubsection{Fault Tolerance}
+\begin{frame}{Fault Tolerance (FT)}
+    \begin{block}{Definition Fault Tolerance}
+        $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
+    \end{block}
+    \begin{itemize}
+        \item Goal: Stop uncontrolled propagation of errors 
+        \item Assuming: All gates can have faults = Circuit level noise
     \end{itemize} 
 \end{frame}
 
+\begin{frame}{Error Propagation Example}
+    \begin{block}{$\mathrm{CNOT}$}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{center}
+            \begin{quantikz}
+                &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
+                &&\targ{}&&
+            \end{quantikz}
+
+            \begin{quantikz}
+                &&\ctrl{1}&& \\
+                &\gate[1,style={noisy},]{E_Z}&\targ{}&&
+            \end{quantikz}
+
+        \end{center}
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%<--- here
+        \begin{center}
+            \begin{quantikz}
+                &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
+                &&\targ{}&\gate[1,style={noisy},]{E_X}&
+            \end{quantikz}
+
+            \begin{quantikz}
+                &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
+                &&\targ{}&\gate[1,style={noisy},]{E_Z}&
+            \end{quantikz}
+        \end{center}
+    \end{column}
+    \end{columns}
+    \end{block}  
+\end{frame}
+
+\begin{frame}{Error Propagation Example}
+    \begin{block}{$\mathrm{CNOT}$}
+        \begin{tikzpicture}[every node/.style={minimum height=2cm}]
+        \draw[very thin, gray](0,0) grid (3,3);
+            \node at () 
+            \begin{quantikz}
+                &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
+                &&\targ{}&&
+            \end{quantikz}
+
+            \begin{quantikz}
+                &&\ctrl{1}&& \\
+                &\gate[1,style={noisy},]{E_Z}&\targ{}&&
+            \end{quantikz}
+
+            \begin{quantikz}
+                &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
+                &&\targ{}&\gate[1,style={noisy},]{E_X}&
+            \end{quantikz}
+
+            \begin{quantikz}
+                &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
+                &&\targ{}&\gate[1,style={noisy},]{E_Z}&
+            \end{quantikz}
+        \end{tikzpicture}
+    \end{block}  
+\end{frame}
 
 \end{document}
