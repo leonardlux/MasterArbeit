@@ -125,7 +125,7 @@
         \end{quantikz}
 
         \begin{quantikz}[,classical gap=0.07cm]
-            \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&\\
+            \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&&\\
             \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
 
@@ -225,72 +225,46 @@
     \begin{block}{Definition Fault Tolerance}
         $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
     \end{block}
+    \textcolor{red}{REWORK THIS}
     \begin{itemize}
         \item Goal: Stop uncontrolled propagation of errors 
         \item Assuming: All gates can have faults = Circuit level noise
     \end{itemize} 
 \end{frame}
 
-\begin{frame}{Error Propagation Example}
+\begin{frame}{Error Propagation}
     \begin{block}{$\mathrm{CNOT}$}
-    \begin{columns}
-    \begin{column}{0.5\textwidth}
         \begin{center}
-            \begin{quantikz}
-                &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
-                &&\targ{}&&
-            \end{quantikz}
+        \begin{quantikz}
+            &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
+            &\ghost{E_X}&\targ{}&&
+        \end{quantikz}$\rightarrow$\begin{quantikz}
+            &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
+            &&\targ{}&\gate[1,style={noisy},]{E_X}&
+        \end{quantikz}
 
-            \begin{quantikz}
-                &&\ctrl{1}&& \\
-                &\gate[1,style={noisy},]{E_Z}&\targ{}&&
-            \end{quantikz}
+
+        \begin{quantikz}
+            &\ghost{E_Z}&\ctrl{1}&& \\
+            &\gate[1,style={noisy},]{E_Z}&\targ{}&&
+        \end{quantikz}$\rightarrow$\begin{quantikz}
+            &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
+            &&\targ{}&\gate[1,style={noisy},]{E_Z}&
+        \end{quantikz}
 
         \end{center}
-    \end{column}
-    \begin{column}{0.5\textwidth}  %%<--- here
-        \begin{center}
-            \begin{quantikz}
-                &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
-                &&\targ{}&\gate[1,style={noisy},]{E_X}&
-            \end{quantikz}
 
-            \begin{quantikz}
-                &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
-                &&\targ{}&\gate[1,style={noisy},]{E_Z}&
-            \end{quantikz}
-        \end{center}
-    \end{column}
-    \end{columns}
     \end{block}  
 \end{frame}
 
-\begin{frame}{Error Propagation Example}
-    \begin{block}{$\mathrm{CNOT}$}
-        \begin{tikzpicture}[every node/.style={minimum height=2cm}]
-        \draw[very thin, gray](0,0) grid (3,3);
-            \node at () 
-            \begin{quantikz}
-                &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
-                &&\targ{}&&
-            \end{quantikz}
+\subsection{Steane Type Error Correction}
 
-            \begin{quantikz}
-                &&\ctrl{1}&& \\
-                &\gate[1,style={noisy},]{E_Z}&\targ{}&&
-            \end{quantikz}
-
-            \begin{quantikz}
-                &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
-                &&\targ{}&\gate[1,style={noisy},]{E_X}&
-            \end{quantikz}
-
-            \begin{quantikz}
-                &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
-                &&\targ{}&\gate[1,style={noisy},]{E_Z}&
-            \end{quantikz}
-        \end{tikzpicture}
-    \end{block}  
+\begin{frame}{Steane Type Error Correction}
+    \begin{itemize}
+        \item $\neq$ Steane Code
+        \item 
+    \end{itemize}
+    
 \end{frame}
 
 \end{document}
