@@ -4,6 +4,8 @@
 \usepackage{color}
 \usepackage{bbold}
 \usepackage{graphicx} % Required for inserting images
+\usepackage{ amssymb } % for check marks
+\usepackage{svg}
 
 \usepackage{tikz}
 \usetikzlibrary{quantikz2}
@@ -36,62 +38,273 @@
 
 \section{Components of the Title}
 
-% 1. Slide (Error Correction)
+% Motivation
+\subsection{Motivation}
+\begin{frame}{Motivation}
+    \textcolor{red}{why should people care about Steane Type Error correction} 
+\end{frame}
+
+% Error Correction
 \subsection{Error Correction}
 \begin{frame}
-    \frametitle{Error Correction (EC)}
+    \frametitle{Basics of \textbf{Error Correction} (EC)}
     \begin{itemize}
         \item Goal: Protect quantum information against noise 
         \item My Case: Quantum memory
         \begin{itemize}
             \item Goal: Conserve arbitrary input state
-            \item Under computational noise
+            \item Under computational noise (Pauli Errors)
         \end{itemize}
     \end{itemize}
-    \begin{block}{Quantum Memory Circuit}
+    \begin{block}{Basic Quantum Memory Circuit}
         \begin{center}
             \begin{quantikz}
-                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[]{Recovery}&\rstick{$\ket{\Psi '}_L$}
+                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[]{Recovery}&\rstick{$\ket{\Psi }_L$}
             \end{quantikz}
         \end{center}
     \end{block}
 \end{frame}
 
-% 2. Slide  (Error Models)
-
-\subsubsection{Error Models}
-\begin{frame}
-    \frametitle{Error Models}    
+% Slide: Stabilizer Codes
+% Definitions 
+\subsubsection{Stabilizer Codes}
+\begin{frame}{Definitions of \textbf{Stabilizer Codes}}
     \begin{itemize}
-        \item Pauli Errors  
-        \item Circuit level noise:
+        \item Stabilizer group: 
+            $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
+        \item Codespace:  
+            $\mathcal{H}_0$
         \begin{itemize}
-            \item Single qubit gates \& init.: Depolarizing single qubit noise ($Depo1$) 
-            \item Two qubits gates (CNOT): Depolarizing two qubit noise ($Depo2$) 
-            \item Before $Z$-Measurements: $X$-Errors 
-
+            \item Error subspaces:
+                $\mathcal{H}_s = \{ \ket{\Psi} \in \mathcal{H} \ |\ g^{(i)}\ket{\Psi} = (-1)^{s_i} \ket{\Psi} \}$ \\
+            \item Syndrome:
+    $s \in \{0,1 \}^m \ \text{s.t.} \ g^{(i)} \ket{\Psi}= (-1)^{s_i} \ket{\Psi} $
         \end{itemize}
+        \item Centralizer:  
+            $\mathcal{C}(\mathcal{G}) = \{ f\in \mathcal{P}_n | f\cdot g = g \cdot f \  \forall g \in \mathcal{G} \} $
+        \item Cosets: 
+            $f\mathcal{G} = \{f\cdot g|\  g\in \mathcal{G}\}$
+        \begin{itemize}
+            \item Cosets of Stabilizer in the Centralizer: 
+            $\bar{X},\bar{Y},\bar{Z} \in \mathcal{C}(\mathcal{G}) \setminus \mathcal{G}$
+            \item Cosets of Centralizer:
+            $f(s)\mathcal{C}(\mathcal{G})= \mathcal{C}_{\mathbb{1}}^{s} \cup \mathcal{C}_{X}^{s} \cup\mathcal{C}_{Y}^{s} \cup\mathcal{C}_{Z}^{s} $ 
+        \end{itemize}
+        \item $\mathcal{P}_n$ can be written as disjoints coset of both
+   \end{itemize} 
+\end{frame}
+
+% Stabilizer Coder structure
+\begin{frame}{Structure of \textbf{Stabilizer Codes}}
+    \begin{figure}
+        \begin{center}
+            \includegraphics[width=0.95\linewidth]{sketch_stabilizer_structure.pdf}
+        \end{center}
+    \end{figure}
+\end{frame}
+
+% Process of Error correction for surface code
+% This can just be said!
+% \begin{frame}{Process of Error Correction}
+%     \begin{enumerate}
+%         \item Measure stabilizer generators $g^{(i)}$ 
+%         \item get syndrome $s$ 
+%         \item decode syndrome to get correction
+%         \item apply correction
+%     \end{enumerate}
+% \end{frame}
+
+% ML Decoder
+\subsubsection{Maximum Likelihood Decoder}
+\begin{frame}{\textbf{Maximum Likelihood Decoder} (MLD)}
+    \begin{itemize}
+        \item Decoder: given syndrome $\rightarrow$ returns recovery operation 
+        \item Maximum likelihood (ML): returns most propable recovery 
+        \item Principal:  
+        \begin{enumerate}
+            \item given $s \rightarrow f(s)$ 
+            \item determine probabilities $\pi$ of the relevant cosets of the stabilizer:
+            $ \pi(\mathcal{C}) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
+            \item choose recovery operation $r(s)$: 
+            $r \in {C}_{ML}^s = \arg\max_\mathcal{C}(\pi(\mathcal{C})) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
+        \end{enumerate}
+        \item Reason why it is hard? \textcolor{red}{Find some good and clean argumentation}
+    \end{itemize} 
+    \textcolor{red}{Use an image to explain?!}
+\end{frame}
+
+\subsubsection{Surface Code}
+\begin{frame}{\textbf{Surface Code}}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \item Stabilizer code
+            \item Transversal $\overline{\mathrm{CNOT}}$ 
+            \item $[[d^2 + (d-1)^2,1,d]]$
+            \begin{itemize}
+                \item $m=2d\cdot(d-1)$
+                \item $|s| = 2^{2d\cdot(d-1)}$
+            \end{itemize}
+            \item Measurement errors: \textcolor{red}{The usual way}
+            \begin{itemize}
+                \item $d$ rounds of syndrome measurement needed to be FT
+            \end{itemize}
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}  
+        \begin{center}
+        \includegraphics[width=0.6\textwidth]{sketch_surface_code.png}
+        \end{center}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\subsubsection{Effective MLD}
+\begin{frame}{Effective MLD}
+    \textcolor{red}{Explain the proper function}
+\end{frame}
+
+\begin{frame}{Error Propagation}
+    \begin{block}{$\mathrm{CNOT}$}
+        \begin{center}
+        \begin{quantikz}
+            &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
+            &\ghost{E_X}&\targ{}&&
+        \end{quantikz}$\rightarrow$\begin{quantikz}
+            &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
+            &&\targ{}&\gate[1,style={noisy},]{E_X}&
+        \end{quantikz}
+
+
+        \begin{quantikz}
+            &\ghost{E_Z}&\ctrl{1}&& \\
+            &\gate[1,style={noisy},]{E_Z}&\targ{}&&
+        \end{quantikz}$\rightarrow$\begin{quantikz}
+            &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
+            &&\targ{}&\gate[1,style={noisy},]{E_Z}&
+        \end{quantikz}
+
+        \end{center}
+
+    \end{block}  
+    \textcolor{red}{Should I write down equations?}
+    \textcolor{red}{should i focus on one type of error}
+\end{frame}
+
+\subsection{Steane Type Error Correction}
+\begin{frame}{Steane Type Error Correction}
+    \begin{itemize}
+        \item $\neq$ Steane Code
+    \end{itemize}
+    \begin{block}{Steane Type Error Correction Circuits}
+        \begin{center}
+        % Simple Steane Type EC
+        % Z-Errors
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&&\gate{Z_R}&\\
+            \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
+        \end{quantikz}
+        % X-Errors
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\ctrl{1}&&&\gate{X_R}&\\
+            \lstick{$\ket{+}_L$}&\qwbundle{n}&\targ{}&\meter{Z}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
+        \end{quantikz}
+        \end{center}
+    \end{block} 
+    \textcolor{red}{Show once complete circuit}
+\end{frame}
+
+\begin{frame}
+    \begin{itemize}
+        \item Components:
+        \begin{itemize}
+            \item logical ancilla qubits $\ket{0}_L,\ket{+}_L$ 
+            \item logical encoding with transversal $\overline{\mathrm{CNOT}}$
+            \item transversal syndrome measurement
+        \end{itemize}
+        \item Principal:
+        \begin{itemize}
+            \item Error propagation through $\mathrm{CNOT}$s 
+            \begin{itemize}
+                \item trivial operation on logical states
+            \end{itemize}
+            \item Transversal measurements $\rightarrow$ syndrome reconstruction 
+       \end{itemize}
+    \end{itemize}
+    \textcolor{red}{Ordering makes one type of error more likely}
+    \textcolor{red}{Show flow of errors through the circuit}
+\end{frame}
+
+\begin{frame}{Why is Steane Type EC interesting?}
+    \begin{itemize}
+    \item Advantages:
+    \begin{itemize}
+        \item Oneshot 
+            \begin{itemize}
+                \item No need for repeated syndrome measurements
+            \end{itemize}
+        \item Fault tolerant by design 
+        \textcolor{red}{Fault tolerant is not defined yet}
+        \textcolor{red}{Argue why it is fault tolerant}
+    \end{itemize}
+    
+    \item Disadvatages:
+    \begin{itemize}
+        \item More (physical) qubits needed
+        \item More than next neighbour interaction needed
+    \end{itemize}
     \end{itemize}
 
-% % columns
-%     \begin{columns}
-%     \begin{column}{0.5\textwidth}
-
-%     \end{column}
-%     \begin{column}{0.5\textwidth}  %%<--- here
-%         \begin{center}
-%         \includegraphics[width=0.5\textwidth]{image1.jpg}
-%         \end{center}
-%     \end{column}
-%     \end{columns}
+    
+\end{frame}
 
 
+\subsubsection{Fault Tolerance}
+\begin{frame}{Fault Tolerance (FT)}
+    \textcolor{red}{Why is FT important and is this making a good point}
+    \begin{block}{Definition Fault Tolerance}
+        $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
+    \end{block}
+    \begin{itemize}
+        \item Goal: Stop uncontrolled propagation of errors
+        \begin{itemize}
+            \item Assumption: All gates can have faults = Circuit level noise
+        \end{itemize}
+    \end{itemize} 
+    \begin{block}{Quantum Memory Circuit}
+        \begin{center}
+            \begin{quantikz}
+                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[style={noisy}]{Noisy Recovery}&\rstick{$\ket{\Psi '}_L$}
+            \end{quantikz}
+        \end{center}
+    \end{block}
+\end{frame}
 
+% Slide  (Error Models)
+
+\subsubsection{Error Models}
+\begin{frame}{Circuit level noise model}
+    All errors of $\mathcal{O}(p)$. 
+    \begin{itemize}
+        \item Depolarizing single qubit noise ($Depo1$) 
+        \begin{itemize}
+            \item After single qubit gates 
+            \item After logical encoding of qubit (Assumption!) 
+        \end{itemize}
+        \item Depolarizing two qubit noise ($Depo2$) 
+        \begin{itemize}
+            \item After $\mathrm{CNOT}$ gates
+        \end{itemize}
+        \item $X$-Errors ($E_X$) 
+        \begin{itemize}
+            \item Before $Z$-Measurements
+        \end{itemize}
+    \end{itemize}
 \end{frame}
 
 % Slide: Error Equations
 \begin{frame}
-    \begin{block}{$Z$-Measurement Error}
+    \begin{block}{$X$-Errors}
         \begin{equation}
             \varepsilon_{E_X}(\rho) = (1-p) \rho + p \cdot X \rho X
         \end{equation}
@@ -129,207 +342,69 @@
             \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
 
+        \begin{quantikz}[,classical gap=0.07cm]
+            \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\gate[style={noisy}]{.}&\\
+            \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\gate[style={noisy}]{ML-noise}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
     \end{block}
 \end{frame}
 
-% Slide: Stabilizer Codes
-% Definitions 
-\subsubsection{Stabilizer Codes}
-\begin{frame}{Stabilizer Codes}
-    Definitions:
-    \begin{itemize}
-        \item Stabilizer group: 
-            $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
-        \item Codespace:  
-            $\mathcal{H}_0$
-        \begin{itemize}
-            \item Error subspaces:
-                $\mathcal{H}_s = \{ \ket{\Psi} \in \mathcal{H} \ |\ g^{(i)}\ket{\Psi} = (-1)^{s_i} \ket{\Psi} \}$ \\
-            \item Syndrome:
-    $s \in \{0,1 \}^m \ \text{s.t.} \ g^{(i)} \ket{\Psi}= (-1)^{s_i} \ket{\Psi} $
-        \end{itemize}
-        \item Centralizer:  
-            $\mathcal{C}(\mathcal{G}) = \{ f\in \mathcal{P}_n | f\cdot g = g \cdot f \  \forall g \in \mathcal{G} \} $
-        \item Cosets: 
-            $f\mathcal{G} = \{f\cdot g|\  g\in \mathcal{G}\}$
-        \begin{itemize}
-            \item Cosets of Stabilizer in the Centralizer: 
-            $\bar{X},\bar{Y},\bar{Z} \in \mathcal{C}(\mathcal{G}) \setminus \mathcal{G}$
-            \item Cosets of Centralizer:
-            $f(s)\mathcal{C}(\mathcal{G})= \mathcal{C}_{\mathbb{1}}^{s} \cup \mathcal{C}_{X}^{s} \cup\mathcal{C}_{Y}^{s} \cup\mathcal{C}_{Z}^{s} $ 
-        \end{itemize}
-   \end{itemize} 
-\end{frame}
-
-% Stabilizer Coder structure
-\begin{frame}{Structure of Stabilizer Codes}
-    \textcolor{red}{Add image of structure here}
-    \begin{figure}
-        \begin{center}
-            \includegraphics[width=0.8\linewidth]{sketch.jpg}
-        \end{center}
-    \end{figure}
-\end{frame}
-
-% Process of Error correction for surface code
-% This can just be said!
-% \begin{frame}{Process of Error Correction}
-%     \begin{enumerate}
-%         \item Measure stabilizer generators $g^{(i)}$ 
-%         \item get syndrome $s$ 
-%         \item decode syndrome to get correction
-%         \item apply correction
-%     \end{enumerate}
-% \end{frame}
-
-% ML Decoder
-\subsubsection{Maximum Likelihood Decoder}
-\begin{frame}{Maximum Likelihood Decoder}
-    \begin{itemize}
-        \item Decoder: given syndrome $\rightarrow$ returns recovery operation 
-        \item Maximum likelihood (ML): returns most propable recovery 
-        \item Principal:  
-        \begin{enumerate}
-            \item given $s \rightarrow f(s)$ 
-            \item determine probabilities $\pi$ of the relevant cosets of the stabilizer:
-            $ \pi(\mathcal{C}) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
-            \item choose recovery operation $r$ with the highest likelihood of success: 
-            $r \in {C}_{ML} = \arg\max_\mathcal{C}(\pi(\mathcal{C})) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
-        \end{enumerate}
-        \item Reason why it is hard? \textcolor{red}{Find some good and clean argumentation}
-    \end{itemize} 
-    \textcolor{red}{Add similiar picture as above to explain function}
-\end{frame}
-
-\subsubsection{Surface Code}
-\begin{frame}{Surface Code}
-    \begin{columns}
-    \begin{column}{0.5\textwidth}
-        \begin{itemize}
-            \item Stabilizer code
-            \item $[[d^2 + (d-1)^2,1,d]]$
-            \item Transversal $\overline{\mathrm{CNOT}}$
-            \item with measurement errors: $d$ rounds of syndrome measurement needed 
-        \end{itemize}
-    \end{column}
-    \begin{column}{0.5\textwidth}  %%<--- here
-        \begin{center}
-        \includegraphics[width=0.5\textwidth]{sketch_surface_code.png}
-        \end{center}
-    \end{column}
-    \end{columns}
-\end{frame}
-
-\subsubsection{Effective MLD}
-\begin{frame}{Effective MLD}
-    \textcolor{red}{Explain the proper function}
-\end{frame}
-
-\subsubsection{Fault Tolerance}
-\begin{frame}{Fault Tolerance (FT)}
-    \begin{block}{Definition Fault Tolerance}
-        $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
-    \end{block}
-    \textcolor{red}{REWORK THIS}
-    \begin{itemize}
-        \item Goal: Stop uncontrolled propagation of errors 
-        \item Assuming: All gates can have faults = Circuit level noise
-    \end{itemize} 
-\end{frame}
-
-\begin{frame}{Error Propagation}
-    \begin{block}{$\mathrm{CNOT}$}
-        \begin{center}
-        \begin{quantikz}
-            &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
-            &\ghost{E_X}&\targ{}&&
-        \end{quantikz}$\rightarrow$\begin{quantikz}
-            &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
-            &&\targ{}&\gate[1,style={noisy},]{E_X}&
-        \end{quantikz}
-
-
-        \begin{quantikz}
-            &\ghost{E_Z}&\ctrl{1}&& \\
-            &\gate[1,style={noisy},]{E_Z}&\targ{}&&
-        \end{quantikz}$\rightarrow$\begin{quantikz}
-            &&\ctrl{1}&\gate[1,style={noisy},]{E_Z}& \\
-            &&\targ{}&\gate[1,style={noisy},]{E_Z}&
-        \end{quantikz}
-
-        \end{center}
-
-    \end{block}  
-    \textcolor{red}{Should I write down equations?}
-\end{frame}
-
-\subsection{Steane Type Error Correction}
-\begin{frame}{Steane Type Error Correction}
-    \begin{itemize}
-        \item $\neq$ Steane Code
-    \end{itemize}
-    \begin{block}{Steane Type Error Correction Circuits}
-        \begin{center}
-        % Simple Steane Type EC
-        % Z-Errors
-        \begin{quantikz}
-            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&&\gate{Z_R}&\\
-            \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
-        \end{quantikz}
-        % X-Errors
-        \begin{quantikz}
-            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\ctrl{1}&&&\gate{X_R}&\\
-            \lstick{$\ket{+}_L$}&\qwbundle{n}&\targ{}&\meter{Z}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}
-        \end{quantikz}
-        \end{center}
-    \end{block} 
-\end{frame}
-
-\begin{frame}
-    \begin{itemize}
-        \item Components:
-        \begin{itemize}
-            \item logical ancilla qubits $\ket{0}_L,\ket{+}_L$ 
-            \item logical encoding with transversal $\overline{\mathrm{CNOT}}$
-            \item transversal syndrome measurement
-        \end{itemize}
-        \item Principal:
-        \begin{itemize}
-            \item Error propagation through $\mathrm{CNOT}$s 
-            \begin{itemize}
-                \item trivial operation on logical states
-            \end{itemize}
-            \item Transversal measurements $\rightarrow$ syndrome reconstruction 
-        \end{itemize}
-        \item Points of interest:
-        \begin{itemize}
-            \item Oneshot (syndrome readout) \textcolor{red}{Explain this better}
-            \item Fault tolerant by design 
-            \item More (physical) qubits needed
-            \item More than next neighbour interaction needed
-        \end{itemize}
-
-    \end{itemize}
-\end{frame}
 
 \subsection{Threshold}
-\begin{frame}{Threshold}
+\begin{frame}{Why is the \textbf{Threshold} interesting?}
      \begin{itemize}
-        \item why is it interesting 
-        \item find physical error rate under which we can arbitrary limit the logical error rate
-        \item by increasing the code distance
-        \item dependent on: encoding, error model, circuit layout
-        \item How to find it 
-        \item What is the optimal threshold
+        \item Def: $p_C$ physical error rate under which we can arbitrary reduce the logical error rate $p_L$
+        \begin{itemize}
+            \item by increasing $d$ = increasing number of qubits 
+            \item above $p_C$ QEC becomes self defeating 
+            \item dependent on: encoding, error model, circuit layout, decoder 
+        \end{itemize}
+        \item Determine:
+        \begin{itemize}
+            \item Find Crossover point of different distances $d$
+            \item Using Monte Carlo simulations 
+        \end{itemize} 
      \end{itemize}
 \end{frame}
 
 \section{Method}
 \begin{frame}{Method}
-    Final Goal: Determine the optimal threshold of Steane Type EC using an ML Decoder
-    \begin{itemize}
-        \item 
-    \end{itemize}
+    \begin{enumerate}
+        \item Implement Steane Type EC with underlying surface code in stim \checkmark
+        \begin{itemize}
+            \item Error model: Circuit Level
+            \item Assumption: FT prepared log. qubits ($\mathcal{O}(p)$)
+            \item Check working using MWPM Decoder
+        \end{itemize}
+        \item Propagate error rate to ancillas for MLD error model \checkmark
+        \item Implement ML-Decoder (not finished) 
+        \begin{itemize}
+            \item First version for indepenent $X-$ and $Z-$errors
+            \item Determine threshold 
+        \end{itemize}
+        \item Upgrade to correlated $X$- and $Z-$Error ML-Decoder
+    \end{enumerate}
 \end{frame}
+
+\begin{frame}{Stim implementation}
+    \begin{center}
+        \includegraphics[width=1\textwidth]{noisy_test.pdf}
+    \end{center}  
+\end{frame}
+
+
+% \begin{frame}
+%     \begin{center}
+%         \includegraphics[width=0.6\textwidth]{}
+%     \end{center}  
+% \end{frame}
+
+
+% \begin{frame}
+%     \begin{center}
+%         \includegraphics[width=0.6\textwidth]{}
+%     \end{center}  
+% \end{frame}
 
 \end{document}
