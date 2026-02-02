@@ -36,14 +36,35 @@
 \tableofcontents
 \end{frame}
 
-\section{Components of the Title}
 
 % Motivation
-\subsection{Motivation}
-\begin{frame}{Motivation}
-    \textcolor{red}{why should people care about Steane Type Error correction} 
+\section{Motivation}
+\begin{frame}{\textbf{Motivation}}
+    \begin{itemize}
+        \item Threshold characterizes QEC code capabilities
+        \begin{itemize}
+            \item depends on.... 
+            \begin{itemize} 
+                \item (underlying) encoding
+                \item Circuit layout 
+                \item Decoder
+                \item Error model 
+            \end{itemize}
+        \end{itemize} 
+        \item Steane Type Error Correction (STEC) is:
+        \begin{itemize}
+            \item Fault tolerant 
+            \item Oneshot 
+            \begin{itemize}
+                \item Only one syndrome readout required 
+                \item Due to redudant stabilizer readout structure
+            \end{itemize}
+        \end{itemize} 
+        
+   \end{itemize}
 \end{frame}
 
+\section{Components of the Title}
 % Error Correction
 \subsection{Error Correction}
 \begin{frame}
@@ -119,18 +140,27 @@
 \begin{frame}{\textbf{Maximum Likelihood Decoder} (MLD)}
     \begin{itemize}
         \item Decoder: given syndrome $\rightarrow$ returns recovery operation 
-        \item Maximum likelihood (ML): returns most propable recovery 
-        \item Principal:  
+        \item Maximum likelihood (ML): returns most propable recovery op. for a given syndrome 
+        \begin{itemize}
+            \item Defines best possible threshold
+        \end{itemize}
+        \item Hard task 
+        \begin{itemize}
+            \item Global optimization problem 
+            \item Exponentially (in $n$) many possible errors 
+            \item Degeneracy needs to be taken into account 
+        \end{itemize}
+        \item Principal (without measurement errors):  
+        \textcolor{red}{Should I do a more general case}
         \begin{enumerate}
-            \item given $s \rightarrow f(s)$ 
+            \item given $s$ (with certainty) 
             \item determine probabilities $\pi$ of the relevant cosets of the stabilizer:
             $ \pi(\mathcal{C}) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
             \item choose recovery operation $r(s)$: 
             $r \in {C}_{ML}^s = \arg\max_\mathcal{C}(\pi(\mathcal{C})) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
         \end{enumerate}
-        \item Reason why it is hard? \textcolor{red}{Find some good and clean argumentation}
+        \item Requires noise model
     \end{itemize} 
-    \textcolor{red}{Use an image to explain?!}
 \end{frame}
 
 \subsubsection{Surface Code}
@@ -251,7 +281,7 @@
     \item Disadvatages:
     \begin{itemize}
         \item More (physical) qubits needed
-        \item More than next neighbour interaction needed
+        \item Not only next neighbour interaction 
     \end{itemize}
     \end{itemize}
 
@@ -260,18 +290,17 @@
 
 
 \subsubsection{Fault Tolerance}
-\begin{frame}{Fault Tolerance (FT)}
-    \textcolor{red}{Why is FT important and is this making a good point}
-    \begin{block}{Definition Fault Tolerance}
-        $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
-    \end{block}
+\begin{frame}{Concept of \textbf{Fault Tolerance}}
     \begin{itemize}
-        \item Goal: Stop uncontrolled propagation of errors
+        \item Motivation: Stop uncontrolled propagation of errors
         \begin{itemize}
             \item Assumption: All gates can have faults = Circuit level noise
         \end{itemize}
     \end{itemize} 
-    \begin{block}{Quantum Memory Circuit}
+    \begin{block}{Definition Fault Tolerance}
+        $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
+    \end{block}
+    \begin{block}{Sketch: Quantum Memory Circuit}
         \begin{center}
             \begin{quantikz}
                 \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[style={noisy}]{Noisy Recovery}&\rstick{$\ket{\Psi '}_L$}
@@ -362,8 +391,8 @@
         \end{itemize}
         \item Determine:
         \begin{itemize}
-            \item Find Crossover point of different distances $d$
             \item Using Monte Carlo simulations 
+            \item Find Crossover point of different distances $d$
         \end{itemize} 
      \end{itemize}
 \end{frame}
@@ -391,6 +420,7 @@
     \begin{center}
         \includegraphics[width=1\textwidth]{noisy_test.pdf}
     \end{center}  
+    \textcolor{red}{Hier noch mehr relevante teile einbauen}
 \end{frame}
 
 
