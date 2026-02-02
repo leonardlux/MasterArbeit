@@ -28,6 +28,12 @@
 % Title page
 \begin{frame}
 \titlepage
+\begin{center}
+Supervised by:\newline 
+\end{center}
+\begin{center}
+Luis Colmenarez, Maarten Wegewijs \& Markus Müller
+\end{center}
 \end{frame}
 
 % Table of Contents
@@ -41,7 +47,7 @@
 \section{Motivation}
 \begin{frame}{\textbf{Motivation}}
     \begin{itemize}
-        \item Threshold characterizes QEC code capabilities
+        \item Threshold important charateristic of QEC code 
         \begin{itemize}
             \item depends on.... 
             \begin{itemize} 
@@ -54,7 +60,7 @@
         \item Steane Type Error Correction (STEC) is:
         \begin{itemize}
             \item Fault tolerant 
-            \item Oneshot 
+            \item One-shot 
             \begin{itemize}
                 \item Only one syndrome readout required 
                 \item Due to redudant stabilizer readout structure
@@ -65,13 +71,38 @@
 \end{frame}
 
 \section{Components of the Title}
+
+\subsection{Threshold}
+\begin{frame}{Why is the \textbf{Threshold} interesting?}
+     \begin{itemize}
+        \item Def.: The threshold $p_{th}$ is a physical error rate under which we can reduce the logical error rate $p_L$
+        \begin{itemize}
+            \item by increasing number of qubits $n\leftrightarrow$  increasing code distance $d$ 
+            \item above $p_{th}$ QEC becomes self defeating 
+            \item dependent on: 
+            \begin{itemize}
+                \item logical encoding 
+                \item error model
+                \item circuit layout
+                \item decoder
+            \end{itemize}
+        \end{itemize}
+        \item Determine $p_{th}$:
+        \begin{itemize}
+            \item Monte Carlo simulations $\rightarrow p_{L}(p_{phy})$  
+            \item Find intersection of $p_{L}(p_{phy})$ for different distances $d$
+        \end{itemize} 
+     \end{itemize}
+\end{frame}
+
+
 % Error Correction
 \subsection{Error Correction}
 \begin{frame}
     \frametitle{Basics of \textbf{Error Correction} (EC)}
     \begin{itemize}
         \item Goal: Protect quantum information against noise 
-        \item My Case: Quantum memory
+        \item This case: Quantum memory
         \begin{itemize}
             \item Goal: Conserve arbitrary input state
             \item Under computational noise (Pauli Errors)
@@ -94,12 +125,14 @@
         \item Stabilizer group: 
             $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
         \item Codespace:  
-            $\mathcal{H}_0$
+            $\mathcal{H}_0 \ni \ket{\Psi}_L$
         \begin{itemize}
             \item Error subspaces:
                 $\mathcal{H}_s = \{ \ket{\Psi} \in \mathcal{H} \ |\ g^{(i)}\ket{\Psi} = (-1)^{s_i} \ket{\Psi} \}$ \\
-            \item Syndrome:
-    $s \in \{0,1 \}^m \ \text{s.t.} \ g^{(i)} \ket{\Psi}= (-1)^{s_i} \ket{\Psi} $
+            \item Syndrome: $s \in \{0,1 \}^m$ 
+            \begin{itemize}
+                \item $\text{s.t.} \ g^{(i)} \ket{\Psi}= (-1)^{s_i} \ket{\Psi} $
+            \end{itemize}
         \end{itemize}
         \item Centralizer:  
             $\mathcal{C}(\mathcal{G}) = \{ f\in \mathcal{P}_n | f\cdot g = g \cdot f \  \forall g \in \mathcal{G} \} $
@@ -110,8 +143,8 @@
             $\bar{X},\bar{Y},\bar{Z} \in \mathcal{C}(\mathcal{G}) \setminus \mathcal{G}$
             \item Cosets of Centralizer:
             $f(s)\mathcal{C}(\mathcal{G})= \mathcal{C}_{\mathbb{1}}^{s} \cup \mathcal{C}_{X}^{s} \cup\mathcal{C}_{Y}^{s} \cup\mathcal{C}_{Z}^{s} $ 
+            \item $\mathcal{P}_n$ can be written as a disjoint union of coset (for both cases) 
         \end{itemize}
-        \item $\mathcal{P}_n$ can be written as disjoints coset of both
    \end{itemize} 
 \end{frame}
 
@@ -143,22 +176,14 @@
         \item Maximum likelihood (ML): returns most propable recovery op. for a given syndrome 
         \begin{itemize}
             \item Defines best possible threshold
+            \item $f_R = \arg \max_{f_R} P(f_R|s)$ 
         \end{itemize}
         \item Hard task 
         \begin{itemize}
             \item Global optimization problem 
-            \item Exponentially (in $n$) many possible errors 
+            \item Exponentially  many possible errors 
             \item Degeneracy needs to be taken into account 
         \end{itemize}
-        \item Principal (without measurement errors):  
-        \textcolor{red}{Should I do a more general case}
-        \begin{enumerate}
-            \item given $s$ (with certainty) 
-            \item determine probabilities $\pi$ of the relevant cosets of the stabilizer:
-            $ \pi(\mathcal{C}) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
-            \item choose recovery operation $r(s)$: 
-            $r \in {C}_{ML}^s = \arg\max_\mathcal{C}(\pi(\mathcal{C})) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
-        \end{enumerate}
         \item Requires noise model
     \end{itemize} 
 \end{frame}
@@ -175,9 +200,9 @@
                 \item $m=2d\cdot(d-1)$
                 \item $|s| = 2^{2d\cdot(d-1)}$
             \end{itemize}
-            \item Measurement errors: \textcolor{red}{The usual way}
+            \item Imperfect measurements:
             \begin{itemize}
-                \item $d$ rounds of syndrome measurement needed to be FT
+                \item Standard: repeat rounds of syndrome readout 
             \end{itemize}
         \end{itemize}
     \end{column}
@@ -189,9 +214,46 @@
     \end{columns}
 \end{frame}
 
-\subsubsection{Effective MLD}
-\begin{frame}{Effective MLD}
-    \textcolor{red}{Explain the proper function}
+\subsubsection{Specific MLD}
+\begin{frame}{Specific MLD}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{eff_ml_decoder_paper.png}
+    \end{center}
+    \begin{itemize}
+        \item Designed for surface codes 
+        \item Assumes:
+        \begin{itemize}
+            \item noiseless syndrome extraction = no measurement errors
+            \item indepenent bit- \& phase-flip noise (1. version) 
+        \end{itemize}
+        \item Basic idea:
+        \begin{itemize}
+            \item Map MLD problem to matchgate quantum circuits to solve efficently ($t=\mathcal{O}(n^2)$)
+        \end{itemize}
+   \end{itemize}
+\end{frame}
+
+\begin{frame}{Specific MLD working principal}
+    \begin{itemize}
+        \item Currently studying this  
+        \item Principal:
+        \begin{enumerate}
+            \item given $s$ (with certainty) 
+            % \item determine $f(s)\in \mathcal{P}_n$ 
+            \item determine probabilities $\pi$ of the relevant cosets of the stabilizer:
+            $ \pi(\mathcal{C}) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
+            \item choose recovery operation $f_R(s)$: 
+            $f_R \in {C}_{ML}^s = \arg\max_\mathcal{C}(\pi(\mathcal{C})) \text{ for } \mathcal{C} \in \{\mathcal{C}_{\mathbb{1}}^{s} ,\mathcal{C}_{X}^{s}, \mathcal{C}_{Y}^{s} ,\mathcal{C}_{Z}^{s} \} $ 
+        \end{enumerate}
+        \item determines $\pi(\mathcal{C})$  efficently  using:
+        \begin{itemize}
+            \item MLD problem reduced to partition function of Ising-like Hamiltonian of a 2d lattice
+            \item reduced to matchgate quantum circuits 
+            \begin{itemize}
+                \item efficently simulatable by classical computers 
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
 \end{frame}
 
 \begin{frame}{Error Propagation}
@@ -221,6 +283,24 @@
     \textcolor{red}{should i focus on one type of error}
 \end{frame}
 
+\subsubsection{Fault Tolerance}
+\begin{frame}{Concept of \textbf{Fault Tolerance}}
+    \begin{itemize}
+        \item Assumption: All gates can have faults (Circuit level noise)
+        \item Motivation: Stop uncontrolled propagation of errors
+        \begin{itemize}
+            \item Remove errors up to a correctable residual error 
+            \textcolor{red}{Find a better expression here}
+        \end{itemize}
+    \end{itemize} 
+    \begin{block}{Quantum Memory Circuit}
+        \begin{center}
+            \begin{quantikz}
+                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[style={noisy}]{Noisy-Recovery}&\rstick{$\ket{\Psi '}_L$}
+            \end{quantikz}
+        \end{center}
+    \end{block}
+\end{frame}
 \subsection{Steane Type Error Correction}
 \begin{frame}{Steane Type Error Correction}
     \begin{itemize}
@@ -261,7 +341,6 @@
             \item Transversal measurements $\rightarrow$ syndrome reconstruction 
        \end{itemize}
     \end{itemize}
-    \textcolor{red}{Ordering makes one type of error more likely}
     \textcolor{red}{Show flow of errors through the circuit}
 \end{frame}
 
@@ -274,8 +353,6 @@
                 \item No need for repeated syndrome measurements
             \end{itemize}
         \item Fault tolerant by design 
-        \textcolor{red}{Fault tolerant is not defined yet}
-        \textcolor{red}{Argue why it is fault tolerant}
     \end{itemize}
     
     \item Disadvatages:
@@ -283,37 +360,22 @@
         \item More (physical) qubits needed
         \item Not only next neighbour interaction 
     \end{itemize}
+    \item Other points of interest:
+    \begin{itemize}
+        \item Able influence likelihood of error types in residual error by ordering of gadgets
+    \end{itemize}
     \end{itemize}
 
     
 \end{frame}
 
 
-\subsubsection{Fault Tolerance}
-\begin{frame}{Concept of \textbf{Fault Tolerance}}
-    \begin{itemize}
-        \item Motivation: Stop uncontrolled propagation of errors
-        \begin{itemize}
-            \item Assumption: All gates can have faults = Circuit level noise
-        \end{itemize}
-    \end{itemize} 
-    \begin{block}{Definition Fault Tolerance}
-        $x$ faults lead to an (max) weight $x$ error at the end of the codeblock
-    \end{block}
-    \begin{block}{Sketch: Quantum Memory Circuit}
-        \begin{center}
-            \begin{quantikz}
-                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[style={noisy}]{Noisy Recovery}&\rstick{$\ket{\Psi '}_L$}
-            \end{quantikz}
-        \end{center}
-    \end{block}
-\end{frame}
 
 % Slide  (Error Models)
 
 \subsubsection{Error Models}
 \begin{frame}{Circuit level noise model}
-    All errors of $\mathcal{O}(p)$. 
+    Probability of noise is of $\mathcal{O}(p)$. 
     \begin{itemize}
         \item Depolarizing single qubit noise ($Depo1$) 
         \begin{itemize}
@@ -370,34 +432,18 @@
             \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&&\\
             \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
-
+        \begin{center}
+            Decoder error model
+        \end{center}
         \begin{quantikz}[,classical gap=0.07cm]
             \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\gate[style={noisy}]{.}&\\
-            \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\gate[style={noisy}]{ML-noise}&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\gate[style={noisy}]{Pseudo-Surface-Noise}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
 
     \end{block}
 \end{frame}
 
-
-\subsection{Threshold}
-\begin{frame}{Why is the \textbf{Threshold} interesting?}
-     \begin{itemize}
-        \item Def: $p_C$ physical error rate under which we can arbitrary reduce the logical error rate $p_L$
-        \begin{itemize}
-            \item by increasing $d$ = increasing number of qubits 
-            \item above $p_C$ QEC becomes self defeating 
-            \item dependent on: encoding, error model, circuit layout, decoder 
-        \end{itemize}
-        \item Determine:
-        \begin{itemize}
-            \item Using Monte Carlo simulations 
-            \item Find Crossover point of different distances $d$
-        \end{itemize} 
-     \end{itemize}
-\end{frame}
-
-\section{Method}
+\section{Method \& some Results}
 \begin{frame}{Method}
     \begin{enumerate}
         \item Implement Steane Type EC with underlying surface code in stim \checkmark
