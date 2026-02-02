@@ -71,6 +71,39 @@ def construct_basic_noise_model(noise: float, X_errors = True, Z_errors = False)
         }
     return noise_model
 
+def construct_circuit_noise_model(noise: float, ):
+    """
+    :param noise: define the error rate of the occuring errors 
+    :type noise: float
+    """
+    noise_model = {
+    "single_qubit_gate": {
+        "operator": {"H"},
+        "error_position": "following",
+        "error": "DEPOLARIZE1",
+        "noise": noise,
+    },
+    "two_qubit_gate": {
+        "operator": {"CX"},
+        "error_position": "following",
+        "error": "DEPOLARIZE2",
+        "noise": noise,
+    },
+    "measurement": {
+        "operator": {"M","MR"},
+        "error_position": "before",
+        "error": "X_ERROR",
+        "noise": noise,
+    },
+    "initialize": {
+        "operator": {"I"}, # Trick I use because init algo is out of scope! 
+        "error_position": "following",
+        "error": "DEPOLARIZE1",
+        "noise": noise,
+    },
+}
+        
+    return noise_model
 """
 Additionaly:
 Some examples

@@ -12,6 +12,11 @@
 \tikzset{ noisy/.style={fill=red!20}
 }
 
+\begin{quantikz}
+    \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&\ctrl{2}&&&\gate{Z_R}&\gate{X_R}\\
+    \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&&\meter{X}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}\\
+    \lstick{$\ket{+}_L$}&\qwbundle{n}&&\targ{}&\meter{Z}&\setwiretype{c}&&\gate{Decoder}\wire[u][2]{c}
+\end{quantikz}
 
 % Quantum Memory
 
