@@ -162,7 +162,7 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
     circuit.append("MR",index_physical + 2*offset_per_log_qubit) 
 
     # Measure observable by measuremnt of logical data from main qubit |Psi>
-    circuit.append("M",index_physical) 
+    circuit.append("M",index_physical,tag="obs_flip_measure") 
 
 
     # Construct all relevant detectors 

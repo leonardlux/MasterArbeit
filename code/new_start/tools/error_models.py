@@ -14,6 +14,7 @@ def add_noise(
     # Hardcoded to ignore the initialization process of qubits
     faultless_tags = {
         "l_qubit_init",
+        "obs_flip_measure",
     }
     # I use the "I" Operation to add some inital error onto my model
     for  circ_instr in circuit:

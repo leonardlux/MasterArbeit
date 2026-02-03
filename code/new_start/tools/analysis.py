@@ -148,7 +148,7 @@ def plot_diff_noise_level(
     plt.subplots(figsize=(20*cm,10*cm))
     plt.loglog()
     plt.xlabel("physical error rate")
-    plt.ylabel("logical error rate per shot")
+    plt.ylabel("logical error rate")
 
     log_error_probs = []
     y_errs = []

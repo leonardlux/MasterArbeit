@@ -17,7 +17,22 @@
     \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&&\meter{X}&\setwiretype{c}&\gate{Decoder}\wire[u][1]{c}\\
     \lstick{$\ket{+}_L$}&\qwbundle{n}&&\targ{}&\meter{Z}&\setwiretype{c}&&\gate{Decoder}\wire[u][2]{c}
 \end{quantikz}
+        % X-Errors
+\begin{quantikz}
+    \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\ctrl{1}&&\\
+    \lstick{$\ket{+}_L$}&\qwbundle{n}&\targ{}&\meter{Z}&\setwiretype{c}
+\end{quantikz}
 
+    % \begin{block}{The $X$-Stabilizer Gadget}
+    %     \begin{center}
+    %     % Simple Steane Type EC
+    %     % Z-Errors
+    %     \begin{quantikz}
+    %         \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&\\
+    %         \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}
+    %     \end{quantikz}
+    %     \end{center}
+    % \end{block}
 % Quantum Memory
 
 \begin{quantikz}
