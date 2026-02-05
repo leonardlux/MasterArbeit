@@ -60,6 +60,10 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 % Definitions 
 \subsection{Stabilizer Codes}
 \begin{frame}{Definitions of \textbf{Stabilizer Codes}}
+    \begin{itemize}
+        \item Stabilizer group: 
+            $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
+    \end{itemize}
     \begin{block}{Stabilizer \& Syndrome}
           \begin{equation*}
                  g^{(i)} \ket{\Psi}_L= (-1)^{s^{(i)}} \ket{\Psi}_L
@@ -70,8 +74,6 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
           \end{equation*}
     \end{block}
     \begin{itemize}
-        \item Stabilizer group: 
-            $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
         \item Codespace:  $\mathcal{H}_{0} \subset \mathcal{H}_n$
         \item Error subspaces: $\mathcal{H}_s$
                 % = \{ \ket{\Psi}_L \in \mathcal{H} \ |\ g^{(i)}\ket{\Psi} = (-1)^{s_i} \ket{\Psi}_L \}$ \\
@@ -124,9 +126,11 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
     \begin{center}
         \includegraphics[width=0.7\textwidth]{ml_decoder.pdf}
     \end{center}
+    \onslide<2->{
     \begin{itemize}
         \item MLD: Determine coset with highest prob. of occuring for given $s$
     \end{itemize}
+    }
 
 \end{frame}
 
@@ -210,6 +214,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 
     \vspace{0.5cm} 
 
+    \onslide<2->{
     \begin{itemize}
         \item and Bug:
     \end{itemize}
@@ -220,6 +225,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
         &&\ctrl{1}&\gate[style={noisy}]{E_Z}&&\\
         &&\targ{}&\gate[style={noisy}]{E_Z}&\meter{Z}&\setwiretype{c}
     \end{quantikz}
+    }
     \end{center}
 \end{frame}
 
@@ -259,11 +265,17 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
     \end{column}
     \begin{column}{0.4\textwidth}
     \begin{itemize}
+        \onslide<1->{
         \item Fault-tolerant  
         \item Single-shot 
+        }
+        \onslide<2->{
         \item More qubits 
         \item More than NN interaction
+        }
+        \onslide<3->{
         \item Not symmetric 
+        }
     \end{itemize} 
     \end{column}    
     \end{columns}
@@ -274,7 +286,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 
 \subsection{Error Models}
 \begin{frame}{Circuit level noise model}
-    Probability of noise is of $\mathcal{O}(p)$. 
+    Probability of noise is of $\mathcal{O}(p)$
     \begin{itemize}
         \setlength{\itemsep}{6pt}
         \item Depolarizing single qubit noise ($Depo1$) 
@@ -306,10 +318,12 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
             \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&&\\
             \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
+        \onslide<2->{
         \begin{quantikz}
             \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\gate[style={noisy}]{.}&\\
             \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\gate[style={noisy}]{Effective\ Noise}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
+        }
 
 \end{frame}
 
@@ -321,11 +335,15 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
             \item Monte Carlo simulations $\rightarrow p_{L}(p_{phy})$  
             \item Find intersection of $p_{L}(p_{phy})$ of different distances $d$
         \end{itemize} 
-        \item Test: MWPM - Circuit Level Noise: 
+        \onslide<2->{
+        \item Test: MWPM - Circuit Level Noise: }
      \end{itemize}
+    \onslide<2->{
     \begin{center}
         \includegraphics[width=0.8\textwidth]{circuit_noise_MWPM.pdf}
     \end{center}  
+    }
+        
 \end{frame}
 
 \section{Progress}
