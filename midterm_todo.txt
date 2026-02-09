@@ -1,0 +1,14 @@
+Todo List:
+
+ML Decoder fertig machen
+multiple round independent decoding 
+	- p_L/round
+
+error model propagation (paper by manuel and david?)
+
+mapping to 2 2d ising models  (2 coupled 2D RBIM)
+	-> determine fundamental threshold (distrubted? vortex model)
+	-> (cheat) back engineer error model with isotropic model
+	
+ML Decoder with corrlated X and Z noise
+
