@@ -1,14 +1,19 @@
 Todo List:
-
-ML Decoder fertig machen
+ML Decoder debugging 
 multiple round independent decoding 
+	- should I switch the original state (+|>)
+	- correction by pauli frame tracking (add to syndrome)
 	- p_L/round
 
-error model propagation (paper by manuel and david?)
+error model propagation 
+	- calc error model (correlated) on all 3 qubits
+	- dont force them to be independent (maybe try)
 
 mapping to 2 2d ising models  (2 coupled 2D RBIM)
 	-> determine fundamental threshold (distrubted? vortex model)
 	-> (cheat) back engineer error model with isotropic model
 	
 ML Decoder with corrlated X and Z noise
+
+Look at the logical encoding 
 

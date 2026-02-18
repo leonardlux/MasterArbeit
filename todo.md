@@ -10,10 +10,17 @@ Doooo that
 
 ## ML Decoder 
 
-Find the bug(s)
-Optimize throughput of the code!!!
+0. increase throughput:
+    - use jit for ML decoder
+    - save results!
+    - save mid results
+1. Find the bug(s)
 
 
-## Quantum Entropie
+## Question from midterm
 
-Araki Lieb
+Why does CSS always has transversal CNOT
+Quantum memory under circuit noise use density matrix operations
+
+sub set sampling might be valid as a sampling method for low error prob
+show more asymptotic behavior (and explain the exponents fucntion)
