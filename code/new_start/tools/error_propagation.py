@@ -40,16 +40,37 @@ def prob_combined_flip_channels(ps):
     """
     # optimized why of writing the above
     pc = np.sum(np.prod(ps**ns*(1-ps)**(1-ns),axis=1))
-            
     return pc
 
-print(prob_combined_flip_channels([0.12,0.23,0.1]))
+def prob_2_depo_channel(p1,p2):
+    return p1 + (1-4/3*p1)*p2
+
+def prob_combined_depo_channels(pd):
+    """
+    Combine the probabilities of multiple concatenated depo1 channels to one cnot channel.
+    
+    :param pd: Description
+    """
+    # use recursive function
+    if len(pd)==2:
+        return prob_2_depo_channel(*pd) 
+    else:
+        pd = [
+            *pd[:-2],
+            prob_2_depo_channel(pd[-2],pd[-1])
+        ] 
+        return prob_combined_depo_channels(pd)
 
 
 """
 Correlated noise models
 """
 
+def correlated_unified_channel(pd,px,pz):
+    pxt = 1/3*pd + (1-4/3*pd)* px * (1-pz)
+    pzt = 1/3*pd + (1-4/3*pd)* (1-px) * pz
+    pyt = 1/3*pd + (1-4/3*pd)* px * pz 
+    return pxt, pyt, pzt 
 
 """
 Uncorrelated noise models
