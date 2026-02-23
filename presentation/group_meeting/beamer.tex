@@ -1,0 +1,210 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{braket}
+\usepackage{color}
+\usepackage{bbold}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{ amssymb } % for check marks
+\usepackage{svg}
+\usepackage{tikz}
+
+\usetikzlibrary{quantikz2}
+
+\usetheme{Antibes}
+
+\title{Steane Type Error Correction - Error Propagation}
+\subtitle{Short Long Update}
+\author{Leonard Lux}
+\date{24.02.2026}
+
+\begin{document}
+
+\tikzset{ noisy/.style={fill=red!20}
+}
+
+% Title page
+\begin{frame}
+\titlepage
+\begin{center}
+Supervised by:\newline 
+\end{center}
+\begin{center}
+Luis Colmenarez, Maarten Wegewijs \& Markus Müller
+\end{center}
+\end{frame}
+
+
+
+\subsection{Surface Code}
+\begin{frame}{Encoding: \textbf{Surface Code}}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \setlength{\itemsep}{8pt}
+            \item Stabilizer code
+            \item Transversal $\overline{\mathrm{CNOT}}$ 
+            \item $[[d^2 + (d-1)^2,1,d]]$
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}  
+        \begin{center}
+        \includegraphics[width=0.9\textwidth]{sketch_surface_code.png}
+        \end{center}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\subsection{Efficient MLD for Surface Code}
+\begin{frame}{\textbf{Efficient} MLD for Surface Code}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{eff_ml_decoder_paper.png}
+    \end{center}
+    \begin{itemize}
+        \setlength{\itemsep}{6pt}
+        \item Designed for surface codes 
+        \item Assumes* independent bit- \& phase-flip noise 
+        \item Mapping:
+        \begin{enumerate}
+            \setlength{\itemsep}{6pt}
+            \item MLD problem 
+            \item Partition function of $2d$ Ising model 
+            \item Matchgate quantum circuits 
+            \begin{itemize}
+                \item Classically efficiently computable ($\mathcal{O}(n^3)$)
+            \end{itemize}
+        \end{enumerate}
+   \end{itemize}
+\end{frame}
+
+
+\begin{frame}{Steane Type Error Correction}
+    \begin{columns}
+    \begin{column}{0.6\textwidth}
+    \begin{block}{The Circuit}
+        % Simple Steane Type EC
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&\ctrl{2}&&\\%&&\gate{Z_R}&\gate{X_R}&\\
+            \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}&&\\%\gate{Decoder}\wire[u][1]{c}\\
+            \lstick{$\ket{+}_L$}&\qwbundle{n}&&&\targ{}&\meter{Z}&\setwiretype{c}%&\gate{Decoder}\wire[u][2]{c}
+        \end{quantikz}
+    \end{block} 
+    \end{column}
+    \begin{column}{0.4\textwidth}
+    \begin{itemize}
+        \item Fault-tolerant  
+        \item Single-shot 
+        \item Not symmetric 
+    \end{itemize} 
+    \end{column}    
+    \end{columns}
+\end{frame}
+
+
+% Slide  (Error Models)
+
+\subsection{Error Models}
+\begin{frame}{Circuit level noise model}
+    Probability of noise is of $\mathcal{O}(p)$
+    \begin{itemize}
+        \setlength{\itemsep}{6pt}
+        \item Depolarizing single qubit noise ($Depo1$) 
+        \begin{itemize}
+            \item After single qubit gates 
+            \item After logical encoding of qubit (Assumption!) 
+        \end{itemize}
+        \item Depolarizing two qubit noise ($Depo2$) 
+        \begin{itemize}
+            \item After $\mathrm{CNOT}$ gates
+        \end{itemize}
+        \item $X$-Errors ($E_X$) 
+        \begin{itemize}
+            \item Before $Z$-Measurements
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+% Slide: Error Equations
+\begin{frame}
+    \begin{block}{$X$-Errors}
+        \begin{equation}
+            \varepsilon_{E_X}(\rho) = (1-p) \rho + p \cdot X \rho X
+        \end{equation}
+    \end{block}
+    
+    % Depo 1
+    \begin{block}{Depolarizing Errors}
+        \begin{equation}
+            \varepsilon_{D_1}(\rho) = (1-p) \rho + \frac{p}{3} \sum^3_{i=1} E_i \rho E_i
+        \end{equation}
+        \begin{equation*}
+            E_i \in \{ X, Y, Z \}
+        \end{equation*}
+
+    % Depo 2
+        \begin{equation}
+            \varepsilon_{D_2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
+        \end{equation}
+        \begin{equation*}
+            E_i \in \{E_k \otimes E_l | E_k,E_l \in \{\mathbb{1},X,Y,Z\} \} \setminus \{\mathbb{1}\otimes\mathbb{1} \}
+        \end{equation*}
+    \end{block}
+\end{frame}
+
+% Slide: Circuit examples Errors
+\begin{frame}{Circuit Level Noise}
+
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_q}$}&\ctrl{1}&\targ{}&&&\\
+            \lstick{$\ket{\Psi_+}$}&\targ{}&&&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_0}$}&&\ctrl{-2}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_q}$}&\gate[1,style={noisy},]{D_1}&\ctrl{1}&\gate[1,style={noisy}]{D_2}\wire[d][1]{q}&\targ{}&\gate[1,style={noisy}]{D_2}\wire[d][2]{q}&&&&&\\
+            \lstick{$\ket{\Psi_+}$}&\gate[1,style={noisy},]{D_1}&\targ{}&\gate[1,style={noisy}]{D_2}&&&&&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_0}$}&\gate[1,style={noisy},]{D_1}&&&\ctrl{-2}&\gate[1,style={noisy}]{D_2}&\gate[]{H}&\gate[1,style={noisy},]{D_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+\end{frame}
+\begin{frame}{Reorder}
+    \begin{itemize}
+        \item commute operators 
+        \item $tr_q$ 
+        \item $Z \simeq I$, $Y \simeq X$
+    \end{itemize}
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_q}$}&\ctrl{1}&\targ{}&\gate[]{Trash}\\
+            \lstick{$\ket{\Psi_+}$}&\targ{}&&&\gate[1,style={noisy}]{D'}\wire[d][1]{q}&\gate[1,style={noisy},]{X_+}&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_0}$}&&\ctrl{-2}&\gate[]{H}&\gate[1,style={noisy}]{D'}&\gate[1,style={noisy},]{X_0}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+    \begin{itemize}
+        \item 3 distinct channels $\rightarrow$ single qubit:
+        \begin{itemize}
+            \item $X_+ \rightarrow$ bit-flip channel ($p_x$)
+            \item $X_0 \rightarrow$ phase-flip channel ($p_z$) 
+            \item $D' \rightarrow$ depo 1 channel ($p_D$)
+        \end{itemize}
+        \item mapping to channel depends on ordering
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{MLD Error Model}
+    \begin{block}{Resulting Probabilities}
+        \begin{equation*}
+            p_x^{(MLD)} = \frac{1}{3}p_{D} + (1- \frac{4}{3}p_D) p_x \cdot(1-p_z) 
+        \end{equation*}
+    \end{block}
+\end{frame}
+
+\begin{frame}
+    \begin{center}
+        Thanks for listening!
+    \end{center}  
+\end{frame}
+
+
+% Appendix
+
+
+
+\end{document}
