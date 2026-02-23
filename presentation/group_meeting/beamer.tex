@@ -35,7 +35,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 
 
 
-\subsection{Surface Code}
+\section{Surface Code}
 \begin{frame}{Encoding: \textbf{Surface Code}}
     \begin{columns}
     \begin{column}{0.5\textwidth}
@@ -54,7 +54,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
     \end{columns}
 \end{frame}
 
-\subsection{Efficient MLD for Surface Code}
+\section{Efficient MLD for Surface Code}
 \begin{frame}{\textbf{Efficient} MLD for Surface Code}
     \begin{center}
         \includegraphics[width=0.7\textwidth]{eff_ml_decoder_paper.png}
@@ -76,7 +76,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
    \end{itemize}
 \end{frame}
 
-
+\section{Steane Type Error Correction}
 \begin{frame}{Steane Type Error Correction}
     \begin{columns}
     \begin{column}{0.6\textwidth}
@@ -102,7 +102,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 
 % Slide  (Error Models)
 
-\subsection{Error Models}
+\section{Error Models}
 \begin{frame}{Circuit level noise model}
     Probability of noise is of $\mathcal{O}(p)$
     \begin{itemize}
@@ -123,11 +123,29 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
     \end{itemize}
 \end{frame}
 
+
+% Slide: Circuit examples Errors
+\begin{frame}{Circuit Level Noise}
+
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_A}$}&\ctrl{1}&\targ{}&&&\\
+            \lstick{$\ket{\Psi_B}$}&\targ{}&&&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_C}$}&&\ctrl{-2}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_A}$}&\gate[1,style={noisy},]{D_1}&\ctrl{1}&\gate[1,style={noisy}]{D_2}\wire[d][1]{q}&\targ{}&\gate[1,style={noisy}]{D_2}\wire[d][2]{q}&&&&&\\
+            \lstick{$\ket{\Psi_B}$}&\gate[1,style={noisy},]{D_1}&\targ{}&\gate[1,style={noisy}]{D_2}&&&&&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_C}$}&\gate[1,style={noisy},]{D_1}&&&\ctrl{-2}&\gate[1,style={noisy}]{D_2}&\gate[]{H}&\gate[1,style={noisy},]{D_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+\end{frame}
+
 % Slide: Error Equations
 \begin{frame}
     \begin{block}{$X$-Errors}
         \begin{equation}
-            \varepsilon_{E_X}(\rho) = (1-p) \rho + p \cdot X \rho X
+            \varepsilon_{X}(\rho) = (1-p) \rho + p \cdot X \rho X
         \end{equation}
     \end{block}
     
@@ -150,22 +168,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
     \end{block}
 \end{frame}
 
-% Slide: Circuit examples Errors
-\begin{frame}{Circuit Level Noise}
-
-        \begin{quantikz}
-            \lstick{$\ket{\Psi_q}$}&\ctrl{1}&\targ{}&&&\\
-            \lstick{$\ket{\Psi_+}$}&\targ{}&&&\meter{$Z$}&\setwiretype{c}\\
-            \lstick{$\ket{\Psi_0}$}&&\ctrl{-2}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
-        \end{quantikz}
-
-        \begin{quantikz}
-            \lstick{$\ket{\Psi_q}$}&\gate[1,style={noisy},]{D_1}&\ctrl{1}&\gate[1,style={noisy}]{D_2}\wire[d][1]{q}&\targ{}&\gate[1,style={noisy}]{D_2}\wire[d][2]{q}&&&&&\\
-            \lstick{$\ket{\Psi_+}$}&\gate[1,style={noisy},]{D_1}&\targ{}&\gate[1,style={noisy}]{D_2}&&&&&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
-            \lstick{$\ket{\Psi_0}$}&\gate[1,style={noisy},]{D_1}&&&\ctrl{-2}&\gate[1,style={noisy}]{D_2}&\gate[]{H}&\gate[1,style={noisy},]{D_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
-        \end{quantikz}
-
-\end{frame}
+\section{MLD Error Model} 
 \begin{frame}{Reorder}
     \begin{itemize}
         \item commute operators 
@@ -173,25 +176,49 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
         \item $Z \simeq I$, $Y \simeq X$
     \end{itemize}
         \begin{quantikz}
-            \lstick{$\ket{\Psi_q}$}&\ctrl{1}&\targ{}&\gate[]{Trash}\\
-            \lstick{$\ket{\Psi_+}$}&\targ{}&&&\gate[1,style={noisy}]{D'}\wire[d][1]{q}&\gate[1,style={noisy},]{X_+}&\meter{$Z$}&\setwiretype{c}\\
-            \lstick{$\ket{\Psi_0}$}&&\ctrl{-2}&\gate[]{H}&\gate[1,style={noisy}]{D'}&\gate[1,style={noisy},]{X_0}&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_A}$}&\ctrl{1}&\targ{}&\gate[]{Trash}\\
+            \lstick{$\ket{\Psi_B}$}&\targ{}&&&\gate[1,style={noisy}]{X_2}\wire[d][1]{q}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_C}$}&&\ctrl{-2}&\gate[]{H}&\gate[1,style={noisy}]{X_2}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
         \end{quantikz}
     \begin{itemize}
-        \item 3 distinct channels $\rightarrow$ single qubit:
+        \item 3 distinct channels 
+        \item mapping depends on ordering
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Channel Equations}
+    \begin{block}{Bit-flip channel}
+        \begin{equation*}
+        \varepsilon_{X,B/C}(\rho) = (1-p) \hat{I}+ p_x \cdot \hat{X}_{B/C} 
+        \end{equation*}
+    \end{block}
+    \begin{block}{$X_2$ channel}
+        \begin{equation*}
+        \varepsilon_{X_2,BC}(\rho) = (1-p_D) \hat{I} + \frac{1}{3} p_D \cdot \left(\hat{X}_B + \hat{X}_C + \hat{X}_B\otimes\hat{X}_C\right) 
+        \end{equation*}
+    \end{block}
+
+    \begin{itemize}
+        \item relabel to MLD perspective: 
         \begin{itemize}
-            \item $X_+ \rightarrow$ bit-flip channel ($p_x$)
-            \item $X_0 \rightarrow$ phase-flip channel ($p_z$) 
-            \item $D' \rightarrow$ depo 1 channel ($p_D$)
+            \item $p_x$ on system $B$: $p_x$
+            \item $p_x$ on system $C$: $p_z$ 
         \end{itemize}
-        \item mapping to channel depends on ordering
     \end{itemize}
 \end{frame}
 
 \begin{frame}{MLD Error Model}
     \begin{block}{Resulting Probabilities}
         \begin{equation*}
-            p_x^{(MLD)} = \frac{1}{3}p_{D} + (1- \frac{4}{3}p_D) p_x \cdot(1-p_z) 
+            p_{(i,j)}^{(MLD)} = \frac{1}{3}p_{D} + (1- \frac{4}{3}p_D)\cdot p_{x,i} \cdot p_{z,j}
+        \end{equation*}
+        \vspace{0.5cm}
+        \begin{equation*}
+            p_{x,i} = 
+            \begin{cases}
+                p_x & \text{if } i=1  \\
+                (1-p_x) & \text{if } i=0\\
+            \end{cases}
         \end{equation*}
     \end{block}
 \end{frame}
@@ -204,7 +231,44 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 
 
 % Appendix
+\begin{frame}{Technical Details}
+    \begin{columns}
+        \begin{column}{0.5\textwidth}
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_A}$}&\ctrl{1}&\targ{}&&&\\
+            \lstick{$\ket{\Psi_B}$}&\targ{}&&&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_C}$}&&\ctrl{-2}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz} 
+        \begin{equation*}
+            p_x^c\left(p_{mB};\right)
+        \end{equation*}
+        \begin{equation*}
+            p_z^c\left(p_{mC},\frac{2}{3}p_H;\frac{8}{15}p_{D2AC},\frac{2}{3}p_{spC}\right) 
+        \end{equation*}
+        \begin{equation*}
+            p_D^c\left(p_{spA};p_{spB},\frac{4}{5}p_{D2AB}\right)
+        \end{equation*}
+            
+        \end{column}
+        \begin{column}{0.5\textwidth}
+        \begin{quantikz}
+            \lstick{$\ket{\Psi_A}$}&\targ{}&\ctrl{1}&&&\\
+            \lstick{$\ket{\Psi_B}$}&&\targ{}&&\meter{$Z$}&\setwiretype{c}\\
+            \lstick{$\ket{\Psi_C}$}&\ctrl{-2}&&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz} 
+        \begin{equation*}
+            p_x^c\left(p_{mB};\frac{8}{15}p_{D2AC},\frac{2}{3}p_{spB}\right)
+        \end{equation*}
+        \begin{equation*}
+            p_z^c\left(p_{mC},\frac{2}{3}p_H;\right) 
+        \end{equation*}
+        \begin{equation*}
+            p_D^c\left(p_{spA};p_{spC},\frac{4}{5}p_{D2AC}\right)
+        \end{equation*}
 
+        \end{column}
+    \end{columns} 
+\end{frame}
 
 
 \end{document}
