@@ -236,13 +236,16 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
             )
 
     # Logical Observable (check in notes) 
+    # Z Logical
     targets = []
     for i in range(d):
-        for j in range(d):
-            targets += [i + j*(2*d-1)]
+        targets += [d**2 + (d-1)**2 - i*(d+(d-1))] #1. column 
+        # following eq. all logical combined = Z logical!
+        # for j in range(d):
+        #     targets += [i + j*(2*d-1)]
     circuit.append(
         "OBSERVABLE_INCLUDE",
-        [stim.target_rec(-(i+1)) for i in targets ],
+        [stim.target_rec(-(i)) for i in targets ],
         0, # 0. log measurement
         )
 

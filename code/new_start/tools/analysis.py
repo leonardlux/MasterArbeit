@@ -5,14 +5,17 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 from tools.error_models import add_noise
-from tools.ml_decoder import ML_Decoder
+from tools.ml_decoder import split_syndrome, decode_half_syndrome,  combined_aron
 
-# TODO: update this function ?! decompose it into parts?!
+from tools.helper import save_circuit_diagram
+
 def count_logical_errors_using_MWPM(
         circuit, 
         num_shots: int, 
         probability: bool = False, 
         shortest_error: bool = False, 
+        distance:int =0,
+        error_rate: float = 0.,
         **kwargs, # just here to ignore the stuff other logical error counter need
         ) -> int:
     """
@@ -52,6 +55,21 @@ def count_logical_errors_using_MWPM(
         predicted_for_shot = predictions[shot]
         if not np.array_equal(actual_for_shot, predicted_for_shot):
             num_errors += 1
+
+    # run ML decoding
+    d = distance 
+    p = error_rate
+    num_errors_ml = 0
+    for obs, d_event in zip(observable_flips,detection_events): 
+        x_stab_syndrome, z_stab_syndrome = split_syndrome(distance, d_event)
+        pred_a = combined_aron(
+            d,
+            p,
+            z_stab_syndrome,
+        )
+        if obs[0] != pred_a:
+            num_errors_ml += 1
+    print(num_errors,num_errors_ml)
     if probability:
         return num_errors/num_shots
     return num_errors
@@ -62,20 +80,43 @@ def count_logical_errors_using_ML(
         distance: int, 
         error_rate: float, 
         probability: bool = False,
-    ) -> int:
-    ## TODO care about Z errors
+    ) -> float:
+    d = distance
+    p = error_rate 
+
     # Sample the circuit.
     sampler = circuit.compile_detector_sampler()
     detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
 
-
-    # init ML decoder
-    X_decoder = ML_Decoder(distance, error_rate)
+    # init ML decoder (only X errors so far)
     num_errors = 0
     for obs, d_event in zip(observable_flips,detection_events): 
-        pred = X_decoder.decode_syndrome(d_event[-distance*(distance-1):], detector_pauli="Z")
-        if obs != pred:
+        x_stab_syndrome, z_stab_syndrome = split_syndrome(d, d_event)
+        pred_a = combined_aron(
+            d,
+            p,
+            z_stab_syndrome,
+        )
+
+        # for error fixing reasons try with only arons (speed) 
+        # pred = decode_half_syndrome(
+        #     d,
+        #     p,
+        #     z_stab_syndrome,
+        #     stab_type="Z",
+        #     ) 
+        
+        
+        # if pred != pred_a:
+        #     print("ALARM!")
+        #     # never triggers => identical
+
+        if obs[0] != pred_a:
             num_errors += 1
+    # print("\n")
+    # print(d,p)
+    # print(num_errors)
+    # print(num_errors/num_shots) 
     if probability:
         return num_errors/num_shots
     return num_errors 
