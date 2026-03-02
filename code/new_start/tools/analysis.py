@@ -6,8 +6,46 @@ from scipy.optimize import curve_fit
 
 from tools.error_models import add_noise
 from tools.ml_decoder import split_syndrome, decode_half_syndrome,  combined_aron
-
+from tools.mwpm_decoder import decode_mwpm_steane
 from tools.helper import save_circuit_diagram
+
+def gen_error_model_count_logical_error_MWPM(noise_model,init_state = "0"):
+    if init_state=="0":
+        z_stab = True
+    def specific(
+            circuit, 
+            num_shots: int, 
+            probability: bool = False, 
+            distance:int =0,
+            error_rate: float = 0.,
+            **kwargs, # just here to ignore the stuff other logical error counter need
+            ) -> int:
+        """
+        """
+        # Sample the circuit.
+        sampler = circuit.compile_detector_sampler()
+        detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
+
+        # Run the decoder.
+        predictions = decode_mwpm_steane(
+            distance, 
+            error_rate, 
+            detection_events, 
+            z_stab=True,
+            noise_model=noise_model, # this is specified by parent function
+            ) 
+
+        # Count the mistakes.
+        num_errors = 0
+        for shot in range(num_shots):
+            actual_for_shot = observable_flips[shot]
+            predicted_for_shot = predictions[shot]
+            if not np.array_equal(actual_for_shot, predicted_for_shot):
+                num_errors += 1
+        if probability:
+            return num_errors/num_shots
+        return num_errors
+    return specific
 
 def count_logical_errors_using_MWPM(
         circuit, 
@@ -80,6 +118,7 @@ def count_logical_errors_using_ML(
         distance: int, 
         error_rate: float, 
         probability: bool = False,
+        **kwargs, # just here to ignore the stuff other logical error counter need
     ) -> float:
     d = distance
     p = error_rate 

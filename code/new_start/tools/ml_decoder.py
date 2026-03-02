@@ -3,19 +3,12 @@ import scipy as sc
 
 if __name__ == "__main__":
     from aron_ml import * 
+    from helper import split_syndrome 
 else:
     from tools.aron_ml import simulation_mld, error_converter
+    from tools.helper import split_syndrome
 
 ## Syndrome to stabilizer Matrix
-def split_syndrome(d,syndrome):
-    """
-    index of syndrome: i
-    0       <= i <   d*(d-1): X-Stabilizer Syndrome
-    d*(d-1) <= i < 2*d*(d-1): Z-Stabilizer Syndrome 
-    """
-    x_syndrome = syndrome[:d*(d-1)]
-    z_syndrome = syndrome[-1*d*(d-1):]
-    return x_syndrome, z_syndrome
 
 def x_syndrome_to_stabilizer_matrix(d, syndrome):    
     """

@@ -145,7 +145,7 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
 
     return circuit
 
-def generate_surface_code_circuit(distance: int = 3, state = "0"):
+def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool = True, X_stab: bool = True, ):
     """
     This functions generates a surface code ciruit with stabilizer readout.
     """
@@ -183,23 +183,25 @@ def generate_surface_code_circuit(distance: int = 3, state = "0"):
     offset_ancilla_psi_Z    = 3*d*(d-1)  
 
     targets_X, targets_Z = index_stab_targets(distance)
-    # Detectors on |0> to detect Z-errors
-    surface_code_circ = add_detectors(
-        surface_code_circ,
-        targets_X, 
-        [offset_ancilla_psi_X_dc, offset_ancilla_psi_X],
-        [], # we do not recombine measurements into stabilizers
-        )
+    # X-stabilizer 
+    if X_stab:
+        surface_code_circ = add_detectors(
+            surface_code_circ,
+            targets_X, 
+            [offset_ancilla_psi_X_dc, offset_ancilla_psi_X],
+            [], # we do not recombine measurements into stabilizers
+            )
 
-    # Detectors on |p> to detect X-errors
-    surface_code_circ= add_detectors(
-        surface_code_circ,
-        targets_Z, 
-        [offset_ancilla_psi_Z_dc, offset_ancilla_psi_Z],
-        [], # we do not recombine measurements into stabilizers
-        )    
+    # Z-stabilizer 
+    if Z_stab:
+        surface_code_circ= add_detectors(
+            surface_code_circ,
+            targets_Z, 
+            [offset_ancilla_psi_Z_dc, offset_ancilla_psi_Z],
+            [], # we do not recombine measurements into stabilizers
+            )    
     
-    # Z Logical
+    # Z Logical observable
     targets = []
     for i in range(d):
         targets += [d**2 + (d-1)**2 - i*(d+(d-1))] #1. column 

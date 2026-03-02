@@ -1,4 +1,5 @@
 import numpy as np
+import matplotlib.pyplot as plt
 """
 This file includes the noise models for the ML-Decoder.
 The noise here is the results of propagating the noise through the circuit until we get a phenemological noise model.
@@ -21,6 +22,13 @@ def odd_occ_vec(n):
     odd_occ_vec = occ_vec[np.sum(occ_vec,axis=1) % 2 == 1]
     return odd_occ_vec 
 
+def prob_2_depo_channel(p1,p2):
+    return p1 + (1-4/3*p1)*p2
+
+"""
+Combine channels funcitons
+"""
+
 def prob_combined_flip_channels(ps):
     """
     This function combines the probabilites of many independent bit/phase flip channels
@@ -41,9 +49,6 @@ def prob_combined_flip_channels(ps):
     # optimized why of writing the above
     pc = np.sum(np.prod(ps**ns*(1-ps)**(1-ns),axis=1))
     return pc
-
-def prob_2_depo_channel(p1,p2):
-    return p1 + (1-4/3*p1)*p2
 
 def prob_combined_depo_channels(pd):
     """
@@ -72,6 +77,76 @@ def correlated_unified_channel(pd,px,pz):
     pyt = 1/3*pd + (1-4/3*pd)* px * pz 
     return pxt, pyt, pzt 
 
+def corr_eff_noise(p, order="0p"):
+    # assuming equal noise level everywhere (and circ level noise)
+    # order p0: first p state CNOT then 0 state CNOT
+    # order 0p
+    if order == "0p":
+        # see calculation for arguments
+        px = prob_combined_flip_channels([p, 8/15*p, 2/3*p, ])
+        pz = prob_combined_flip_channels([p, 2/3*p,         ])
+        pd = prob_combined_depo_channels([p, p, 4/5*p,      ])
+        pxt, pyt, pzt = correlated_unified_channel(pd,px,pz)
+        return pxt, pyt, pzt
+    elif order == "p0":
+        # see calculation for arguments
+        px = prob_combined_flip_channels([p,                        ])
+        pz = prob_combined_flip_channels([p, 2/3*p, 8/15*p, 2/3*p,  ])
+        pd = prob_combined_depo_channels([p, p, 4/5*p,              ])
+        pxt, pyt, pzt = correlated_unified_channel(pd, px, pz)
+        return pxt, pyt, pzt
+    else:
+        raise ValueError("unknown order parameter")
+
+if False: 
+    plt.figure()
+    ps = np.linspace(0,1,num=20)
+    px, pz, py = [], [], []
+    for p in ps:
+        _px, _py, _pz,  = corr_eff_noise(p)
+        px.append(_px)
+        py.append(_py)
+        pz.append(_pz)
+    px = np.array(px)
+    pz = np.array(pz)
+    py = np.array(py)
+    plt.plot(ps,px,label="x")
+    plt.plot(ps,pz,label="z")
+    plt.plot(ps,py,label="y")
+    plt.plot(ps, px+pz+py)
+    plt.legend()
+    plt.show()
+
 """
 Uncorrelated noise models
 """
+
+def uncorr_eff_noise(p,order="0p"):
+    # assuming equal noise level (p) everywhere (and circ level noise)
+    if order == "0p":
+        # see calculation for arguments
+        px = prob_combined_flip_channels([p, 8/15*p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p ])
+        pz = prob_combined_flip_channels([p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p         ])
+        return px, pz
+    elif order == "p0":
+        # see calculation for arguments
+        px = prob_combined_flip_channels([p, 2/3*p, 2/3*p, 2/3*4/5*p    ])
+        pz = prob_combined_flip_channels([p, 2/3*p, 8/15*p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p  ])
+        return px, pz
+    else:
+        raise ValueError("unknown order parameter")
+
+if False:
+    plt.figure()
+    ps = np.linspace(0,1,num=20)
+    px, pz = [], []
+    for p in ps:
+        _px, _pz = uncorr_eff_noise(p)
+        px.append(_px)
+        pz.append(_pz)
+    px = np.array(px)
+    pz = np.array(pz)
+    plt.plot(ps,px)
+    plt.plot(ps,pz)
+    plt.plot(ps, px+pz)
+    plt.show()
