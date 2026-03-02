@@ -4,7 +4,7 @@ import pymatching
 from tools.surface_code import generate_surface_code_circuit
 from tools.error_models import add_noise, construct_basic_noise_model 
 from tools.error_propagation import uncorr_eff_noise
-from tools.helper import split_syndromes
+from tools.helper import split_syndromes 
 
 def init_mwpm_decoder(d, p, z_stab: bool = True, noise_model = "circ_lvl"): 
     # z_stab = false <=> decoder for x_stab 
@@ -65,17 +65,27 @@ def decode_mwpm_steane(d, p, syndromes, z_stab:bool = True, noise_model:str =  "
     returns list of predictions for observable
     if both true returns list of list! 
     """
-    x_stab_syndromes, z_stab_syndromes = split_syndromes(d, syndromes) 
-    # Z-Stabilizer <=> X-Errors
-    if z_stab:
-        z_matcher = init_mwpm_decoder(d, p, z_stab=True, noise_model=noise_model)
-        log_x_predictions = z_matcher.decode_batch(z_stab_syndromes)
-        return log_x_predictions
-    # X-Stabilizer <=> Z-Errors
-    elif not z_stab:
-        x_matcher = init_mwpm_decoder(d, p, z_stab=False, noise_model=noise_model)
-        log_z_predictions = x_matcher.decode_batch(x_stab_syndromes)
-        return log_z_predictions
+    x_stab_syndromes, z_stab_syndromes, ft_syndromes = split_syndromes(d, syndromes) 
 
+    # z_stab==True: Z-Stabilizer <=> X-Errors
+    if z_stab: 
+        stab_syndromes = z_stab_syndromes
+    # z_stab==False: X-Stabilizer <=> Z-Errors
+    elif not z_stab:
+        stab_syndromes = x_stab_syndromes
+
+    matcher = init_mwpm_decoder(d, p, z_stab, noise_model=noise_model)
+    log_predictions = matcher.decode_batch(stab_syndromes)
+
+    if noise_model == "circ_lvl":
+        # assuming same error probability for ft error (TODO correct this!)
+        ft_syndromes = ft_syndromes ^ stab_syndromes # pauli frame tracking!!! idea
+        ft_matcher = init_mwpm_decoder(d,p) 
+        ft_predicitons = ft_matcher.decode_batch(ft_syndromes)
+        # xor works!
+        log_predictions = log_predictions^ft_predicitons
+
+    return log_predictions
+
+# TODO correct error probability for FT syndrome (can I calc that?) 
 # TODO build iterative multi round decoder! 
-# TODO build for circuit level noise!

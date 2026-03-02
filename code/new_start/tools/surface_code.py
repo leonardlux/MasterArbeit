@@ -216,7 +216,7 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
 
     return surface_code_circ
 
-def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False):
+def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True):
     """
     This function generates the the steane type EC.
     
@@ -318,7 +318,7 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
     # TODO: I just need this if I want to make something fault tolerant, correct?
     # TODO: Actually destroys pymatching if this detector is active!! WHY?! -> because pymatching requires one version for each error (overcomplete?)
     # I might need to take the Z_stab measurement on |+>_L into account
-    if final_log_detector:
+    if ft_stab_detector:
         circuit = add_detectors(
             circuit,
             targets_Z,

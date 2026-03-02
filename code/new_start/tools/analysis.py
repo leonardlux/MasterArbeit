@@ -95,19 +95,20 @@ def count_logical_errors_using_MWPM(
             num_errors += 1
 
     # run ML decoding
-    d = distance 
-    p = error_rate
-    num_errors_ml = 0
-    for obs, d_event in zip(observable_flips,detection_events): 
-        x_stab_syndrome, z_stab_syndrome = split_syndrome(distance, d_event)
-        pred_a = combined_aron(
-            d,
-            p,
-            z_stab_syndrome,
-        )
-        if obs[0] != pred_a:
-            num_errors_ml += 1
-    print(num_errors,num_errors_ml)
+    if False:
+        d = distance 
+        p = error_rate
+        num_errors_ml = 0
+        for obs, d_event in zip(observable_flips,detection_events): 
+            x_stab_syndrome, z_stab_syndrome = split_syndrome(distance, d_event)
+            pred_a = combined_aron(
+                d,
+                p,
+                z_stab_syndrome,
+            )
+            if obs[0] != pred_a:
+                num_errors_ml += 1
+        print(num_errors,num_errors_ml)
     if probability:
         return num_errors/num_shots
     return num_errors
