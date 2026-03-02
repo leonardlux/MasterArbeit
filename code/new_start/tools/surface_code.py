@@ -62,6 +62,45 @@ def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
             targets_Z.append(targets)
     return targets_X, targets_Z
 
+# Stim only support relative measurement references  
+def rel_meas(circuit, meas):
+    # get relative inxex by absolute measurement index
+    return meas - circuit.num_measurements
+
+def add_detectors(circuit, targets, offsets_def_ancillas:list, offsets_measurements:list):
+    """
+    circuit: needed for num_measurements 
+    targets: defines which qubits recombine to a stabilizer (by index)
+    offsets_def_ancillas: offset of index of classical stabilizer measurements which define teh codespace
+    offsets_measurements: offset of index of individual bits which should be recombined to stabilizer measurements
+    """
+    for i, targets in enumerate(targets):
+        sign_defining_ancilla = [i + offset for offset in offsets_def_ancillas]  
+        recombined_stabilizer = [t + offset for t in targets for offset in offsets_measurements] 
+        rel_meas_indices = [rel_meas(circuit,x) for x in [*sign_defining_ancilla,*recombined_stabilizer]]
+        circuit.append("DETECTOR",[stim.target_rec(x) for x in rel_meas_indices])
+    return circuit
+
+def measure_surface_code_stabilizer(distance, circuit, offset=0, tag=""):
+
+    _, index_X_ancilla, index_Z_ancilla = index_qubits_surface_code(distance, offset)
+    # Initalize all physical qubits into a log. state by measurement of stabilizer
+    targets_X, targets_Z = index_stab_targets(distance, offset)
+    # Site-/X-stabilizers
+    circuit.append("H", index_X_ancilla, tag=tag)
+    for i_ancilla ,targets in zip(index_X_ancilla,targets_X):
+        for i_target in targets:
+            circuit.append("CNOT", [i_ancilla, i_target], tag=tag)
+    circuit.append("H", index_X_ancilla, tag=tag)
+    circuit.append("MR", index_X_ancilla, tag=tag) # <- result (re)defines the codespace/generators of stabilizers! 
+    # Plaquette-/Z-stabilizers
+    for i_ancilla ,targets in zip(index_Z_ancilla,targets_Z):
+        for i_target in targets:
+            circuit.append("CNOT", [i_target, i_ancilla], tag=tag)
+    circuit.append("MR", index_Z_ancilla, tag=tag) # <- result (re)defines the codespace/generators of stabilizers! 
+
+    return circuit
+
 def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: str = "0", final_tag: str = "" ):
     """
     This function adds a log qubit, encoded in surface code, to the circuit. 
@@ -93,25 +132,87 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
     circuit.append("R", index_X_ancilla, tag=marker_tag)
     circuit.append("R", index_Z_ancilla, tag=marker_tag)
 
-    # Initalize all physical qubits into a log. state by measurement of stabilizer
-    targets_X, targets_Z = index_stab_targets(distance, offset)
-    # Site-/X-stabilizers
-    circuit.append("H", index_X_ancilla, tag=marker_tag)
-    for i_ancilla ,targets in zip(index_X_ancilla,targets_X):
-        for i_target in targets:
-            circuit.append("CNOT", [i_ancilla, i_target], tag=marker_tag)
-    circuit.append("H", index_X_ancilla, tag=marker_tag)
-    circuit.append("MR", index_X_ancilla, tag=marker_tag) # <- result (re)defines the codespace/generators of stabilizers! 
-    # Plaquette-/Z-stabilizers
-    for i_ancilla ,targets in zip(index_Z_ancilla,targets_Z):
-        for i_target in targets:
-            circuit.append("CNOT", [i_target, i_ancilla], tag=marker_tag)
-    circuit.append("MR", index_Z_ancilla, tag=marker_tag) # <- result (re)defines the codespace/generators of stabilizers!
+    # initalize by measuring stabilizer (the resulting measurements define the codespace)
+    circuit = measure_surface_code_stabilizer(
+        distance,
+        circuit,
+        offset,
+        tag = marker_tag,
+    )
 
     # Add Idendity operators to annotate the end of log qubit init in the circuit
     circuit.append("I", index_physical, tag=final_tag)
 
     return circuit
+
+def generate_surface_code_circuit(distance: int = 3, state = "0"):
+    """
+    This functions generates a surface code ciruit with stabilizer readout.
+    """
+    if not state in ["0", "p"]:
+        raise ValueError(f"does not know state {state}, expected: '0' for |0> or 'p' for |+>")
+    d = distance
+    # initialize
+    surface_code_circ = generate_surface_code_log_qubit_circuit(
+        distance,
+        state=state,
+        final_tag="psi_data",
+        )
+    # measure stabilizer 
+    surface_code_circ = measure_surface_code_stabilizer(
+        distance,
+        surface_code_circ,
+    ) 
+    # Measure observable by measuremnt of logical data from main qubit |Psi>
+    index_physical, _, _ = index_qubits_surface_code(distance)
+    surface_code_circ.append("M",index_physical,tag="obs_flip_measure") 
+
+    """
+    Measurement catalogue:
+    dc = define codespace
+    0           <   i   <   d*(d-1): |Psi> X-stab. meas.    -(dc)-> steane X-stab = Z-error detector  
+    1*d*(d-1)   <=  i   < 2*d*(d-1): |Psi> Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector 
+    2*d*(d-1)   <=  i   < 3*d*(d-1): |Psi> X-stab. meas.    -> steane X-stab = Z-error detector 
+    3*d*(d-1)   <=  i   < 4*d*(d-1): |Psi> Z-stab. meas.    -> steane Z-stab = X-error detector
+    4*d*(d-1)   <=  i   < 4*d*(d-1) + (d^2 + (d-1)^2): |Psi> data qubit meas. -> Z-observable => final obs 
+    """
+    # generate detectors    
+    offset_ancilla_psi_X_dc = 0
+    offset_ancilla_psi_Z_dc = 1*d*(d-1)  
+    offset_ancilla_psi_X    = 2*d*(d-1)  
+    offset_ancilla_psi_Z    = 3*d*(d-1)  
+
+    targets_X, targets_Z = index_stab_targets(distance)
+    # Detectors on |0> to detect Z-errors
+    surface_code_circ = add_detectors(
+        surface_code_circ,
+        targets_X, 
+        [offset_ancilla_psi_X_dc, offset_ancilla_psi_X],
+        [], # we do not recombine measurements into stabilizers
+        )
+
+    # Detectors on |p> to detect X-errors
+    surface_code_circ= add_detectors(
+        surface_code_circ,
+        targets_Z, 
+        [offset_ancilla_psi_Z_dc, offset_ancilla_psi_Z],
+        [], # we do not recombine measurements into stabilizers
+        )    
+    
+    # Z Logical
+    targets = []
+    for i in range(d):
+        targets += [d**2 + (d-1)**2 - i*(d+(d-1))] #1. column 
+        # following: all logical combined = Z logical!
+        # for j in range(d):
+        #     targets += [i + j*(2*d-1)]
+    surface_code_circ.append(
+        "OBSERVABLE_INCLUDE",
+        [stim.target_rec(-(i)) for i in targets ],
+        0, # 0. log measurement
+        )
+
+    return surface_code_circ
 
 def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False):
     """
@@ -164,37 +265,26 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
     # Measure observable by measuremnt of logical data from main qubit |Psi>
     circuit.append("M",index_physical,tag="obs_flip_measure") 
 
-
     # Construct all relevant detectors 
     # Detectors should make the process of QEC simpler... right?!
     """
     Measurement catalogue:
-    0           <   i   <   d*(d-1): |Psi> X-ancilla meas. (not needed)
-    1*d*(d-1)   <=  i   < 2*d*(d-1): |Psi> Z-ancilla meas. => final result 
-    2*d*(d-1)   <=  i   < 3*d*(d-1): |0> X-ancilla meas. => Z-error detector
-    3*d*(d-1)   <=  i   < 4*d*(d-1): |0> Z-ancilla meas. (not needed)
-    4*d*(d-1)   <=  i   < 5*d*(d-1): |+> X-ancilla meas. (not needed)
-    5*d*(d-1)   <=  i   < 6*d*(d-1): |+> Z-ancilla meas. => X-error detector
-    6*d*(d-1)                      <=  i   < 6*d*(d-1) +   (d**2 + (d-1)**2): |0> data qubit meas. => Z-error detector
-    6*d*(d-1)+   (d**2 + (d-1)**2) <=  i   < 6*d*(d-1) + 2*(d**2 + (d-1)**2): |+> data qubit meas. => X-error detector 
-    6*d*(d-1)+ 2*(d**2 + (d-1)**2) <=  i   < 6*d*(d-1) + 3*(d**2 + (d-1)**2): |Psi> data qubit meas. => final results
+    ("dc" = "defines codespace")
+    0           <   i   <   d*(d-1): |Psi> X-stab. meas.    -(dc)-> steane X-stab = Z-error detector 
+    1*d*(d-1)   <=  i   < 2*d*(d-1): |Psi> Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector & FT check 
+    2*d*(d-1)   <=  i   < 3*d*(d-1): |0>   X-stab. meas.    -(dc)-> steane X-stab = Z-error detector
+    3*d*(d-1)   <=  i   < 4*d*(d-1): |0>   Z-stab. meas. (not needed)
+    4*d*(d-1)   <=  i   < 5*d*(d-1): |+>   X-stab. meas. (not needed)
+    5*d*(d-1)   <=  i   < 6*d*(d-1): |+>   Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector
+    6*d*(d-1)                      <=  i   < 6*d*(d-1) +   (d**2 + (d-1)**2): |0> data qubit meas. -> steane X-stab => Z-error detector
+    6*d*(d-1)+   (d**2 + (d-1)**2) <=  i   < 6*d*(d-1) + 2*(d**2 + (d-1)**2): |+> data qubit meas. -> steane Z-stab => X-error detector 
+    6*d*(d-1)+ 2*(d**2 + (d-1)**2) <=  i   < 6*d*(d-1) + 3*(d**2 + (d-1)**2): |Psi> data qubit meas. -> Z-observable => final obs 
     """
-    # Stim only support relative measurement references  
-    def rel_meas(meas):
-        # get relative inxex by absolute measurement index
-        return meas - circuit.num_measurements
+
 
     # the code space is defined by the stabilizer generators, which we measured using the ancilla qubits
     # the previous measurement defines the sign of the stabilizer generator! 
     # We need to take those into account
-
-    def add_detectors(circuit, targets, offsets_def_ancillas:list, offsets_measurements:list):
-        for i, targets in enumerate(targets):
-            sign_defining_ancilla = [i + offset for offset in offsets_def_ancillas]  
-            recombined_stabilizer = [t + offset for t in targets for offset in offsets_measurements] 
-            rel_meas_indices = [rel_meas(x) for x in [*sign_defining_ancilla,*recombined_stabilizer]]
-            circuit.append("DETECTOR",[stim.target_rec(x) for x in rel_meas_indices])
-        return circuit
 
     offset_ancilla_psi_Z = 1*d*(d-1)  
     offset_ancilla_psi_X = 0
@@ -207,7 +297,6 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
 
     targets_X, targets_Z = index_stab_targets(distance)
     # Detectors on |0> to detect Z-errors
-    # TODO: understand WHY?! we need to take the sgn change of psi (x) into account?! 
     circuit = add_detectors(
         circuit,
         targets_X, 
@@ -225,7 +314,7 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
     
     # Detector on |Psi> from observable measurement
     # TODO: I just need this if I want to make something fault tolerant, correct?
-    # TODO: Actually destroys pymatching if this detector is active!! WHY?!
+    # TODO: Actually destroys pymatching if this detector is active!! WHY?! -> because pymatching requires one version for each error (overcomplete?)
     # I might need to take the Z_stab measurement on |+>_L into account
     if final_log_detector:
         circuit = add_detectors(
@@ -248,6 +337,5 @@ def generate_steane_circuit(distance: int = 3, final_log_detector: bool = False)
         [stim.target_rec(-(i)) for i in targets ],
         0, # 0. log measurement
         )
-
 
     return circuit
