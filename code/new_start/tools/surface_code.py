@@ -216,7 +216,7 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
 
     return surface_code_circ
 
-def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True):
+def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, repetitions: int = 1):
     """
     This function generates the the steane type EC.
     
@@ -244,25 +244,27 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True):
         state="p",
         final_tag="p_data"
         )
-    circuit = circuit_log_data + circuit_aux_0 + circuit_aux_p
+    circuit = circuit_log_data
+    for rep in range(repetitions):
+        # add components over and over
+        circuit = circuit + circuit_aux_0 + circuit_aux_p  
+        # Steane Connections/Entanglement! 
+        index_physical, _, _ = index_qubits_surface_code(distance)
+        # entangle C|0>NOT|Psi> 
+        for i in index_physical:
+            # CxNOTy: "CNOT",[x,y]
+            circuit.append("CNOT", (offset_per_log_qubit + i, i))
+        # measure:
+        circuit.append("H", index_physical + offset_per_log_qubit) 
+        # note the Hadamard is NOT! a log. Hadamard (not transversal)
+        circuit.append("MR",index_physical + offset_per_log_qubit) 
 
-    # Steane Connections/Entanglement! 
-    index_physical, _, _ = index_qubits_surface_code(distance)
-    # entangle C|0>NOT|Psi> 
-    for i in index_physical:
-        # CxNOTy: "CNOT",[x,y]
-        circuit.append("CNOT", (offset_per_log_qubit + i, i))
-    # measure:
-    circuit.append("H", index_physical + offset_per_log_qubit) 
-    # note the Hadamard is NOT! a log. Hadamard (not transversal)
-    circuit.append("MR",index_physical + offset_per_log_qubit) 
-
-    # entangle C|Psi>NOT|p> 
-    for i in index_physical:
-        # CxNOTy: "CNOT",[x,y]
-        circuit.append("CNOT", (i, 2*offset_per_log_qubit + i))
-    # measure:
-    circuit.append("MR",index_physical + 2*offset_per_log_qubit) 
+        # entangle C|Psi>NOT|p> 
+        for i in index_physical:
+            # CxNOTy: "CNOT",[x,y]
+            circuit.append("CNOT", (i, 2*offset_per_log_qubit + i))
+        # measure:
+        circuit.append("MR",index_physical + 2*offset_per_log_qubit) 
 
     # Measure observable by measuremnt of logical data from main qubit |Psi>
     circuit.append("M",index_physical,tag="obs_flip_measure") 
@@ -270,49 +272,76 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True):
     # Construct all relevant detectors 
     # Detectors should make the process of QEC simpler... right?!
     """
-    Measurement catalogue:
     ("dc" = "defines codespace")
-    0           <   i   <   d*(d-1): |Psi> X-stab. meas.    -(dc)-> steane X-stab = Z-error detector 
-    1*d*(d-1)   <=  i   < 2*d*(d-1): |Psi> Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector & FT check 
-    2*d*(d-1)   <=  i   < 3*d*(d-1): |0>   X-stab. meas.    -(dc)-> steane X-stab = Z-error detector
-    3*d*(d-1)   <=  i   < 4*d*(d-1): |0>   Z-stab. meas. (not needed)
-    4*d*(d-1)   <=  i   < 5*d*(d-1): |+>   X-stab. meas. (not needed)
-    5*d*(d-1)   <=  i   < 6*d*(d-1): |+>   Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector
-    6*d*(d-1)                      <=  i   < 6*d*(d-1) +   (d**2 + (d-1)**2): |0> data qubit meas. -> steane X-stab => Z-error detector
-    6*d*(d-1)+   (d**2 + (d-1)**2) <=  i   < 6*d*(d-1) + 2*(d**2 + (d-1)**2): |+> data qubit meas. -> steane Z-stab => X-error detector 
-    6*d*(d-1)+ 2*(d**2 + (d-1)**2) <=  i   < 6*d*(d-1) + 3*(d**2 + (d-1)**2): |Psi> data qubit meas. -> Z-observable => final obs 
+    r: number of repetions
+    n_stab  = d*(d-1)
+    n_qubit = d**2 + (d-1)**2
+    n_loop  = 4 * n_stab + 2 * n_qubit 
+
+    Measurement catalogue:
+        0          <   i   <   n_stab: |Psi> X-stab. meas.    -(dc)-> steane X-stab = Z-error detector 
+        1*n_stab   <=  i   < 2*n_stab: |Psi> Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector & FT check 
+    - start of rep. (each loop offset by: offset = n_loop * r + 2*n_stab)
+        0          <=  i   < 1*n_stab: |0>   X-stab. meas.    -(dc)-> steane X-stab = Z-error detector
+        1*n_stab   <=  i   < 2*n_stab: |0>   Z-stab. meas. (not needed)
+        2*n_stab   <=  i   < 3*n_stab: |+>   X-stab. meas. (not needed)
+        3*n_stab   <=  i   < 4*n_stab: |+>   Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector
+        4*n_stab           <=  i < 4*n_stab +   n_qubit: |0> data qubit meas. -> steane X-stab => Z-error detector
+        4*n_stab + n_qubit <=  i < 4*n_stab + 2*n_qubit: |+> data qubit meas. -> steane Z-stab => X-error detector 
+    - end of rep.
+        2*n_stab + r*n_loop <=  i   < 2*n_stab + reps*n_loop + n_qubit: |Psi> data qubit meas. -> Z-observable => final obs & FT check
     """
 
 
     # the code space is defined by the stabilizer generators, which we measured using the ancilla qubits
     # the previous measurement defines the sign of the stabilizer generator! 
     # We need to take those into account
+    n_stab  = d*(d-1)
+    n_qubit = d**2 + (d-1)**2
+    n_loop = 4 * n_stab + 2 * n_qubit
 
-    offset_ancilla_psi_Z = 1*d*(d-1)  
-    offset_ancilla_psi_X = 0
-    offset_ancilla_0_X = 2*d*(d-1) 
-    offset_ancilla_p_Z = 5*d*(d-1)
+    # offsets = os
+    os_ancilla_psi_X = 0
+    os_ancilla_psi_Z = 1 * n_stab
+    os_loop = 2 * n_stab
 
-    offset_data_psi = 6*d*(d-1) + 2*(d**2 + (d-1)**2)  
-    offset_data_0 = 6*d*(d-1)
-    offset_data_p = 6*d*(d-1) + (d**2 + (d-1)**2)
+    # loop rel offsets
+    os_ancilla_0_X   = 0 * n_stab 
+    os_ancilla_p_Z   = 3 * n_stab
+    os_data_0 = 4 * n_stab
+    os_data_p = 4 * n_stab + n_qubit 
+
+    # end offset
+    os_data_psi = 2 * n_stab + repetitions * n_loop 
 
     targets_X, targets_Z = index_stab_targets(distance)
-    # Detectors on |0> to detect Z-errors
-    circuit = add_detectors(
-        circuit,
-        targets_X, 
-        [offset_ancilla_0_X, offset_ancilla_psi_X],
-        [offset_data_0],
-        )
+    for rep in range(repetitions):
+        # Detectors on |0> to detect Z-errors
+        cur_os = os_loop + n_loop * rep
+        circuit = add_detectors(
+            circuit,
+            targets_X, 
+            [
+                cur_os + os_ancilla_0_X, 
+                os_ancilla_psi_X,
+            ],
+            [
+                cur_os + os_data_0,
+            ],
+            )
 
-    # Detectors on |p> to detect X-errors
-    circuit = add_detectors(
-        circuit,
-        targets_Z, 
-        [offset_ancilla_p_Z, offset_ancilla_psi_Z],
-        [offset_data_p],
-        )
+        # Detectors on |p> to detect X-errors
+        circuit = add_detectors(
+            circuit,
+            targets_Z, 
+            [
+                cur_os + os_ancilla_p_Z, 
+                os_ancilla_psi_Z,
+            ],
+            [
+                cur_os + os_data_p,
+            ],
+            )
     
     # Detector on |Psi> from observable measurement
     # TODO: I just need this if I want to make something fault tolerant, correct?
@@ -322,8 +351,8 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True):
         circuit = add_detectors(
             circuit,
             targets_Z,
-            [offset_ancilla_psi_Z],
-            [offset_data_psi],
+            [os_ancilla_psi_Z],
+            [os_data_psi],
             )
 
     # Logical Observable (check in notes) 
