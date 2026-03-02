@@ -55,7 +55,6 @@ def stabilizer_to_pauli(d, syndrome_matrix, add_logical: bool = False):
     # add logical operator by inverting first row (applying a logical gate) 
     if add_logical:
         f[0,:] = (f[0,:] + 1) % 2  
-    print(f)
     # add the vertical qubits erros to pauli string in 0 state (no error)
     f = np.concatenate((f,np.zeros((d,d-1))),axis=1)
     # flatten so that we can refer to them by index of qubit/edge location!
@@ -64,17 +63,46 @@ def stabilizer_to_pauli(d, syndrome_matrix, add_logical: bool = False):
     return f
 
 if False:
+    # check function of syndrome -> pauli functions 
     d = 3 
+    flipped_bits = [-1]
+
+    def print_string(f):
+        print("Error as Matrix:")
+        for i in range(d-1):
+            print(f[i*(2*d-1):i*(2*d-1)+d])
+            print(f[i*(2*d-1)+d:i*(2*d-1)+d+(d-1)])
+        print(f[-d:])
+
     syndrome = [False] * (2*d*(d-1))
+    for flip in flipped_bits:
+        syndrome[flip] = not syndrome[flip]
+
+    print(f"complete syndrome: \n{syndrome}\n")
+
     x_syn, z_syn = split_syndrome(d,syndrome)
+
+    print(f"syndrome parts: \nX-Stab.: {x_syn} \nZ-Stab.: {z_syn}\n")
 
     x_stab_m = x_syndrome_to_stabilizer_matrix(d,x_syn)
     x_f = stabilizer_to_pauli(d,x_stab_m)
-    print(x_f)
+    x_f_log = stabilizer_to_pauli(d,x_stab_m,add_logical=True)
+    print(f"X-Stab. Matrix (rot.):\n{x_stab_m}")
+    print(f"Z-Error Pauli:\n{x_f}")
+    print_string(x_f)
+    print(f"Z-Error Pauli + log.:\n{x_f_log}")
+    print_string(x_f_log)
+    print()
 
     z_stab_m = z_syndrome_to_stabilizer_matrix(d,z_syn)
     z_f = stabilizer_to_pauli(d,z_stab_m)
-    print(z_f)
+    z_f_log = stabilizer_to_pauli(d,z_stab_m,add_logical=True)
+    print(f"Z-Stab. Matrix:\n{z_stab_m}")
+    print(f"X-Error Pauli:\n{z_f}")
+    print_string(z_f)
+    print(f"X-Error Pauli + log.:\n{z_f_log}")
+    print_string(z_f_log)
+    print()
 
 ## ML Decoder 
 # Matrix A
@@ -315,16 +343,8 @@ def combined_aron(d,p,h_syndrome, only_obs_flip=True):
     else:
         return p_I, p_L, obs_flip
 
-d = 3
-h_synd = [False]*(d*(d-1))
-trigger = [1,3,5]
-for trig in trigger:
-    h_synd[trig] = True
-
-z_matrix = z_syndrome_to_stabilizer_matrix(d,h_synd)
-print(  stabilizer_to_pauli(d,z_matrix))
-
 if __name__ == "__main__" and False:
+    # compare arons and my decoder 
     def check_prop_array(pis,pls,log_values=False):
         pis = np.array(pis)
         pls = np.array(pls)
