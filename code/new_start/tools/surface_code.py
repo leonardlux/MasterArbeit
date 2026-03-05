@@ -62,6 +62,14 @@ def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
             targets_Z.append(targets)
     return targets_X, targets_Z
 
+def index_log_Z(d,):
+    qubit_z_measure = np.arange(d) * (2*d - 1) 
+    return qubit_z_measure 
+
+def index_log_X(d):
+    qubit_x_measure = np.arange(d)
+    return qubit_x_measure
+
 # Stim only support relative measurement references  
 def rel_meas(circuit, meas):
     # get relative inxex by absolute measurement index
@@ -201,13 +209,11 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
             [], # we do not recombine measurements into stabilizers
             )    
     
-    # Z Logical observable
     targets = []
-    for i in range(d):
-        targets += [d**2 + (d-1)**2 - i*(d+(d-1))] #1. column 
-        # following: all logical combined = Z logical!
-        # for j in range(d):
-        #     targets += [i + j*(2*d-1)]
+    i_ls = index_log_Z(d) #TODO: adapt for arbitray intput state!
+    for i_qubit in i_ls:
+        targets += [d**2 + (d-1)**2 - i_qubit] 
+
     surface_code_circ.append(
         "OBSERVABLE_INCLUDE",
         [stim.target_rec(-(i)) for i in targets ],
@@ -216,7 +222,8 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
 
     return surface_code_circ
 
-def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, repetitions: int = 1):
+#TODO: adapt to arbtriary inital state!
+def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, rounds: int = 1):
     """
     This function generates the the steane type EC.
     
@@ -245,7 +252,7 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, re
         final_tag="p_data"
         )
     circuit = circuit_log_data
-    for rep in range(repetitions):
+    for round in range(rounds):
         # add components over and over
         circuit = circuit + circuit_aux_0 + circuit_aux_p  
         # Steane Connections/Entanglement! 
@@ -273,34 +280,35 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, re
     # Detectors should make the process of QEC simpler... right?!
     """
     ("dc" = "defines codespace")
-    r: number of repetions
+    r: number of rounds 
+    Number of measurements
     n_stab  = d*(d-1)
     n_qubit = d**2 + (d-1)**2
-    n_loop  = 4 * n_stab + 2 * n_qubit 
+    n_round  = 4 * n_stab + 2 * n_qubit 
 
     Measurement catalogue:
         0          <   i   <   n_stab: |Psi> X-stab. meas.    -(dc)-> steane X-stab = Z-error detector 
         1*n_stab   <=  i   < 2*n_stab: |Psi> Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector & FT check 
-    - start of rep. (each loop offset by: offset = n_loop * r + 2*n_stab)
+    - start of new round (each round offset by: offset = n_round * r + 2*n_stab)
         0          <=  i   < 1*n_stab: |0>   X-stab. meas.    -(dc)-> steane X-stab = Z-error detector
         1*n_stab   <=  i   < 2*n_stab: |0>   Z-stab. meas. (not needed)
         2*n_stab   <=  i   < 3*n_stab: |+>   X-stab. meas. (not needed)
         3*n_stab   <=  i   < 4*n_stab: |+>   Z-stab. meas.    -(dc)-> steane Z-stab = X-error detector
         4*n_stab           <=  i < 4*n_stab +   n_qubit: |0> data qubit meas. -> steane X-stab => Z-error detector
         4*n_stab + n_qubit <=  i < 4*n_stab + 2*n_qubit: |+> data qubit meas. -> steane Z-stab => X-error detector 
-    - end of rep.
+    - end of round 
         2*n_stab + r*n_loop <=  i   < 2*n_stab + reps*n_loop + n_qubit: |Psi> data qubit meas. -> Z-observable => final obs & FT check
     """
-
-
     # the code space is defined by the stabilizer generators, which we measured using the ancilla qubits
     # the previous measurement defines the sign of the stabilizer generator! 
     # We need to take those into account
+
     n_stab  = d*(d-1)
     n_qubit = d**2 + (d-1)**2
-    n_loop = 4 * n_stab + 2 * n_qubit
+    n_round = 4 * n_stab + 2 * n_qubit
 
     # offsets = os
+    # X = X-stab; Z = Z-stab
     os_ancilla_psi_X = 0
     os_ancilla_psi_Z = 1 * n_stab
     os_loop = 2 * n_stab
@@ -312,12 +320,12 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, re
     os_data_p = 4 * n_stab + n_qubit 
 
     # end offset
-    os_data_psi = 2 * n_stab + repetitions * n_loop 
+    os_data_psi = 2 * n_stab + rounds * n_round 
 
     targets_X, targets_Z = index_stab_targets(distance)
-    for rep in range(repetitions):
+    for round in range(rounds):
         # Detectors on |0> to detect Z-errors
-        cur_os = os_loop + n_loop * rep
+        cur_os = os_loop + n_round * round
         circuit = add_detectors(
             circuit,
             targets_X, 
@@ -345,7 +353,7 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, re
     
     # Detector on |Psi> from observable measurement
     # TODO: I just need this if I want to make something fault tolerant, correct?
-    # TODO: Actually destroys pymatching if this detector is active!! WHY?! -> because pymatching requires one version for each error (overcomplete?)
+    # TODO: Actually destroys pymatching if this detector is active!! WHY?! -> because pymatching requires one version for each error (overcomplete?) (deconstruct error thing)
     # I might need to take the Z_stab measurement on |+>_L into account
     if ft_stab_detector:
         circuit = add_detectors(
@@ -356,13 +364,10 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, re
             )
 
     # Logical Observable (check in notes) 
-    # Z Logical
     targets = []
-    for i in range(d):
-        targets += [d**2 + (d-1)**2 - i*(d+(d-1))] #1. column 
-        # following eq. all logical combined = Z logical!
-        # for j in range(d):
-        #     targets += [i + j*(2*d-1)]
+    i_ls = index_log_Z(d) #TODO: adapt for arbitray intput state!
+    for i_qubit in i_ls:
+        targets += [d**2 + (d-1)**2 - i_qubit] 
     circuit.append(
         "OBSERVABLE_INCLUDE",
         [stim.target_rec(-(i)) for i in targets ],

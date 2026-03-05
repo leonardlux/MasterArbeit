@@ -5,9 +5,50 @@ import matplotlib.pyplot as plt
 from scipy.optimize import curve_fit
 
 from tools.error_models import add_noise
-from tools.ml_decoder import split_syndrome, decode_half_syndrome,  combined_aron
-from tools.mwpm_decoder import decode_mwpm_steane
-from tools.helper import save_circuit_diagram
+from tools.ml_decoder import decode_half_syndrome,  combined_aron
+from tools.mwpm_decoder import decode_mwpm_steane, decode_mwpm_reps
+from tools.helper import split_syndrome, split_syndromes_rounds, pauli_frame_track_syndromes
+
+def gen_multi_rep_count_logical_error_MWPM(rounds:int = 1, init_state = "0",):
+    if init_state=="0":
+        z_stab = True
+    def specific(
+            circuit, 
+            num_shots: int, 
+            probability: bool = False, 
+            distance:int =0,
+            error_rate: float = 0.,
+            **kwargs, # just here to ignore the stuff other logical error counter need
+            ) -> int:
+        """
+        """
+        d = distance 
+        p = error_rate
+        # Sample the circuit.
+        sampler = circuit.compile_detector_sampler()
+        detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
+
+
+        # Run the decoder.
+        predictions = decode_mwpm_reps(
+            d, 
+            p, 
+            rounds,
+            detection_events, 
+            z_stab=True,
+            ) 
+
+        # Count the mistakes.
+        num_errors = 0
+        for shot in range(num_shots):
+            actual_for_shot = observable_flips[shot]
+            predicted_for_shot = predictions[shot]
+            if not np.array_equal(actual_for_shot, predicted_for_shot):
+                num_errors += 1
+        if probability:
+            return num_errors/num_shots
+        return num_errors
+    return specific 
 
 def gen_error_model_count_logical_error_MWPM(noise_model,init_state = "0"):
     if init_state=="0":

@@ -4,7 +4,7 @@ import pymatching
 from tools.surface_code import generate_surface_code_circuit
 from tools.error_models import add_noise, construct_basic_noise_model 
 from tools.error_propagation import uncorr_eff_noise
-from tools.helper import split_syndromes 
+from tools.helper import split_syndromes, split_and_pauli_frame_track 
 
 def init_mwpm_decoder(d, p, z_stab: bool = True, noise_model = "circ_lvl"): 
     # z_stab = false <=> decoder for x_stab 
@@ -79,7 +79,7 @@ def decode_mwpm_steane(d, p, syndromes, z_stab:bool = True, noise_model:str =  "
 
     if noise_model == "circ_lvl":
         # assuming same error probability for ft error (TODO correct this!)
-        ft_syndromes = ft_syndromes ^ stab_syndromes # pauli frame tracking!!! idea
+        ft_syndromes = np.logical_xor(ft_syndromes,stab_syndromes) # pauli frame tracking!!! idea
         ft_matcher = init_mwpm_decoder(d,p) 
         ft_predicitons = ft_matcher.decode_batch(ft_syndromes)
         # xor works!
@@ -87,5 +87,45 @@ def decode_mwpm_steane(d, p, syndromes, z_stab:bool = True, noise_model:str =  "
 
     return log_predictions
 
+def decode_mwpm_reps(d, p, reps, syndromes, z_stab:bool = True,):
+    """
+    d: distance 
+    p: error rate (assumes circuit lvl noise and uniform noise probability everywhere)
+    syndromes: list of generated syndromes
+    z_stab: True -> calculate prediciton log X (|0> state relevant)
+            False-> calculate prediction log Z (|+> state relevant) <=> calcuates x_stab
+    noise_model: defines which noise model the decoder assumes
+
+    decoded using effective circuit and noise model!!
+    treats X and Z noise independet 
+    returns list of predictions for observable
+    if both true returns list of list! 
+    """
+    # pauli frame tracked syndromes
+    px_synd, pz_synd, pft_synd = split_and_pauli_frame_track(d, reps, syndromes, z_stab)
+
+    # z_stab==True: Z-Stabilizer <=> X-Errors
+    if z_stab: 
+        stab_syndromes = pz_synd 
+    # z_stab==False: X-Stabilizer <=> Z-Errors
+    elif not z_stab:
+        stab_syndromes = px_synd 
+
+    shots = len(stab_syndromes[0])
+    log_predictions = np.zeros((reps+1,shots,1)) # reps +1 for ft-check
+
+    # Steane syndromes
+    matcher = init_mwpm_decoder(d, p, z_stab, noise_model="circ_lvl")
+    for rep in range(reps):
+        log_predictions[rep] = matcher.decode_batch(stab_syndromes[rep])
+    # FT syndrome
+    ft_matcher = init_mwpm_decoder(d, p, z_stab, noise_model="circ_lvl")
+    log_predictions[reps] = ft_matcher.decode_batch(pft_synd)
+
+    final_predictions = np.zeros((shots))
+    for i in range(len(log_predictions)):
+        final_predictions = np.logical_xor(final_predictions,log_predictions[i])
+
+    return final_predictions
 # TODO correct error probability for FT syndrome (can I calc that?) 
 # TODO build iterative multi round decoder! 

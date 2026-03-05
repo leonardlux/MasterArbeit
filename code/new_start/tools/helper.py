@@ -1,3 +1,5 @@
+import numpy as np
+
 def save_circuit_diagram(circuit,savepath):
     diagram = circuit.diagram("timeline-svg")
     with open(savepath, 'w') as f:
@@ -29,3 +31,61 @@ def split_syndromes(d,syndromes):
     ft_syndromes = syndromes[:,2*n_stab:3*n_stab]
 
     return x_syndromes, z_syndromes, ft_syndromes
+
+def split_syndromes_rounds(d, rounds, syndromes):
+    """
+    n_stab = d*(d-1)
+
+    index of syndrome: 
+    start of new round: offset = r * 2 * n_stab 
+        0*n_stab <= i < 1*n_stab: X-Stabilizer Syndrome
+        1*n_stab <= i < 2*n_stab: Z-Stabilizer Syndrome 
+    end of round 
+        reps * 2 * n_stab <= i < (2 * reps + 1) * n_stab: Z-Stabilizer Syndrome for Fault Tolerance
+    """
+    n_stab = d*(d-1)
+    n_round = 2*n_stab
+
+    x_syndromes  = [syndromes[:, r*n_round           : r*n_round +   n_stab] for r in range(rounds)]
+    z_syndromes  = [syndromes[:, r*n_round + n_stab  : r*n_round + 2*n_stab] for r in range(rounds)]
+    ft_syndromes = syndromes[:,-1*n_stab:]
+    """
+    shape of return:
+    x_syndromes[round][shot][stab] 
+    """
+    return x_syndromes, z_syndromes, ft_syndromes
+
+def pauli_frame_track_syndromes(rounds,syndromes):
+    # idea: xor all the syndrome with one another to track the acutal change
+    xor_syndromes = np.zeros(np.array(syndromes).shape)
+    xor_syndromes[0] = syndromes[0]
+    for round in range(rounds-1):
+        xor_syndromes[round+1] = np.logical_xor(syndromes[round],syndromes[round+1])
+    return xor_syndromes
+
+def pauli_frame_track_ft_syndrome(stab_syndrom, ft_synd):
+    pft_synd = np.logical_xor(stab_syndrom, ft_synd)
+    return pft_synd 
+
+def split_and_pauli_frame_track(d, rounds, syndromes, z_stab=True):
+    """
+    reps: number of repetions 
+    syndrome: output of stim 
+    z_stab: determines which synd is used to construct pauli frame FT
+        -> True <=> z_stab
+        -> False <=> x_stab
+    this function does necessary all the preparations for the syndromes 
+    """
+    x_syndromes, z_syndromes, ft_syndromes = split_syndromes_rounds(d, rounds, syndromes)
+    # pauli frame:
+    px_synd  = pauli_frame_track_syndromes(rounds,x_syndromes) 
+    pz_synd  = pauli_frame_track_syndromes(rounds,z_syndromes) 
+    if z_stab:
+        # observable is measured in Z basis
+        pft_synt = pauli_frame_track_ft_syndrome(z_syndromes[-1],ft_syndromes)
+    elif not z_stab:
+        # observable is measured in X basis
+        pft_synt = pauli_frame_track_ft_syndrome(x_syndromes[-1],ft_syndromes)
+    else:
+        raise ValueError("Unkown state")
+    return px_synd, pz_synd, pft_synt
