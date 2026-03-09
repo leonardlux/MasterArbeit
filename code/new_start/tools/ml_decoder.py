@@ -5,104 +5,12 @@ if __name__ == "__main__":
     from aron_ml import * 
     from helper import split_syndrome 
     from surface_code import index_log_Z, index_log_X
+    from pauli_frame_track import stabilizer_to_pauli, x_syndrome_to_stabilizer_matrix, z_syndrome_to_stabilizer_matrix
 else:
     from tools.aron_ml import simulation_mld, error_converter
     from tools.helper import split_syndrome
     from tools.surface_code import index_log_Z, index_log_X
-
-## Syndrome to stabilizer Matrix
-
-def x_syndrome_to_stabilizer_matrix(d, syndrome):    
-    """
-    from list to matrix shaped like the qubits location (d,d-1) 
-    X stabilizer syndrome 
-    """
-    syndrome = np.multiply(syndrome,1) # Boolean to int
-    stabilizer_matrix = np.zeros((d, d-1)) # final form 
-    for col in range(d-1):
-        for row in range(d):
-            stabilizer_matrix[row,-1* (col + 1)] = syndrome[ col * d + row ]
-    return stabilizer_matrix 
-
-def z_syndrome_to_stabilizer_matrix(d, syndrome):
-    """
-    from list to matrix shaped like the qubits location (d,d-1) 
-    Z stabilizer syndrome
-    """
-    syndrome = np.multiply(syndrome,1) # Boolean to int
-    stabilizer_matrix = np.reshape(syndrome, (d, d-1))
-    return stabilizer_matrix
-
-## Stabilizer matrix to Pauli error 
-def stabilizer_to_pauli(d, syndrome_matrix, add_logical: bool = False):
-    """
-    given a matrix of syndrome calculates a possible X-error 
-
-    syndrome array: indedx: starting top left, going right -> down
-    """
-    # at this step only errors on horizontal qubits are generated 
-    f = np.zeros((d,d)) 
-    for i, row in enumerate(syndrome_matrix):
-        for j, detector in enumerate(row):
-            if detector:
-                for jt in range(j+1):
-                    f[i,jt] = (f[i,jt] + 1)%2
-    # add logical operator by inverting first row (applying a logical gate) 
-    if add_logical:
-        f[0,:] = (f[0,:] + 1) % 2  
-    # add the vertical qubits erros to pauli string in 0 state (no error)
-    f = np.concatenate((f,np.zeros((d,d-1))),axis=1)
-    # flatten so that we can refer to them by index of qubit/edge location!
-    f = f.flatten()
-    f = f[:-(d-1)] # last row of verticals does not exists!
-
-    # determin p for Z * f = p * f * Z
-    sgn_f = np.sum(f[index_log_Z(d)])%2
-    return f, sgn_f
-
-if False:
-    # check function of syndrome -> pauli functions 
-    d = 3 
-    flipped_bits = [-1]
-
-    def print_string(f):
-        print("Error as Matrix:")
-        for i in range(d-1):
-            print(f[i*(2*d-1):i*(2*d-1)+d])
-            print(f[i*(2*d-1)+d:i*(2*d-1)+d+(d-1)])
-        print(f[-d:])
-
-    syndrome = [False] * (2*d*(d-1))
-    for flip in flipped_bits:
-        syndrome[flip] = not syndrome[flip]
-
-    print(f"complete syndrome: \n{syndrome}\n")
-
-    x_syn, z_syn = split_syndrome(d,syndrome)
-
-    print(f"syndrome parts: \nX-Stab.: {x_syn} \nZ-Stab.: {z_syn}\n")
-
-    x_stab_m = x_syndrome_to_stabilizer_matrix(d,x_syn)
-    x_f, sgn_f = stabilizer_to_pauli(d,x_stab_m)
-    x_f_log, _ = stabilizer_to_pauli(d,x_stab_m,add_logical=True)
-    print(f"X-Stab. Matrix (rot.):\n{x_stab_m}")
-    print(f"Z-Error Pauli:\n{x_f}")
-    print(f"sign: {sgn_f}")
-    print_string(x_f)
-    print(f"Z-Error Pauli + log.:\n{x_f_log}")
-    print_string(x_f_log)
-    print()
-
-    z_stab_m = z_syndrome_to_stabilizer_matrix(d,z_syn)
-    z_f, sgn_f = stabilizer_to_pauli(d,z_stab_m)
-    z_f_log, _ = stabilizer_to_pauli(d,z_stab_m,add_logical=True)
-    print(f"Z-Stab. Matrix:\n{z_stab_m}")
-    print(f"X-Error Pauli:\n{z_f}")
-    print(f"sign: {sgn_f}")
-    print_string(z_f)
-    print(f"X-Error Pauli + log.:\n{z_f_log}")
-    print_string(z_f_log)
-    print()
+    from tools.pauli_frame_track import stabilizer_to_pauli, x_syndrome_to_stabilizer_matrix, z_syndrome_to_stabilizer_matrix
 
 ## ML Decoder 
 # Matrix A
@@ -219,15 +127,13 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
         raise ValueError("unexpected detector")
     
     # prob of coset without logical error 
-    f, sgn_f = stabilizer_to_pauli(d, stabilizer_matrix)
+    f, _ = stabilizer_to_pauli(d, stabilizer_matrix)
     p_I = coset_probability(d, p, f)
     # prob of coset with logical error 
     f, _ = stabilizer_to_pauli(d, stabilizer_matrix, add_logical=True)
     p_L = coset_probability(d, p, f)
 
-    obs_flip = 1 if p_I < p_L else 0 
-    obs_flip = (obs_flip + sgn_f ) % 2
-    obs_flip = True if obs_flip == 1 else 0
+    obs_flip = True if p_I < p_L else False
     if only_obs_flip:
         return obs_flip
     else: 
@@ -310,15 +216,13 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True)
         raise ValueError("unexpected detector")
     
     # prob of coset without logical error 
-    f, sgn_f = stabilizer_to_pauli(d, stabilizer_matrix)
+    f, _ = stabilizer_to_pauli(d, stabilizer_matrix)
     log_p_I = coset_probability_log(d, p, f)
     # prob of coset with logical error 
     f, _ = stabilizer_to_pauli(d, stabilizer_matrix, add_logical=True)
     log_p_L = coset_probability_log(d, p, f)
 
-    obs_flip = 1 if log_p_I < log_p_L else 0 
-    obs_flip = (obs_flip + sgn_f ) % 2
-    obs_flip = True if obs_flip == 1 else 0
+    obs_flip = True if log_p_I < log_p_L else False
     if only_obs_flip:
         # returns if observable flips
         return obs_flip
@@ -326,9 +230,9 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True)
         return log_p_I, log_p_L, obs_flip 
 
 # arons code adapted 
-def combined_aron(d,p,h_syndrome, only_obs_flip=True):
+def decode_half_syndrome_aron(d,p,h_syndrome, only_obs_flip=True):
     z_matrix = z_syndrome_to_stabilizer_matrix(d, h_syndrome)
-    f_I, sgn_f = stabilizer_to_pauli(d, z_matrix)
+    f_I, pauli_flip = stabilizer_to_pauli(d, z_matrix)
     f_L, _ = stabilizer_to_pauli(d, z_matrix, add_logical=True)
     p_I = simulation_mld(
         p,
@@ -340,14 +244,14 @@ def combined_aron(d,p,h_syndrome, only_obs_flip=True):
         d,
         error_converter(int(d), f_L),
         )
-    obs_flip = 1 if p_I < p_L else 0 
-    obs_flip = (obs_flip + sgn_f ) % 2
-    obs_flip = True if obs_flip == 1 else 0
+    obs_flip = True if p_I < p_L else False 
+    # obs_flip = obs_flip^pauli_flip
     if only_obs_flip:
-        return obs_flip
+        return obs_flip 
     else:
-        return p_I, p_L, obs_flip
+        return p_I, p_L, obs_flip 
 
+# I disabled the testing a bit
 if __name__ == "__main__" and False:
     # compare arons and my decoder 
     def check_prop_array(pis,pls,log_values=False):
@@ -396,7 +300,7 @@ if __name__ == "__main__" and False:
         p_is += [p_I]
         p_ls += [p_L]
         obs_flips += [obs]
-        ap_I, ap_L, aobs = combined_aron(d,p,synd) # always in log scale
+        ap_I, ap_L, aobs = decode_half_syndrome_aron(d,p,synd) # always in log scale
         ap_is += [ap_I]
         ap_ls += [ap_L]
         aobs_flips += [aobs]

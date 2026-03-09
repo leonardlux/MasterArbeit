@@ -1,3 +1,7 @@
+# current questions
+
+Error model for FT check at the end?
+
 # Thematischer Bezug
 
 Nielsen and Chuang get the book 
@@ -11,11 +15,10 @@ Doooo that
 ## ML Decoder 
 
 0. increase throughput:
-    - use jit for ML decoder
-    - save results!
-    - save mid results
-1. Find the bug(s)
-
+    use numba (like aron did it!)
+1. adapt for circuit level noise
+2. Multiple rounds
+3. simplyfer decoder and plotting
 
 ## Question from midterm
 

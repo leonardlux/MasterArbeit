@@ -1,13 +1,18 @@
 import stim # type: ignore
 import pymatching # type: ignore
 import numpy as np # type: ignore
-import matplotlib.pyplot as plt 
-from scipy.optimize import curve_fit
 
 from tools.error_models import add_noise
-from tools.ml_decoder import decode_half_syndrome,  combined_aron
+from tools.ml_decoder import decode_half_syndrome,  decode_half_syndrome_aron
 from tools.mwpm_decoder import decode_mwpm_steane, decode_mwpm_reps
 from tools.helper import split_syndrome, split_syndromes_rounds, pauli_frame_track_syndromes
+from tools.pauli_frame_track import syndrome_to_pauli_flips 
+
+def sample_ciruit(circuit, num_shots):
+    # Sample the circuit.
+    sampler = circuit.compile_detector_sampler()
+    detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
+    return detection_events, observable_flips
 
 def gen_multi_rep_count_logical_error_MWPM(rounds:int = 1, init_state = "0",):
     if init_state=="0":
@@ -142,7 +147,7 @@ def count_logical_errors_using_MWPM(
         num_errors_ml = 0
         for obs, d_event in zip(observable_flips,detection_events): 
             x_stab_syndrome, z_stab_syndrome = split_syndrome(distance, d_event)
-            pred_a = combined_aron(
+            pred_a = decode_half_syndrome_aron(
                 d,
                 p,
                 z_stab_syndrome,
@@ -164,115 +169,38 @@ def count_logical_errors_using_ML(
     ) -> float:
     d = distance
     p = error_rate 
-
-    # Sample the circuit.
-    sampler = circuit.compile_detector_sampler()
-    detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
+    
+    detection_events, observable_flips = sample_ciruit(circuit, num_shots) 
 
     # init ML decoder (only X errors so far)
     num_errors = 0
     for obs, d_event in zip(observable_flips,detection_events): 
         x_stab_syndrome, z_stab_syndrome = split_syndrome(d, d_event)
-        pred_a = combined_aron(
+        pred_log = decode_half_syndrome_aron(
             d,
             p,
             z_stab_syndrome,
         )
+        log_x_f_p, log_z_f_p = syndrome_to_pauli_flips(d, d_event)
 
-        # for error fixing reasons try with only arons (speed) 
-        # pred = decode_half_syndrome(
-        #     d,
-        #     p,
-        #     z_stab_syndrome,
-        #     stab_type="Z",
-        #     ) 
-        
-        
-        # if pred != pred_a:
-        #     print("ALARM!")
-        #     # never triggers => identical
+        pred_obs = pred_log ^ log_x_f_p
 
-        if obs[0] != pred_a:
+        if obs[0] != pred_obs:
             num_errors += 1
-    # print("\n")
-    # print(d,p)
-    # print(num_errors)
-    # print(num_errors/num_shots) 
     if probability:
         return num_errors/num_shots
     return num_errors 
 
-# funciton to determin slope
-def determine_slope(
-        noise,
-        log_prob,
-        yerr=[],
-        plot=False,
-        plotpath="",):
-
-    def linear(x,a,b):
-        return a*x + b
-
-    def clean_array(x,*args):
-        """
-        cleans out NaNs and infs from the x array,
-        and applies the same mask to all args
-        """
-        mask = np.logical_and(np.logical_not(np.isnan(x)),np.isfinite(x))
-        return x[mask], *[arg[mask] for arg in args] 
-
-
-    # clean out NaNs and infite values, after log
-    y, x= clean_array(np.log(log_prob), np.log(noise))
-
-    # fit to curve on log scale
-    popt, pcov = curve_fit(linear,x,y)
-    exponent = popt[0]
-    const = popt[1]
-    
-    if plot:
-        plt.figure()
-        if len(yerr)!=0:
-            plt.errorbar(noise,log_prob,yerr=yerr,label="data points")
-        else:
-            plt.plot(noise,log_prob,label="data points")
-        plt.plot(noise,np.exp(linear(np.log(noise),exponent,const)),label=f"fit: exp = {exponent:.4}")
-        plt.xlabel('Physical error rate')
-        plt.ylabel('Logical error rate')
-        plt.legend(loc = 'upper left')
-        plt.yscale('log')
-        plt.xscale('log')
-        plt.show()
-        if plotpath!= "":
-            plt.savefig(plotpath)
-    return exponent, const
-
-def plot_diff_noise_level(
+# function to determin slope
+def generate_log_error_rates(
         circuits:list,
         noise_model_fct,
+        distances,
         noise_set = np.logspace(-2,-0.1),
-        distances = None,
         num_shots = 10_000, 
         count_log_error_fct = count_logical_errors_using_MWPM,
-        filename = "",
-        plot_path = "/home/leo/Documents/MasterArbeit/code/images",
-        fit_slopes = False,
-        reference_lines = False,
     ):
-
-    if not distances:
-        legend = False
-        distances = [""] * len(circuits)
-    else:
-        legend = True
-    cm = 1/2.54 # to convert inches to cm
-    plt.figure()
-    plt.subplots(figsize=(20*cm,10*cm))
-    plt.loglog()
-    plt.xlabel("physical error rate")
-    plt.ylabel("logical error rate")
-
-    log_error_probs = []
+    log_error_rates = []
     y_errs = []
     for i,circuit in enumerate(circuits):
         log_error_prob = []
@@ -294,38 +222,9 @@ def plot_diff_noise_level(
         log_error_prob = np.array(log_error_prob)
         y_err = (log_error_prob*(1-log_error_prob)/num_shots)**(1/2)
 
-        log_error_probs.append(log_error_prob)
+        log_error_rates.append(log_error_prob)
         y_errs.append(y_err)
 
-        plt.errorbar(
-            noise_set,
-            log_error_prob,
-            yerr=y_err,
-            label=f"d={distances[i]}",
-            )
-        
-        # TODO: add fitted reference lines!
-        if fit_slopes:
-            cutoff = int(len(noise_set)/2)
-            exponent, const = determine_slope(noise_set[:cutoff],log_error_prob[:cutoff],plot=False)
-            x = noise_set
-            y = np.exp((np.log(noise_set)*exponent + const))
-            plt.plot(
-                x,
-                y,
-                label=f"fit d={distances[i]}: exp = {exponent:.4}",
-                linestyle="dotted",
-                alpha=0.5,
-                )
+    return log_error_rates, y_errs
 
-    if reference_lines:
-        plt.plot(noise_set,noise_set**2,label="$p^2$")
-        plt.plot(noise_set,noise_set,label="$p$",c="green")
 
-    if legend:
-        plt.legend()
-    if filename != "":
-        plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
-    plt.show()
-
-    return 

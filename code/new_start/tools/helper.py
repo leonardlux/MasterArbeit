@@ -1,10 +1,5 @@
 import numpy as np
 
-def save_circuit_diagram(circuit,savepath):
-    diagram = circuit.diagram("timeline-svg")
-    with open(savepath, 'w') as f:
-        f.write(str(diagram))
-
 # splits syndromes into parts
 def split_syndrome(d,syndrome):
     """
@@ -32,6 +27,7 @@ def split_syndromes(d,syndromes):
 
     return x_syndromes, z_syndromes, ft_syndromes
 
+# Everything following might be broken!
 def split_syndromes_rounds(d, rounds, syndromes):
     """
     n_stab = d*(d-1)
