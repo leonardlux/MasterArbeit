@@ -51,7 +51,7 @@ def split_syndromes_rounds(d, rounds, syndromes):
     """
     return x_syndromes, z_syndromes, ft_syndromes
 
-def pauli_frame_track_syndromes(rounds,syndromes):
+def xor_syndromes(rounds, syndromes):
     # idea: xor all the syndrome with one another to track the acutal change
     xor_syndromes = np.zeros(np.array(syndromes).shape)
     xor_syndromes[0] = syndromes[0]
@@ -59,11 +59,11 @@ def pauli_frame_track_syndromes(rounds,syndromes):
         xor_syndromes[round+1] = np.logical_xor(syndromes[round],syndromes[round+1])
     return xor_syndromes
 
-def pauli_frame_track_ft_syndrome(stab_syndrom, ft_synd):
-    pft_synd = np.logical_xor(stab_syndrom, ft_synd)
-    return pft_synd 
+def xor_ft_syndrome(ft_synd, stab_synd):
+    xor_ft_synd = np.logical_xor(stab_synd, ft_synd)
+    return xor_ft_synd 
 
-def split_and_pauli_frame_track(d, rounds, syndromes, z_stab=True):
+def split_and_xor_syndrome(d, rounds, syndromes, ft_z_stab=True):
     """
     reps: number of repetions 
     syndrome: output of stim 
@@ -74,14 +74,19 @@ def split_and_pauli_frame_track(d, rounds, syndromes, z_stab=True):
     """
     x_syndromes, z_syndromes, ft_syndromes = split_syndromes_rounds(d, rounds, syndromes)
     # pauli frame:
-    px_synd  = pauli_frame_track_syndromes(rounds,x_syndromes) 
-    pz_synd  = pauli_frame_track_syndromes(rounds,z_syndromes) 
-    if z_stab:
+    px_synd  = xor_syndromes(rounds,x_syndromes) 
+    pz_synd  = xor_syndromes(rounds,z_syndromes) 
+    if ft_z_stab:
         # observable is measured in Z basis
-        pft_synt = pauli_frame_track_ft_syndrome(z_syndromes[-1],ft_syndromes)
-    elif not z_stab:
+        pft_synt = xor_ft_syndrome(z_syndromes[-1],ft_syndromes)
+    elif not ft_z_stab:
         # observable is measured in X basis
-        pft_synt = pauli_frame_track_ft_syndrome(x_syndromes[-1],ft_syndromes)
+        pft_synt = xor_ft_syndrome(x_syndromes[-1],ft_syndromes)
     else:
         raise ValueError("Unkown state")
+    # Order of snydromes synd[round][shot][stab]
     return px_synd, pz_synd, pft_synt
+
+def reorder_syndromes(old_order):
+    new_order = old_order.transpose(1, 0, 2)
+    return new_order

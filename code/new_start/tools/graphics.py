@@ -102,6 +102,7 @@ def plot_diff_noise_level(
     if filename != "":
         plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
     plt.title(title)
+    plt.grid()
     plt.legend()
     plt.show()
     pass

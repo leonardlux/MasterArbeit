@@ -3,13 +3,9 @@ import scipy as sc
 
 if __name__ == "__main__":
     from aron_ml import * 
-    from helper import split_syndrome 
-    from surface_code import index_log_Z, index_log_X
     from pauli_frame_track import stabilizer_to_pauli, x_syndrome_to_stabilizer_matrix, z_syndrome_to_stabilizer_matrix
 else:
     from tools.aron_ml import simulation_mld, error_converter
-    from tools.helper import split_syndrome
-    from tools.surface_code import index_log_Z, index_log_X
     from tools.pauli_frame_track import stabilizer_to_pauli, x_syndrome_to_stabilizer_matrix, z_syndrome_to_stabilizer_matrix
 
 ## ML Decoder 
@@ -127,7 +123,7 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
         raise ValueError("unexpected detector")
     
     # prob of coset without logical error 
-    f, _ = stabilizer_to_pauli(d, stabilizer_matrix)
+    f, c_f = stabilizer_to_pauli(d, stabilizer_matrix)
     p_I = coset_probability(d, p, f)
     # prob of coset with logical error 
     f, _ = stabilizer_to_pauli(d, stabilizer_matrix, add_logical=True)
@@ -135,7 +131,8 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
 
     obs_flip = True if p_I < p_L else False
     if only_obs_flip:
-        return obs_flip
+        # c_f is the sign if we commute the logical with the pauli
+        return obs_flip, c_f
     else: 
         return p_I, p_L, obs_flip 
 
@@ -216,7 +213,7 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True)
         raise ValueError("unexpected detector")
     
     # prob of coset without logical error 
-    f, _ = stabilizer_to_pauli(d, stabilizer_matrix)
+    f, c_f = stabilizer_to_pauli(d, stabilizer_matrix)
     log_p_I = coset_probability_log(d, p, f)
     # prob of coset with logical error 
     f, _ = stabilizer_to_pauli(d, stabilizer_matrix, add_logical=True)
@@ -225,14 +222,14 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True)
     obs_flip = True if log_p_I < log_p_L else False
     if only_obs_flip:
         # returns if observable flips
-        return obs_flip
+        return obs_flip, c_f
     else: 
         return log_p_I, log_p_L, obs_flip 
 
 # arons code adapted 
 def decode_half_syndrome_aron(d,p,h_syndrome, only_obs_flip=True):
     z_matrix = z_syndrome_to_stabilizer_matrix(d, h_syndrome)
-    f_I, pauli_flip = stabilizer_to_pauli(d, z_matrix)
+    f_I, c_f = stabilizer_to_pauli(d, z_matrix)
     f_L, _ = stabilizer_to_pauli(d, z_matrix, add_logical=True)
     p_I = simulation_mld(
         p,
@@ -247,7 +244,7 @@ def decode_half_syndrome_aron(d,p,h_syndrome, only_obs_flip=True):
     obs_flip = True if p_I < p_L else False 
     # obs_flip = obs_flip^pauli_flip
     if only_obs_flip:
-        return obs_flip 
+        return obs_flip, c_f
     else:
         return p_I, p_L, obs_flip 
 

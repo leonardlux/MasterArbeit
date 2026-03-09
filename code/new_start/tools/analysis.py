@@ -5,8 +5,9 @@ import numpy as np # type: ignore
 from tools.error_models import add_noise
 from tools.ml_decoder import decode_half_syndrome,  decode_half_syndrome_aron
 from tools.mwpm_decoder import decode_mwpm_steane, decode_mwpm_reps
-from tools.helper import split_syndrome, split_syndromes_rounds, pauli_frame_track_syndromes
+from tools.helper import split_syndrome, split_syndromes, split_and_xor_syndrome, reorder_syndromes, xor_ft_syndrome
 from tools.pauli_frame_track import syndrome_to_pauli_flips 
+from tools.error_propagation import uncorr_eff_noise
 
 def sample_ciruit(circuit, num_shots):
     # Sample the circuit.
@@ -69,8 +70,7 @@ def gen_error_model_count_logical_error_MWPM(noise_model,init_state = "0"):
         """
         """
         # Sample the circuit.
-        sampler = circuit.compile_detector_sampler()
-        detection_events, observable_flips = sampler.sample(num_shots, separate_observables=True)
+        detection_events, observable_flips = sample_ciruit(circuit, num_shots) 
 
         # Run the decoder.
         predictions = decode_mwpm_steane(
@@ -164,6 +164,7 @@ def count_logical_errors_using_ML(
         num_shots: int, 
         distance: int, 
         error_rate: float, 
+        rounds: int,
         probability: bool = False,
         **kwargs, # just here to ignore the stuff other logical error counter need
     ) -> float:
@@ -174,9 +175,10 @@ def count_logical_errors_using_ML(
 
     # init ML decoder (only X errors so far)
     num_errors = 0
+    # iterating over each shot!
     for obs, d_event in zip(observable_flips,detection_events): 
-        x_stab_syndrome, z_stab_syndrome = split_syndrome(d, d_event)
-        pred_log = decode_half_syndrome_aron(
+        x_stab_syndrome, z_stab_syndrome, =  split_syndrome(d, d_event)
+        pred_log, _ = decode_half_syndrome_aron(
             d,
             p,
             z_stab_syndrome,
@@ -191,11 +193,103 @@ def count_logical_errors_using_ML(
         return num_errors/num_shots
     return num_errors 
 
+def count_logical_errors_using_ML_FT(
+        circuit, 
+        num_shots: int, 
+        distance: int, 
+        error_rate: float, 
+        rounds: int,
+        probability: bool = False,
+        **kwargs, # just here to ignore the stuff other logical error counter need
+    ) -> float:
+    d = distance
+    p_eff, _ = uncorr_eff_noise(error_rate)
+    p_eff = error_rate
+
+    
+    detection_events, observable_flips = sample_ciruit(circuit, num_shots) 
+
+    x_synds, z_synds, ft_synds = split_syndromes(d,detection_events)
+
+    # init ML decoder (only X errors so far)
+    num_errors = 0
+    # iterating over each shot!
+    for obs, z_synd, ft_synd in zip(observable_flips, z_synds, ft_synds): 
+        # normal syndrome decoding
+
+        pred, c_f = decode_half_syndrome_aron(
+            d,
+            p_eff,
+            z_synd,
+        )
+        # ft syndrome decoding
+        xor_ft_synd = xor_ft_syndrome(ft_synd, z_synd)
+        pred_ft, c_f_ft = decode_half_syndrome_aron(
+            d,
+            p_eff,
+            xor_ft_synd,
+        )
+
+        pred_obs = pred ^ c_f ^ pred_ft ^ c_f_ft
+
+        if obs[0] != pred_obs:
+            num_errors += 1
+    if probability:
+        return num_errors/num_shots
+    return num_errors 
+
+def count_logical_errors_using_ML2(
+        circuit, 
+        num_shots: int, 
+        distance: int, 
+        error_rate: float, 
+        rounds: int,
+        probability: bool = False,
+        observable: str = "Z",
+        **kwargs, # just here to ignore the stuff other logical error counter need
+    ) -> float:
+    d = distance
+    p = error_rate 
+    
+    detection_events, observable_flips = sample_ciruit(circuit, num_shots) 
+    x_synd, z_synd, ft_synd = split_and_xor_syndrome(d, rounds, detection_events)
+
+    if observable == "Z":
+        rel_synd = z_synd
+    elif observable == "X":
+        rel_synd = x_synd
+    else: 
+        raise ValueError("observable value unexpected")
+    
+    # t_synd[round][shot][i_stab]
+    rel_synd = reorder_syndromes(rel_synd)
+    # rel_synd[shot][round][i_stab]
+
+    predicitons = np.zeros((num_shots,rounds))
+    pauli_repr_flips = np.zeros((num_shots,rounds))
+
+    # all these calculation can be done in parralel!
+    for i_shot, synd_shot in enumerate(synd_round): 
+        for i_round, synd_round in enumerate(rel_synd):
+            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_aron(
+                d,
+                p,
+                synd_shot,
+            )
+
+
+    
+
+    num_errors = 0 
+    if probability:
+        return num_errors/num_shots
+    return num_errors 
 # function to determin slope
 def generate_log_error_rates(
         circuits:list,
         noise_model_fct,
         distances,
+        rounds=1,
         noise_set = np.logspace(-2,-0.1),
         num_shots = 10_000, 
         count_log_error_fct = count_logical_errors_using_MWPM,
@@ -212,7 +306,8 @@ def generate_log_error_rates(
             log_error_prob.append(
                 count_log_error_fct(
                     noisy_circuit, 
-                    num_shots, 
+                    num_shots= num_shots, 
+                    rounds=rounds,
                     probability = True,
                     error_rate = noise,
                     distance = distances[i]
