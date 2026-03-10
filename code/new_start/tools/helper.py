@@ -88,5 +88,5 @@ def split_and_xor_syndrome(d, rounds, syndromes, ft_z_stab=True):
     return px_synd, pz_synd, pft_synt
 
 def reorder_syndromes(old_order):
-    new_order = old_order.transpose(1, 0, 2)
+    new_order = old_order.swapaxes(0, 1)
     return new_order

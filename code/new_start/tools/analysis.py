@@ -202,6 +202,7 @@ def count_logical_errors_using_ML_FT(
         probability: bool = False,
         **kwargs, # just here to ignore the stuff other logical error counter need
     ) -> float:
+    # Also works for basic noise model! xor syndrome == 0
     d = distance
     p_eff, _ = uncorr_eff_noise(error_rate)
     p_eff = error_rate
@@ -213,7 +214,7 @@ def count_logical_errors_using_ML_FT(
 
     # init ML decoder (only X errors so far)
     num_errors = 0
-    # iterating over each shot!
+    # iterating over each shot! one can use paralism here! (if I design it a bit nicer!)
     for obs, z_synd, ft_synd in zip(observable_flips, z_synds, ft_synds): 
         # normal syndrome decoding
 
@@ -250,37 +251,51 @@ def count_logical_errors_using_ML2(
     ) -> float:
     d = distance
     p = error_rate 
-    
+
     detection_events, observable_flips = sample_ciruit(circuit, num_shots) 
-    x_synd, z_synd, ft_synd = split_and_xor_syndrome(d, rounds, detection_events)
+
+    ft_z_stab = True if observable == "Z" else False
+    x_synds, z_synds, ft_synds = split_and_xor_syndrome(d, rounds, detection_events, ft_z_stab)
 
     if observable == "Z":
-        rel_synd = z_synd
+        rel_synd = z_synds
     elif observable == "X":
-        rel_synd = x_synd
+        rel_synd = x_synds
     else: 
         raise ValueError("observable value unexpected")
-    
     # t_synd[round][shot][i_stab]
     rel_synd = reorder_syndromes(rel_synd)
     # rel_synd[shot][round][i_stab]
 
     predicitons = np.zeros((num_shots,rounds))
     pauli_repr_flips = np.zeros((num_shots,rounds))
-
     # all these calculation can be done in parralel!
-    for i_shot, synd_shot in enumerate(synd_round): 
-        for i_round, synd_round in enumerate(rel_synd):
+    for i_shot, synd_shot in enumerate(rel_synd): 
+        for i_round, synd_round in enumerate(synd_shot):
             predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_aron(
                 d,
                 p,
-                synd_shot,
+                synd_round,
             )
+    multi_round_pred = np.sum(predicitons,axis=1)%2
+    multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
 
+    # FT prediciton
+    ft_predictions = np.zeros((num_shots))
+    pauli_repr_flip_ft = np.zeros((num_shots))
+    for i_shot, ft_synd in enumerate(ft_synds):
+        ft_predictions[i_shot], pauli_repr_flip_ft[i_shot] = decode_half_syndrome_aron(
+            d,
+            p,
+            ft_synd
+        )  
 
-    
+    total_pred = (multi_round_pauli_flip + multi_round_pred + ft_predictions + pauli_repr_flip_ft)%2
+    total_pred = np.array(total_pred, dtype=bool)
 
-    num_errors = 0 
+    mismatch = total_pred != observable_flips.flatten()
+    num_errors = np.sum(mismatch)  
+
     if probability:
         return num_errors/num_shots
     return num_errors 
