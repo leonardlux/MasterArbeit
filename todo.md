@@ -2,6 +2,8 @@
 
 Error model for FT check at the end?
 
+Should not make a difference which logical I choose to use right?
+
 # Thematischer Bezug
 
 Nielsen and Chuang get the book 
@@ -16,9 +18,9 @@ Doooo that
 
 0. increase throughput:
     use numba (like aron did it!)
-1. adapt for circuit level noise
-2. Multiple rounds
-3. simplyfer decoder and plotting
+    and parralism with numba
+3. simplify decoder and plotting
+
 
 ## Question from midterm
 

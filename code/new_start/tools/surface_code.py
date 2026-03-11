@@ -63,7 +63,11 @@ def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
     return targets_X, targets_Z
 
 def index_log_Z(d,):
-    qubit_z_measure = np.arange(d) * (2*d - 1) 
+    qubit_z_measure = np.array([], dtype=int) 
+    # range(1) (first column logical Z)
+    # range(d) (every column logical Z)
+    for i in range(d):
+        qubit_z_measure = np.append(qubit_z_measure, i + np.arange(d) * (2*d - 1))
     return qubit_z_measure 
 
 def index_log_X(d):
