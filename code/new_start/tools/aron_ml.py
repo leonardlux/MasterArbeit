@@ -1,6 +1,8 @@
 import numpy as np
+import numba 
 
-# @numba.njit()
+
+@numba.njit()
 def error_converter(d,E):
     """
     Convert error string to form which is more natural for the mld algorithm
@@ -18,7 +20,7 @@ def error_converter(d,E):
     return f
 
 #Optimal algorithm for maximum likmelihood decoding
-# @numba.njit
+@numba.njit
 def initialize_M0(d):
     """
     Creation of the initial covariance metrix M0. This is the covariance matrix of the initial gaussian state |psi_e>.
@@ -31,7 +33,7 @@ def initialize_M0(d):
     M0[2*d-1,0]=-1
     return M0
 
-# @numba.njit
+@numba.njit
 def simulate_H_columns(M,j,log_gamma,f,p,d):
     """
     Algorithm for simulating the action of Gaussian operator H_j.
@@ -58,7 +60,7 @@ def simulate_H_columns(M,j,log_gamma,f,p,d):
     M=A-(B@np.linalg.inv(M+A)@B)
     return M,log_gamma
 
-# @numba.njit
+@numba.njit
 def simulate_V_columns(M,j,log_gamma,f,p,d):
     """
     Algorithm for simulating the action of Gaussian operator V_j.
@@ -87,7 +89,7 @@ def simulate_V_columns(M,j,log_gamma,f,p,d):
     M=A-(B@np.linalg.inv(M+A)@B)
     return M,log_gamma
 
-# @numba.njit
+@numba.njit
 def simulation_mld(p,d,f):
     """
     Calculation of ln(Z({w_E})) from an inital error string, and the probability of errors.

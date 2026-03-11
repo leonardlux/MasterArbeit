@@ -1,6 +1,7 @@
 import stim # type: ignore
 import pymatching # type: ignore
 import numpy as np # type: ignore
+import numba 
 
 from tools.error_models import add_noise
 from tools.ml_decoder import decode_half_syndrome,  decode_half_syndrome_aron
@@ -239,7 +240,7 @@ def count_logical_errors_using_ML_FT(
         return num_errors/num_shots
     return num_errors 
 
-def count_logical_errors_using_ML2(
+def count_logical_errors_using_ML_rounds(
         circuit, 
         num_shots: int, 
         distance: int, 
@@ -270,12 +271,12 @@ def count_logical_errors_using_ML2(
     predicitons = np.zeros((num_shots,rounds))
     pauli_repr_flips = np.zeros((num_shots,rounds))
     # all these calculation can be done in parralel!
-    for i_shot, synd_shot in enumerate(rel_synd): 
-        for i_round, synd_round in enumerate(synd_shot):
+    for i_shot in numba.prange(num_shots): 
+        for i_round in numba.prange(rounds):
             predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_aron(
                 d,
                 p,
-                synd_round,
+                rel_synd[i_shot,i_round],
             )
     multi_round_pred = np.sum(predicitons,axis=1)%2
     multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
@@ -283,11 +284,11 @@ def count_logical_errors_using_ML2(
     # FT prediciton
     ft_predictions = np.zeros((num_shots))
     pauli_repr_flip_ft = np.zeros((num_shots))
-    for i_shot, ft_synd in enumerate(ft_synds):
+    for i_shot in numba.prange(num_shots):
         ft_predictions[i_shot], pauli_repr_flip_ft[i_shot] = decode_half_syndrome_aron(
             d,
             p,
-            ft_synd
+            ft_synds[i_shot] 
         )  
 
     total_pred = (multi_round_pauli_flip + multi_round_pred + ft_predictions + pauli_repr_flip_ft)%2

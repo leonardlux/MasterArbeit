@@ -61,13 +61,16 @@ def plot_diff_noise_level(
         fit_slopes = False,
         reference_lines = False,
         title="",
+        seperate_figure=True,
+        prelabel="",
     ):
     cm = 1/2.54 # to convert inches to cm
-    plt.figure()
-    plt.subplots(figsize=(20*cm,10*cm))
-    plt.loglog()
-    plt.xlabel("physical error rate")
-    plt.ylabel("logical error rate")
+    if seperate_figure:
+        plt.figure()
+        plt.subplots(figsize=(20*cm,10*cm))
+        plt.loglog()
+        plt.xlabel("physical error rate")
+        plt.ylabel("logical error rate")
 
     for i, log_error_prob in enumerate(log_error_rates):
 
@@ -78,7 +81,7 @@ def plot_diff_noise_level(
             noise_set,
             log_error_prob,
             yerr=y_err,
-            label=f"d={distances[i]}",
+            label=f"{prelabel}d={distances[i]}",
             )
         
         # TODO: add fitted reference lines!
@@ -101,9 +104,49 @@ def plot_diff_noise_level(
 
     if filename != "":
         plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
+    if seperate_figure:
+        plt.title(title)
+        plt.grid()
+        plt.legend()
+        plt.show()
+    pass
+
+def overlay_different_slopes(
+        list_log_error_rates,
+        list_yerrs,
+        distances,
+        noise_set,
+        titles=[""]*100, # hacky
+        title="",
+        reference_lines=True,
+        fit_slopes=False,
+        ):
+    cm = 1/2.54 # to convert inches to cm
+    plt.figure()
+    plt.subplots(figsize=(20*cm,10*cm))
+    plt.loglog()
+    plt.xlabel("physical error rate")
+    plt.ylabel("logical error rate")
+    for i in range(len(list_log_error_rates)):
+        plot_diff_noise_level(
+            log_error_rates=list_log_error_rates[i],
+            y_errs=list_yerrs[i],
+            distances=distances,
+            noise_set=noise_set,
+            prelabel=titles[i] +" ",
+            fit_slopes=fit_slopes,
+            seperate_figure=False,
+        )
+    
+    
+    if reference_lines:
+        plt.plot(noise_set,noise_set**2,label="$p^2$")
+        plt.plot(noise_set,noise_set,label="$p$",c="green")
     plt.title(title)
     plt.grid()
     plt.legend()
     plt.show()
     pass
+
+    
 
