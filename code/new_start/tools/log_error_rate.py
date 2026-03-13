@@ -6,7 +6,7 @@ import numba
 from tools.error_models import add_noise
 from tools.ml_decoder import decode_half_syndrome,  decode_half_syndrome_aron
 from tools.mwpm_decoder import decode_mwpm_steane, decode_mwpm_reps
-from tools.helper import split_syndrome, split_syndromes, split_and_xor_syndrome, reorder_syndromes, xor_ft_syndrome
+from tools.syndrome import split_syndrome, split_syndromes, split_and_xor_syndrome, reorder_syndromes, xor_ft_syndrome
 from tools.pauli_frame_track import syndrome_to_pauli_flips 
 from tools.error_propagation import uncorr_eff_noise
 
@@ -250,6 +250,8 @@ def count_logical_errors_using_ML_rounds(
         observable: str = "Z",
         **kwargs, # just here to ignore the stuff other logical error counter need
     ) -> float:
+    # decoding implementation that gonna be used
+    decode_half_syndrome_func = decode_half_syndrome_aron 
     d = distance
     p = error_rate 
 
@@ -273,7 +275,7 @@ def count_logical_errors_using_ML_rounds(
     # all these calculation can be done in parralel!
     for i_shot in numba.prange(num_shots): 
         for i_round in numba.prange(rounds):
-            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_aron(
+            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_func(
                 d,
                 p,
                 rel_synd[i_shot,i_round],
@@ -285,7 +287,7 @@ def count_logical_errors_using_ML_rounds(
     ft_predictions = np.zeros((num_shots))
     pauli_repr_flip_ft = np.zeros((num_shots))
     for i_shot in numba.prange(num_shots):
-        ft_predictions[i_shot], pauli_repr_flip_ft[i_shot] = decode_half_syndrome_aron(
+        ft_predictions[i_shot], pauli_repr_flip_ft[i_shot] = decode_half_syndrome_func(
             d,
             p,
             ft_synds[i_shot] 

@@ -14,24 +14,26 @@ Read more:
 Formalismus vereinheitlichen!
 Write a lot of stuff into my latex overview file 
 
-## ML Decoder 
+# ToDos 
 
+## Orderd ToDo List
+
+1. Switch FT Decoder to MWPM independet of Steane decoder choice
+2. Use/Adapt luis' finite size scaling analysis to ID threshold
+3. Under Code Capacity Model: Check threshold for MWPM and ML Decoder (compare to literature)
+4. Plot threshold against #rounds (for different distances?)
+5. Plot log error rate against #rounds for different distances (for fixed error rate < threshold)
+6. Get |+> state (Z-errors) to work
+7. Implement MWPM multi rounds
+8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
+
+## Other ToDos
 0. increase throughput:
-    use numba (like aron did it!)
+    use numba more!! (for faster results) 
     and parralism with numba
-01. check working for |+> state (Z error detection)
-1. simplify decoder and plotting
-2. implement mulitple rounds in MWPM
-3. compare to MWPM with allknowing detector Error model!
-4. enable complex error models
-
-Results to check out:
-1. determine threshold dependend on round 
-2. comparison threshold mwpm and ml (cicruit lvl error) and MWPM with all knwoing DEM
-3. checkout if error model is correct (modify error model and check behavior of threshold?)
-
-Write down theory part in a clean formalism!
-
+1. compare to MWPM with allknowing detector Error model!
+2. enable complex error models
+3. tex error propagation part
 
 ## Question from midterm
 

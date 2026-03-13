@@ -4,7 +4,7 @@ import pymatching
 from tools.surface_code import generate_surface_code_circuit
 from tools.error_models import add_noise, construct_basic_noise_model 
 from tools.error_propagation import uncorr_eff_noise
-from tools.helper import split_syndromes, split_and_xor_syndrome 
+from tools.syndrome import split_syndromes, split_and_xor_syndrome 
 
 def init_mwpm_decoder(d, p, z_stab: bool = True, noise_model = "circ_lvl"): 
     # z_stab = false <=> decoder for x_stab 
