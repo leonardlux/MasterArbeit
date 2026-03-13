@@ -25,6 +25,7 @@ Write a lot of stuff into my latex overview file
 5. Plot log error rate against #rounds for different distances (for fixed error rate < threshold)
 6. Get |+> state (Z-errors) to work
 7. Implement MWPM multi rounds
+8. JIT everything!! (that is part of generating data)
 8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
 
 ## Other ToDos
