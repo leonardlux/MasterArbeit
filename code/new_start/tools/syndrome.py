@@ -63,11 +63,11 @@ def xor_ft_syndrome(ft_synd, stab_synd):
     xor_ft_synd = np.logical_xor(stab_synd, ft_synd)
     return xor_ft_synd 
 
-def split_and_xor_syndrome(d, rounds, syndromes, ft_z_stab=True):
+def split_and_xor_syndrome(d, rounds, syndromes, ft_stab_z=True):
     """
     reps: number of repetions 
     syndrome: output of stim 
-    z_stab: determines which synd is used to construct pauli frame FT
+    ft_stab_z: determines which syndrome is used to construct pauli frame FT
         -> True <=> z_stab
         -> False <=> x_stab
     this function does necessary all the preparations for the syndromes 
@@ -76,10 +76,10 @@ def split_and_xor_syndrome(d, rounds, syndromes, ft_z_stab=True):
     # pauli frame:
     px_synd  = xor_syndromes(rounds,x_syndromes) 
     pz_synd  = xor_syndromes(rounds,z_syndromes) 
-    if ft_z_stab:
+    if ft_stab_z:
         # observable is measured in Z basis
         pft_synt = xor_ft_syndrome(z_syndromes[-1],ft_syndromes)
-    elif not ft_z_stab:
+    elif not ft_stab_z:
         # observable is measured in X basis
         pft_synt = xor_ft_syndrome(x_syndromes[-1],ft_syndromes)
     else:
