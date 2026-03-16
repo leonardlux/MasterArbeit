@@ -187,7 +187,7 @@ def count_logical_errors_ML(
         return num_errors/num_shots
     return num_errors 
 
-def generate_log_error_rates(
+def generate_log_error_rates_diff_p(
         circuits:list,
         noise_model_fct,
         distances,
