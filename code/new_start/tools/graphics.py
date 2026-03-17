@@ -63,6 +63,7 @@ def plot_diff_noise_level(
         title="",
         seperate_figure=True,
         prelabel="",
+        p_th = None,
     ):
     cm = 1/2.54 # to convert inches to cm
     if seperate_figure:
@@ -101,6 +102,9 @@ def plot_diff_noise_level(
     if reference_lines:
         plt.plot(noise_set,noise_set**2,label="$p^2$")
         plt.plot(noise_set,noise_set,label="$p$",c="green")
+
+    if p_th != None:
+        plt.axvline(p_th,label="$p_{th}$")
 
     if filename != "":
         plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
@@ -148,5 +152,11 @@ def overlay_different_slopes(
     plt.show()
     pass
 
-    
-
+def plot_fssa_results(xs,ys,yerrs,pc,nu,distances):
+    def fit_func(x,d):
+        return d**(1/nu)*(x-pc)
+    plt.figure()
+    for x, y, yerr, d in zip(xs,ys,yerrs,distances):
+        plt.errorbar(fit_func(x,d),y,yerr=yerr,label=f"d={d}") 
+    plt.legend()
+    plt.show()

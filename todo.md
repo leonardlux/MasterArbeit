@@ -16,14 +16,27 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+
 ## Orderd ToDo List
 
-2. Use/Adapt luis' finite size scaling analysis to ID threshold
+2. get rid of error of the hadamrd before the measurement
 3. Under Code Capacity Model: Check threshold for MWPM and ML Decoder (compare to literature)
 4. Plot threshold against #rounds (for different distances?)
 6. Get |+> state (Z-errors) to work
 8. JIT everything!! (that is part of generating data)
+9. reduce redudant parameters passed on (observables and z_stab, noise_model_func/error_model and noise_model string)
+10. save data to files!
 8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
+
+10. compare to d rounds stabilizer measurement as one QEC cycle
+    + for each of the d put error on data qubit
+11. check order of stabilizer cnots (to get the free distance improvement)
+
+12. enable different order
+
+13. enable bell state as inital state + different logic measurement 
+
+14. write down error propagation in latex 
 
 ## Other ToDos
 0. increase throughput:
