@@ -95,12 +95,13 @@ def construct_circuit_noise_model(noise: float, ):
     :type noise: float
     """
     noise_model = {
-    "single_qubit_gate": {
-        "operator": {"H"},
-        "error_position": "following",
-        "error": "DEPOLARIZE1",
-        "noise": noise,
-    },
+    # Deactivate symmatrize X and Z measurements/ do not treat them asymetric
+    # "single_qubit_gate": {
+    #     "operator": {"H"},
+    #     "error_position": "following",
+    #     "error": "DEPOLARIZE1",
+    #     "noise": noise,
+    # },
     "two_qubit_gate": {
         "operator": {"CX"},
         "error_position": "following",

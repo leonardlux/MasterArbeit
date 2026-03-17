@@ -1,8 +1,5 @@
+
 # current questions
-
-Error model for FT check at the end?
-
-Should not make a difference which logical I choose to use right?
 
 # Thematischer Bezug
 
@@ -16,16 +13,21 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+This week
+0. get |+> states to work (Z-errors)
+1. jit & parralise everything
+    1. save results to file
+    2. reduce redundancy in parameters passed on!
+        + observable and z_stab
+        + noise_model, error_func, noise_model_string
+1. code capacity check threshold for MWPM and ML Decoder  
+    0. discard distance 3!
+    1. find literature
+2. threshold for circuit lvl noise
+    - threshold dependent on rounds for circ lvl noise
 
 ## Orderd ToDo List
 
-2. get rid of error of the hadamrd before the measurement
-3. Under Code Capacity Model: Check threshold for MWPM and ML Decoder (compare to literature)
-4. Plot threshold against #rounds (for different distances?)
-6. Get |+> state (Z-errors) to work
-8. JIT everything!! (that is part of generating data)
-9. reduce redudant parameters passed on (observables and z_stab, noise_model_func/error_model and noise_model string)
-10. save data to files!
 8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
 
 10. compare to d rounds stabilizer measurement as one QEC cycle
@@ -53,3 +55,8 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+
+# Done today 17.03
+
+00. get rid of error of the Hadmard
