@@ -2,7 +2,7 @@ import numpy as np
 import numba 
 
 
-@numba.njit()
+@numba.njit
 def error_converter(d,E):
     """
     Convert error string to form which is more natural for the mld algorithm

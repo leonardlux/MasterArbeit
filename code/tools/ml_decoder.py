@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sc
+import numba
 
 if __name__ == "__main__":
     from aron_ml import * 
@@ -114,7 +115,7 @@ def coset_probability(d,p,f):
     coset_prob = pauli_error_prob * np.sqrt(gamma / 2) * (np.linalg.det((m + gen_m_0(d))))**(1/4)
     return coset_prob 
 
-def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
+def decode_half_syndrome(d, p, h_syndrome, stab_type="Z"):
     if stab_type.upper() == "Z":
         stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
     elif stab_type.upper() == "X": 
@@ -131,11 +132,8 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
     p_L = coset_probability(d, p, f)
 
     obs_flip = True if p_I < p_L else False
-    if only_obs_flip:
-        # c_f is the sign if we commute the logical with the pauli
-        return obs_flip, c_f
-    else: 
-        return p_I, p_L, obs_flip 
+    # c_f is the sign if we commute the logical with the pauli
+    return obs_flip, c_f
 
 # log prob
 def simulate_horizontal_log(d, j, m, log_gamma, weights):
@@ -205,7 +203,7 @@ def coset_probability_log(d,p,f):
     log_coset_prob = 1/2 * log_gamma - 1/2 * np.log(2) + np.log(pauli_error_prob)  + 1/4*np.log(np.linalg.det(m + gen_m_0(d)))
     return log_coset_prob
 
-def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
+def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z"):
     if stab_type.upper() == "Z":
         stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
     elif stab_type.upper() == "X":
@@ -222,14 +220,11 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True)
     log_p_L = coset_probability_log(d, p, f)
 
     obs_flip = True if log_p_I < log_p_L else False
-    if only_obs_flip:
-        # returns if observable flips
-        return obs_flip, c_f
-    else: 
-        return log_p_I, log_p_L, obs_flip 
+    return obs_flip, c_f
 
 # arons code adapted 
-def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
+@numba.njit
+def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",):
     if stab_type.upper() == "X":
         # need to rotate X stabilizer -> can be treated like Z stabilizer 
         h_syndrome = rotate_and_reorder_syndrome(d, h_syndrome)
@@ -248,7 +243,4 @@ def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",only_obs_flip=True
         error_converter(int(d), f_L),
         )
     obs_flip = True if p_I < p_L else False 
-    if only_obs_flip:
-        return obs_flip, c_f
-    else:
-        return p_I, p_L, obs_flip 
+    return obs_flip, c_f

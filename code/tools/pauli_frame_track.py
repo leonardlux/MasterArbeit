@@ -1,4 +1,5 @@
 import numpy as np
+import numba 
 
 if __name__ == "__main__":
     from syndrome import split_syndrome 
@@ -9,6 +10,7 @@ else:
 
 ## Syndrome to stabilizer Matrix
 
+@numba.njit
 def format_syndrome_to_matrix(d, syndrome):
     """
     from list to matrix shaped like the qubits location (d,d-1) 
@@ -17,6 +19,7 @@ def format_syndrome_to_matrix(d, syndrome):
     stabilizer_matrix = np.reshape(syndrome, (d, d-1))
     return stabilizer_matrix
 
+@numba.njit
 def rotate_and_reorder_syndrome(d, syndrome):    
     """
     rotate syndrome: rotate stabilizer position 90° counterclockwise
@@ -31,6 +34,7 @@ def rotate_and_reorder_syndrome(d, syndrome):
     return rot_syndrome 
 
 ## Stabilizer matrix to Pauli error 
+@numba.njit
 def stabilizer_to_pauli(d, syndrome_matrix, add_logical: bool = False):
     """
     given a matrix of syndrome calculates a possible X-error 
@@ -55,7 +59,7 @@ def stabilizer_to_pauli(d, syndrome_matrix, add_logical: bool = False):
 
     # determine p for Z * f = p * f * Z
     # determines if log, measured observable should be flipped to account for coset pauli
-    pauli_flip = True if np.sum(f[index_log_Z(d)])%2 == 1 else False
+    pauli_flip = bool(np.sum(f[index_log_Z(d)])%2)
     return f, pauli_flip 
 
 
@@ -71,48 +75,3 @@ def syndrome_to_pauli_flips(d, syndrome):
     _, log_x_flip_pauli = stabilizer_to_pauli(d,z_stab_m)
     # returns for both log obsvervable if they would flip due to the reference pauli
     return log_x_flip_pauli, log_z_flip_pauli
-
-if  __name__ == "__main__" and False:
-    # check function of syndrome -> pauli functions 
-    d = 3 
-    flipped_bits = [-1]
-
-    def print_string(f):
-        print("Error as Matrix:")
-        for i in range(d-1):
-            print(f[i*(2*d-1):i*(2*d-1)+d])
-            print(f[i*(2*d-1)+d:i*(2*d-1)+d+(d-1)])
-        print(f[-d:])
-
-    syndrome = [False] * (2*d*(d-1))
-    for flip in flipped_bits:
-        syndrome[flip] = not syndrome[flip]
-
-    print(f"complete syndrome: \n{syndrome}\n")
-
-    x_syn, z_syn = split_syndrome(d,syndrome)
-
-    print(f"syndrome parts: \nX-Stab.: {x_syn} \nZ-Stab.: {z_syn}\n")
-
-    x_stab_m = rotate_and_reorder_syndrome(d,x_syn)
-    x_f, sgn_f = stabilizer_to_pauli(d,x_stab_m)
-    x_f_log, _ = stabilizer_to_pauli(d,x_stab_m,add_logical=True)
-    print(f"X-Stab. Matrix (rot.):\n{x_stab_m}")
-    print(f"Z-Error Pauli:\n{x_f}")
-    print(f"sign: {sgn_f}")
-    print_string(x_f)
-    print(f"Z-Error Pauli + log.:\n{x_f_log}")
-    print_string(x_f_log)
-    print()
-
-    z_stab_m = format_syndrome_to_matrix(d,z_syn)
-    z_f, sgn_f = stabilizer_to_pauli(d,z_stab_m)
-    z_f_log, _ = stabilizer_to_pauli(d,z_stab_m,add_logical=True)
-    print(f"Z-Stab. Matrix:\n{z_stab_m}")
-    print(f"X-Error Pauli:\n{z_f}")
-    print(f"sign: {sgn_f}")
-    print_string(z_f)
-    print(f"X-Error Pauli + log.:\n{z_f_log}")
-    print_string(z_f_log)
-    print()
-

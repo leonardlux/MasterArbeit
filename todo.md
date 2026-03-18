@@ -18,15 +18,21 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+0. more results:
+basic: 
+look at |+> (Z-errors/phase-flips) and |0> (X-errors/bit-flips) states
+save a circuit diagram for distance 3
+and MWPM Decoder and ML Decoder
+    - 'full' range to show asymptotic behavior
+        - use data collapse method here as well (should also work)
+    - indepth around p_th 
+        - determine p_th
+            + discard d=3
+        - compare to literature
+
 This week
-1. jit & parralise everything
+1. save data
     1. save results to file
-    2. reduce redundancy in parameters passed on!
-        + observable and z_stab
-        + noise_model, error_func, noise_model_string
-1. code capacity check threshold for MWPM and ML Decoder  
-    0. discard distance 3!
-    1. find literature
 2. threshold for circuit lvl noise
     - threshold dependent on rounds for circ lvl noise
 
@@ -45,6 +51,8 @@ This week
 14. write down error propagation in latex 
 
 ## Other ToDos
+0. 2 obs will be a problem for my current count logical implementation!
+0. reimplement noise model func and propagated noise model, such that both are id by one parameter!
 0. increase throughput:
     use numba more!! (for faster results) 
     and parralism with numba
@@ -64,7 +72,9 @@ show more asymptotic behavior (and explain the exponents fucntion)
 
 00. implement |+> state
     + works for everything 
-
+01. jitted everything and parrallised something (little return)
+02. 
+    
 # 17.03 Tuesday 
 
 00. get rid of error of the Hadmard

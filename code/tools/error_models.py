@@ -155,34 +155,3 @@ noise_model = {
         "specific_tag": {"psi_data"}, # specific tag of targeted instruction
     }
 }
-
-
-# Example of a noise model
-# Parameters stolen from the paper "Demonstration of fault-tolerant Steane quantum error correction"
-noise = 0.01
-noise_model = {
-    "single_qubit_gate": {
-        "operator": {"H"},
-        "error_position": "following",
-        "error": "DEPOLARIZE1",
-        "noise": noise,
-    },
-    "two_qubit_gate": {
-        "operator": {"CX"},
-        "error_position": "following",
-        "error": "DEPOLARIZE2",
-        "noise": noise,
-    },
-    "measurement": {
-        "operator": {"M","MR"},
-        "error_position": "before",
-        "error": "X_ERROR",
-        "noise": 0.003,
-    },
-    "initialize": {
-        "operator": {"I"}, # Trick I use because init algo is out of scope! 
-        "error_position": "following",
-        "error": "X_ERROR",
-        "noise": 0.003,
-    },
-}

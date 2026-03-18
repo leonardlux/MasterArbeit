@@ -1,5 +1,6 @@
 import numpy as np # type: ignore 
 import stim # type: ignore
+import numba
 
 
 def index_qubits_surface_code(distance: int = 3, offset: int = 0):
@@ -62,29 +63,29 @@ def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
             targets_Z.append(targets)
     return targets_X, targets_Z
 
-multi_row_logical = False 
-def index_log_Z(d,):
-    qubit_z_measure = np.array([], dtype=int) 
-    if multi_row_logical:
-        # logical on every column
-        cols = d
-    else:
-        # logical only on first column
-        cols = 1
+# Multi_row_logical needs to be identical for both X and Z!
+@numba.njit
+def index_log_Z(d, multi_row_logical:bool = False):
+    cols = d if multi_row_logical else 1
+
+    qubit_z_measure = np.empty(cols * d, dtype=np.int64)
+    k = 0
     for i in range(cols):
-        qubit_z_measure = np.append(qubit_z_measure, i + np.arange(d) * (2*d - 1))
+        for j in range(d):
+            qubit_z_measure[k] = i + j * (2*d - 1)
+            k += 1
     return qubit_z_measure 
 
-def index_log_X(d):
-    qubit_x_measure = np.array([], dtype=int) 
-    if multi_row_logical:
-        # logical on every column
-        rows = d
-    else:
-        # logical only on first column
-        rows = 1
+@numba.njit
+def index_log_X(d, multi_row_logical:bool = False):
+    rows = d if multi_row_logical else 1
+
+    qubit_x_measure = np.empty(rows* d, dtype=np.int64)
+    k = 0
     for i in range(rows):
-        qubit_x_measure = np.append(qubit_x_measure, np.arange(d) + i * (2*d - 1))
+        for j in range(d):
+            qubit_x_measure[k] = j + i * (2*d - 1)
+            k += 1
     return qubit_x_measure
 
 # Stim only support relative measurement references  

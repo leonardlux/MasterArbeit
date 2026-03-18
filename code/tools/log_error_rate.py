@@ -112,6 +112,40 @@ def count_logical_errors_MWPM(
     return num_errors 
 
 # ML Decoding
+# TODO: is this acutally an improvement?
+@numba.njit(parallel=True)
+def fast_decoding(d,p,observable,rounds,num_shots,rel_synd):    
+    predicitons = np.zeros((num_shots,rounds))
+    pauli_repr_flips = np.zeros((num_shots,rounds))
+    for i_round in numba.prange(rounds):
+        for i_shot in range(num_shots): 
+            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_aron(
+                d,
+                p,
+                rel_synd[i_shot,i_round],
+                stab_type=observable, # the observable determines which stabilizers we need to decode
+            )
+    multi_round_pred = np.sum(predicitons,axis=1)%2
+    multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
+    return multi_round_pred, multi_round_pauli_flip
+
+# TODO Jit this one!
+def slow_decoding(d,p,observable,rounds,num_shots,rel_synd):    
+    predicitons = np.zeros((num_shots,rounds))
+    pauli_repr_flips = np.zeros((num_shots,rounds))
+    # all these calculation can be done in parralel!
+    for i_shot in numba.prange(num_shots): 
+        for i_round in numba.prange(rounds):
+            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome(
+                d,
+                p,
+                rel_synd[i_shot,i_round],
+                stab_type=observable, # the observable determines which stabilizers we need to decode
+            )
+    multi_round_pred = np.sum(predicitons,axis=1)%2
+    multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
+    return multi_round_pred, multi_round_pauli_flip
+
 def count_logical_errors_ML(
         circuit, 
         num_shots: int, 
@@ -124,7 +158,7 @@ def count_logical_errors_ML(
         **kwargs, # just here to ignore the stuff other logical error counter need
     ):
     # select decoding implementation that gonna be used
-    decode_half_syndrome_func = decode_half_syndrome_aron
+    decoding_func = fast_decoding 
     d = distance
     # Adapt noise to given noise model
     if noise_model == "circ":
@@ -147,19 +181,7 @@ def count_logical_errors_ML(
     # rel_synd[shot][round][i_stab]
 
     # Actual Decoding: 
-    predicitons = np.zeros((num_shots,rounds))
-    pauli_repr_flips = np.zeros((num_shots,rounds))
-    # all these calculation can be done in parralel!
-    for i_shot in numba.prange(num_shots): 
-        for i_round in numba.prange(rounds):
-            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_func(
-                d,
-                p,
-                rel_synd[i_shot,i_round],
-                stab_type=observable, # the observable determines which stabilizers we need to decode
-            )
-    multi_round_pred = np.sum(predicitons,axis=1)%2
-    multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
+    multi_round_pred, multi_round_pauli_flip = decoding_func(d,p,observable,rounds,num_shots,rel_synd)
 
     # FT prediciton
     # Old Way of ML FT prediction
