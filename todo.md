@@ -1,6 +1,11 @@
 
 # current questions
 
+choice of logical repr in the end
+    - should not matter
+    - but at least if I choose diff, for X and Z: d>3 fails! (Z multi, X single and X obs)
+        - difference only appears for ML decoder 
+
 # Thematischer Bezug
 
 Read more:
@@ -14,7 +19,6 @@ Write a lot of stuff into my latex overview file
 # ToDos 
 
 This week
-0. get |+> states to work (Z-errors)
 1. jit & parralise everything
     1. save results to file
     2. reduce redundancy in parameters passed on!
@@ -56,7 +60,14 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 18.03 Wednesday
 
-# Done today 17.03
+00. implement |+> state
+    + works for everything 
+
+# 17.03 Tuesday 
 
 00. get rid of error of the Hadmard
+01. Meeting 
+02. working out data collapse method
+03. surface_code.py and mwpm decoder |+> state

@@ -62,16 +62,29 @@ def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
             targets_Z.append(targets)
     return targets_X, targets_Z
 
+multi_row_logical = False 
 def index_log_Z(d,):
     qubit_z_measure = np.array([], dtype=int) 
-    # range(1) (first column logical Z)
-    # range(d) (every column logical Z)
-    for i in range(d):
+    if multi_row_logical:
+        # logical on every column
+        cols = d
+    else:
+        # logical only on first column
+        cols = 1
+    for i in range(cols):
         qubit_z_measure = np.append(qubit_z_measure, i + np.arange(d) * (2*d - 1))
     return qubit_z_measure 
 
 def index_log_X(d):
-    qubit_x_measure = np.arange(d)
+    qubit_x_measure = np.array([], dtype=int) 
+    if multi_row_logical:
+        # logical on every column
+        rows = d
+    else:
+        # logical only on first column
+        rows = 1
+    for i in range(rows):
+        qubit_x_measure = np.append(qubit_x_measure, np.arange(d) + i * (2*d - 1))
     return qubit_x_measure
 
 # Stim only support relative measurement references  
@@ -157,17 +170,23 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
 
     return circuit
 
-def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool = True, X_stab: bool = True, ):
+def generate_surface_code_circuit(distance: int = 3, observable: int = "Z", Z_stab: bool = True, X_stab: bool = True, ):
     """
     This functions generates a surface code ciruit with stabilizer readout.
     """
-    if not state in ["0", "p"]:
-        raise ValueError(f"does not know state {state}, expected: '0' for |0> or 'p' for |+>")
     d = distance
+    if observable == "Z":
+        init_log_state = "0" 
+        i_logical_measurement_targets = index_log_Z(d)
+    elif observable == "X":
+        init_log_state = "p"
+        i_logical_measurement_targets = index_log_X(d)
+    else:
+        raise ValueError(f"unkown observable value: {observable}")
     # initialize
     surface_code_circ = generate_surface_code_log_qubit_circuit(
         distance,
-        state=state,
+        state=init_log_state,
         final_tag="psi_data",
         )
     # measure stabilizer 
@@ -177,6 +196,8 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
     ) 
     # Measure observable by measuremnt of logical data from main qubit |Psi>
     index_physical, _, _ = index_qubits_surface_code(distance)
+    if observable == "X":
+        surface_code_circ.append("H",index_physical, tag="obs_change_of_basis")
     surface_code_circ.append("M",index_physical,tag="obs_flip_measure") 
 
     """
@@ -212,10 +233,10 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
             [offset_ancilla_psi_Z_dc, offset_ancilla_psi_Z],
             [], # we do not recombine measurements into stabilizers
             )    
-    
+
+    # Measure observable 
     targets = []
-    i_ls = index_log_Z(d) #TODO: adapt for arbitray intput state!
-    for i_qubit in i_ls:
+    for i_qubit in i_logical_measurement_targets:
         targets += [d**2 + (d-1)**2 - i_qubit] 
 
     surface_code_circ.append(
@@ -226,23 +247,37 @@ def generate_surface_code_circuit(distance: int = 3, state = "0", Z_stab: bool =
 
     return surface_code_circ
 
-#TODO: adapt to arbtriary inital state!
-def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, rounds: int = 1):
+def generate_steane_circuit(distance: int = 3, rounds: int = 1, observable: str = "Z",ft_stab_detector: bool = True):
     """
     This function generates the the steane type EC.
     
     :param distance: Distance of the used log. qubits 
     :type distance: int
+    :param observable: choice of observable measurement on data qubit  
+
+    oberservable influences inital state: 
+        "Z"->"|0>"
+        "X"->"|+>"
     """
     d = distance
+    if observable == "Z":
+        init_log_state = "0" 
+        i_logical_measurement_targets = index_log_Z(d)
+    elif observable == "X":
+        init_log_state = "p"
+        i_logical_measurement_targets = index_log_X(d)
+    else:
+        raise ValueError(f"unkown observable value: {observable}")
+
     offset_per_log_qubit = (d**2 + (d-1)**2 + 2*d*(d-1)) # num. of all phy. qubits per log. qubit
-    # init. all qubits in correct state!
+    # init. 
     circuit_log_data = generate_surface_code_log_qubit_circuit(
         distance, 
         offset=0,
-        state="0",
+        state=init_log_state,
         final_tag="psi_data"
         )
+    # init ancilla qubits
     circuit_aux_0 = generate_surface_code_log_qubit_circuit(
         distance, 
         offset = offset_per_log_qubit,
@@ -278,6 +313,8 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, ro
         circuit.append("MR",index_physical + 2*offset_per_log_qubit) 
 
     # Measure observable by measuremnt of logical data from main qubit |Psi>
+    if observable == "X":
+        circuit.append("H",index_physical, tag="obs_change_of_basis")
     circuit.append("M",index_physical,tag="obs_flip_measure") 
 
     # Construct all relevant detectors 
@@ -356,21 +393,23 @@ def generate_steane_circuit(distance: int = 3, ft_stab_detector: bool = True, ro
             )
     
     # Detector on |Psi> from observable measurement
-    # TODO: I just need this if I want to make something fault tolerant, correct?
-    # TODO: Actually destroys pymatching if this detector is active!! WHY?! -> because pymatching requires one version for each error (overcomplete?) (deconstruct error thing)
-    # I might need to take the Z_stab measurement on |+>_L into account
     if ft_stab_detector:
+        if observable == "Z":
+            ft_targets = targets_Z
+            ft_ancilla = os_ancilla_psi_Z
+        else:
+            ft_targets = targets_X
+            ft_ancilla = os_ancilla_psi_X
         circuit = add_detectors(
             circuit,
-            targets_Z,
-            [os_ancilla_psi_Z],
+            ft_targets,
+            [ft_ancilla],
             [os_data_psi],
             )
 
     # Logical Observable (check in notes) 
     targets = []
-    i_ls = index_log_Z(d) #TODO: adapt for arbitray intput state!
-    for i_qubit in i_ls:
+    for i_qubit in i_logical_measurement_targets:
         targets += [d**2 + (d-1)**2 - i_qubit] 
     circuit.append(
         "OBSERVABLE_INCLUDE",

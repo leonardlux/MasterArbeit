@@ -94,7 +94,6 @@ def count_logical_errors_MWPM(
     for i_round in range(rounds):
         predicitons[i_round] = matcher.decode_batch(rel_synd[i_round]).flatten()
         # .flatten() is needed because we always assume that only one observable is measured (in ML, and I wanted to adapt to this problem)
-
     # combine rounds together
     multi_round_pred =np.sum(predicitons,axis=0)%2
     # FT Decoding 
@@ -125,7 +124,7 @@ def count_logical_errors_ML(
         **kwargs, # just here to ignore the stuff other logical error counter need
     ):
     # select decoding implementation that gonna be used
-    decode_half_syndrome_func = decode_half_syndrome_aron 
+    decode_half_syndrome_func = decode_half_syndrome_aron
     d = distance
     # Adapt noise to given noise model
     if noise_model == "circ":
@@ -157,6 +156,7 @@ def count_logical_errors_ML(
                 d,
                 p,
                 rel_synd[i_shot,i_round],
+                stab_type=observable, # the observable determines which stabilizers we need to decode
             )
     multi_round_pred = np.sum(predicitons,axis=1)%2
     multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
@@ -192,6 +192,7 @@ def generate_log_error_rates_diff_p(
         noise_model_fct,
         distances,
         rounds=1,
+        observable:int = "Z",
         noise_set = np.logspace(-2,-0.1),
         num_shots = 10_000, 
         noise_model = "circ",
@@ -215,6 +216,7 @@ def generate_log_error_rates_diff_p(
                     error_rate = noise,
                     distance = distances[i],
                     noise_model = noise_model,
+                    observable = observable,
                     ) 
                 )
         

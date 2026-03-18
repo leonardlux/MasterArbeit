@@ -3,10 +3,10 @@ import scipy as sc
 
 if __name__ == "__main__":
     from aron_ml import * 
-    from pauli_frame_track import stabilizer_to_pauli, x_syndrome_to_stabilizer_matrix, z_syndrome_to_stabilizer_matrix
+    from pauli_frame_track import stabilizer_to_pauli, rotate_and_reorder_syndrome, format_syndrome_to_matrix
 else:
     from tools.aron_ml import simulation_mld, error_converter
-    from tools.pauli_frame_track import stabilizer_to_pauli, x_syndrome_to_stabilizer_matrix, z_syndrome_to_stabilizer_matrix
+    from tools.pauli_frame_track import stabilizer_to_pauli, rotate_and_reorder_syndrome, format_syndrome_to_matrix
 
 ## ML Decoder 
 # Matrix A
@@ -116,9 +116,10 @@ def coset_probability(d,p,f):
 
 def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
     if stab_type.upper() == "Z":
-        stabilizer_matrix = z_syndrome_to_stabilizer_matrix(d, h_syndrome)
-    elif stab_type.upper() == "X": #TODO check this!
-        stabilizer_matrix = x_syndrome_to_stabilizer_matrix(d, h_syndrome)
+        stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
+    elif stab_type.upper() == "X": 
+        rot_synd = rotate_and_reorder_syndrome(d, h_syndrome)
+        stabilizer_matrix = format_syndrome_to_matrix(d, rot_synd)
     else:
         raise ValueError("unexpected detector")
     
@@ -206,9 +207,10 @@ def coset_probability_log(d,p,f):
 
 def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
     if stab_type.upper() == "Z":
-        stabilizer_matrix = z_syndrome_to_stabilizer_matrix(d, h_syndrome)
+        stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
     elif stab_type.upper() == "X":
-        stabilizer_matrix = x_syndrome_to_stabilizer_matrix(d, h_syndrome)
+        rot_synd = rotate_and_reorder_syndrome(d, h_syndrome)
+        stabilizer_matrix = format_syndrome_to_matrix(d, rot_synd)
     else:
         raise ValueError("unexpected detector")
     
@@ -227,10 +229,14 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z",only_obs_flip=True)
         return log_p_I, log_p_L, obs_flip 
 
 # arons code adapted 
-def decode_half_syndrome_aron(d,p,h_syndrome, only_obs_flip=True):
-    z_matrix = z_syndrome_to_stabilizer_matrix(d, h_syndrome)
-    f_I, c_f = stabilizer_to_pauli(d, z_matrix)
-    f_L, _ = stabilizer_to_pauli(d, z_matrix, add_logical=True)
+def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",only_obs_flip=True):
+    if stab_type.upper() == "X":
+        # need to rotate X stabilizer -> can be treated like Z stabilizer 
+        h_syndrome = rotate_and_reorder_syndrome(d, h_syndrome)
+    stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
+
+    f_I, c_f = stabilizer_to_pauli(d, stabilizer_matrix)
+    f_L, _ = stabilizer_to_pauli(d, stabilizer_matrix, add_logical=True)
     p_I = simulation_mld(
         p,
         d,
@@ -242,81 +248,7 @@ def decode_half_syndrome_aron(d,p,h_syndrome, only_obs_flip=True):
         error_converter(int(d), f_L),
         )
     obs_flip = True if p_I < p_L else False 
-    # obs_flip = obs_flip^pauli_flip
     if only_obs_flip:
         return obs_flip, c_f
     else:
         return p_I, p_L, obs_flip 
-
-# I disabled the testing a bit
-if __name__ == "__main__" and False:
-    # compare arons and my decoder 
-    def check_prop_array(pis,pls,log_values=False):
-        pis = np.array(pis)
-        pls = np.array(pls)
-        if log_values:
-            pis = np.exp(pis)
-            pls = np.exp(pls)
-        print(f"\nsum p_I={np.sum(pis)}")
-        print(f"sum p_L={np.sum(pls)}")
-        print(f"Total sum={np.sum(pls) + np.sum(pis)}")
-
-    def test(d):
-        """
-        generates all possible syndromes 
-        """
-        ns = np.arange(0,2**(d),)
-        occ_vec = ((ns[:, None] >> np.arange(d)) & 1).astype(np.bool) 
-        return occ_vec
-
-
-
-    syndrome_list3 = [
-        True, False,
-        True, False,
-        True, True,
-    ]
-    syndrome_list = syndrome_list3 
-    stab_type = "Z"
-    d = 3
-    p = 0.01 
-    all_possible_syndromes = test(d*(d-1))
-    p_is = [] 
-    ap_is = []
-    p_ls = []
-    ap_ls = []
-    obs_flips = []
-    aobs_flips = []
-    miss_count = 0
-    my_log_implementation = False# for log = False
-    for synd in all_possible_syndromes:
-        if not my_log_implementation:
-            p_I, p_L, obs = decode_half_syndrome(d, p, synd, stab_type, only_obs_flip=False)
-        else:
-            p_I, p_L, obs = decode_half_syndrome_log(d, p, synd, stab_type, only_obs_flip=False)
-        p_is += [p_I]
-        p_ls += [p_L]
-        obs_flips += [obs]
-        ap_I, ap_L, aobs = decode_half_syndrome_aron(d,p,synd) # always in log scale
-        ap_is += [ap_I]
-        ap_ls += [ap_L]
-        aobs_flips += [aobs]
-        if obs != aobs:
-            miss_count += 1
-            print()
-            print(obs,aobs)
-            print(synd)
-            print(p_I, p_L)
-            print(ap_I, ap_L)
-            print()
-
-
-    print("different obs:",miss_count)
-    print(len(all_possible_syndromes))
-    print("mine:") 
-    check_prop_array(p_is, p_ls, log_values=my_log_implementation)
-    # = 0.999999999 for normal
-    # = 0.999999999 for log
-    print("aron:")
-    check_prop_array(ap_is, ap_ls, log_values=True)
-    # works now!

@@ -89,6 +89,23 @@ def construct_bit_flip_model(noise: float,):
         }
     return noise_model
 
+def construct_phase_flip_model(noise: float,):
+    """
+    construct_basic_error_model, constructs a noise model where there are only error after initilazation of the main data qubit.
+    
+    :param noise: define the error rate of the occuring errors 
+    :type noise: float
+    """
+    noise_model = {} 
+    noise_model["inital_Z_errors"] = { 
+            "operator": {"I"}, 
+            "error_position": "following", 
+            "error": "Z_ERROR", 
+            "noise": noise, 
+            "specific_tag": {"psi_data"}, 
+        }
+    return noise_model
+
 def construct_circuit_noise_model(noise: float, ):
     """
     :param noise: define the error rate of the occuring errors 

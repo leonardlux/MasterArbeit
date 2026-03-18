@@ -32,6 +32,7 @@ def gen_mwpm_matcher(d, p, z_stab: bool = True, noise_model = "basic"):
         d,
         Z_stab=z_stab, 
         X_stab = not z_stab, 
+        observable= ("Z" if z_stab else "X")
         )
     flip_noise = construct_basic_noise_model(
         pr, 
