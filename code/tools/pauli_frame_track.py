@@ -1,12 +1,8 @@
 import numpy as np
 import numba 
 
-if __name__ == "__main__":
-    from syndrome import split_syndrome 
-    from surface_code import index_log_Z, index_log_X
-else:
-    from tools.syndrome import split_syndrome
-    from tools.surface_code import index_log_Z, index_log_X
+from tools.syndrome import split_syndrome
+from tools.circuits import index_log_Z, index_log_X
 
 ## Syndrome to stabilizer Matrix
 

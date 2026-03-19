@@ -419,3 +419,10 @@ def generate_steane_circuit(distance: int = 3, rounds: int = 1, observable: str 
         )
 
     return circuit
+
+def config_to_circ_func(config):
+    value = config["circ"]["type"]
+    if  value == "steane":
+        return generate_steane_circuit
+    else:
+        raise ValueError(f"unkown config parameter: circ, type: {value}")

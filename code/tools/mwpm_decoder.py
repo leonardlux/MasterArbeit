@@ -1,7 +1,7 @@
 import numpy as np
 import pymatching
 
-from tools.surface_code import generate_surface_code_circuit
+from tools.circuits import generate_surface_code_circuit
 from tools.error_models import add_noise, construct_basic_noise_model 
 from tools.error_propagation import uncorr_eff_noise
 from tools.syndrome import split_syndromes, split_and_xor_syndrome 

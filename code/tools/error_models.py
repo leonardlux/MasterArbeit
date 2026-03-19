@@ -138,20 +138,17 @@ def construct_circuit_noise_model(noise: float, ):
         "noise": noise,
     },
 }
-        
     return noise_model
-"""
-Additionaly:
-Some examples
-"""
 
-# Most basic example of a noise model
-noise_model = {
-    "<some name>": {
-        "operator": {"H"}, # set {} of str descriping the stim instructions/targets beeing targeted
-        "error_position": "before", # or "following" in regard to the orignial instruction
-        "error": "X_ERROR", # str with name of the stim error instruction
-        "noise": 0.1, # noise rate of the error  
-        "specific_tag": {"psi_data"}, # specific tag of targeted instruction
-    }
-}
+def config_to_noise_model_func(config):
+    value = config["noise_model"]["noise_model_name"]
+    if value == "circ":
+        return construct_circuit_noise_model
+    elif value == "bit_flip":
+        return construct_bit_flip_model
+    elif value == "phase_flip":
+        return construct_phase_flip_model 
+    elif value == "basic":
+        return construct_basic_noise_model 
+    else:
+        raise ValueError(f"unkown config parameter: circ, type: {value}")
