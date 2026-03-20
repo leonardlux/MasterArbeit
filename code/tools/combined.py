@@ -3,6 +3,7 @@ import numpy as np
 from tools.circuits             import config_to_circ_func
 from tools.error_models         import config_to_noise_model_func, add_noise 
 from tools.syndrome_prediction  import config_to_predict_func, sample_ciruit, calc_num_errors  
+from tools.file                 import read_config, write_folder
 
 
 def generate_data_from_config(config: dict):
@@ -57,6 +58,8 @@ def generate_data_from_config(config: dict):
     }
     return data 
 
-
-                
+def generate_new_data_from_config_file(config_filepath, output_folder_name):
+    config = read_config(config_filepath)
+    data = generate_data_from_config(config)
+    write_folder(config, data, folder_name=output_folder_name)
 

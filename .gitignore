@@ -27,3 +27,6 @@ Notizen/notes/images/*
 # other
 *.zip
 *.h5
+
+# data
+*.hdf5

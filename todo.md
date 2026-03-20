@@ -18,6 +18,7 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+This week:
 0. more results:
 basic: 
 look at |+> (Z-errors/phase-flips) and |0> (X-errors/bit-flips) states
@@ -31,9 +32,9 @@ and MWPM Decoder and ML Decoder
         - compare to literature
 
 (scan all data folders and gather all relevant datasets (not really necessary))
+
 1. write anaylsis function based on data object
 
-This week
 2. threshold for circuit lvl noise
     - threshold dependent on rounds for circ lvl noise
 

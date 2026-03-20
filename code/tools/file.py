@@ -43,6 +43,7 @@ def read_data(filepath):
             data[key] = np.array(file[key])
     return data 
 
+
 # write results to folders: 
 def folderpath_from_name(folder_name):
     base_path = "/home/leo/Documents/MasterArbeit/code/data"
