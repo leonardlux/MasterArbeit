@@ -184,3 +184,12 @@ def generate_log_error_rates_diff_p(
         log_error_rates.append(log_error_prob)
         y_errs.append(y_err)
     return log_error_rates, y_errs
+
+def config_to_predict_func(config):
+    value = config["decoder"]["type"]
+    if value == "ml":
+        return predict_ML 
+    elif value == "mwpm":
+        return predict_MWPM
+    else:
+        raise ValueError(f"unkown config parameter: circ, type: {value}")

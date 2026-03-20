@@ -141,7 +141,7 @@ def construct_circuit_noise_model(noise: float, ):
     return noise_model
 
 def config_to_noise_model_func(config):
-    value = config["noise_model"]["noise_model_name"]
+    value = config["noise_model"]["type"]
     if value == "circ":
         return construct_circuit_noise_model
     elif value == "bit_flip":

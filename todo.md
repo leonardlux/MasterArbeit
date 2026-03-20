@@ -30,19 +30,20 @@ and MWPM Decoder and ML Decoder
             + discard d=3
         - compare to literature
 
+(scan all data folders and gather all relevant datasets (not really necessary))
+1. write anaylsis function based on data object
+
 This week
-1. save data
-    1. save results to file
 2. threshold for circuit lvl noise
     - threshold dependent on rounds for circ lvl noise
 
 ## Orderd ToDo List
 
-8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
-
 10. compare to d rounds stabilizer measurement as one QEC cycle
     + for each of the d put error on data qubit
-11. check order of stabilizer cnots (to get the free distance improvement)
+    + check order of stabilizer cnots in surface code (to get the free distance improvement)
+
+8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
 
 12. enable different order
 
@@ -52,12 +53,7 @@ This week
 
 ## Other ToDos
 0. 2 obs will be a problem for my current count logical implementation!
-0. reimplement noise model func and propagated noise model, such that both are id by one parameter!
-0. increase throughput:
-    use numba more!! (for faster results) 
-    and parralism with numba
-1. compare to MWPM with allknowing detector Error model!
-2. enable complex error models
+2. enable complex error models (yes!)
 3. tex error propagation part
 
 ## Question from midterm
@@ -68,12 +64,24 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 20.03 Friday
+
+01. write data to file
+02. write config to file -> read config -> gen data from config -> write data
+03. write data to folder
+
+# 19.03 Thursday
+
+00. config file
+01. reimplement syndrome decoding (more physics applied) 
+02. deleted all knowing MWPM (not of interest correct ? otherwise reimplement correctly!)
+03. generate data from config file
+
 # 18.03 Wednesday
 
 00. implement |+> state
     + works for everything 
 01. jitted everything and parrallised something (little return)
-02. 
     
 # 17.03 Tuesday 
 
