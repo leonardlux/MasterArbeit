@@ -7,7 +7,7 @@ choice of logical repr in the end
         - difference only appears for ML decoder 
 
 data collapse method only work close to threshold 
-    + should i show asymtotic behavior?
+    + should i show asymtotic behavior? (is there anything interesting)
 
 ML might have numerical stability problems for asymptotic behavior
     + is this a problem?! (is it due do my coding?)
@@ -25,40 +25,29 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
-1. Plot log_error_rate over full noise_length
+1. Plot log_error_rate over full noise_length 
     + optional selective distances 
     + optional selective rounds
     + optional show determined threshold
+    1. show data for basic noise level for broad range of ML/MWPM decoder
+        + talk about interesting interaction
 
 2. Determine Threshold
-    + given data row, return threshold for each #r 
-    + optional for selective number of rounds
+    + enable kill certain distances (or lower limit)
+    + enable limit in probability (min and max)
     + TODO: should I return errors
 
-3. Plot data collapse fit
-    + given determined parameters
+20. enable compare thresholds method!
     
+3. compare threshold for basic case in one plot 
+    + with error bars!
+    + compare to literature
 
+4. save a circuit diagram for distance 3 as a result file
 
-This week:
-0. more results:
-basic: 
-look at |+> (Z-errors/phase-flips) and |0> (X-errors/bit-flips) states
-save a circuit diagram for distance 3
-and MWPM Decoder and ML Decoder
-    - 'full' range to show asymptotic behavior
-        - use data collapse method here as well (should also work)
-    - indepth around p_th 
-        - determine p_th
-            + discard d=3
-        - compare to literature
+5. determine threshold (and nu for circ level function)
 
-(scan all data folders and gather all relevant datasets (not really necessary))
-
-1. write anaylsis function based on data object
-
-2. threshold for circuit lvl noise
-    - threshold dependent on rounds for circ lvl noise
+5. add titles to plots!
 
 ## Orderd ToDo List
 
@@ -86,6 +75,14 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+# 21.03 Friday
+
+00. solved bugs in new implementation
+01. enabled analysis from saved data
+02. recovered results for basic test
+03. plot data collpase method results
+
 
 # 20.03 Friday
 
