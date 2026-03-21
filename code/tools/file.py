@@ -3,8 +3,12 @@ import yaml
 import os 
 import numpy as np
 
+from tools.parameter import PATH_TO_CONFIG_FOLDER, PATH_TO_DATA_FOLDER
+
 # Configs
-def write_config(configuration: dict, filepath: str):
+def write_config(configuration: dict, filepath: str, backup: bool = False):
+    if backup:
+        filepath = os.path.join(PATH_TO_CONFIG_FOLDER, filepath+".yaml")
     with open(filepath,"w") as file:
         yaml.dump(configuration, file)
     pass
@@ -46,7 +50,7 @@ def read_data(filepath):
 
 # write results to folders: 
 def folderpath_from_name(folder_name):
-    base_path = "/home/leo/Documents/MasterArbeit/code/data"
+    base_path = PATH_TO_DATA_FOLDER 
     folder_path = os.path.join(base_path,folder_name)
     return folder_path
 
@@ -77,7 +81,7 @@ def read_folder(folder_name="",folder_path=""):
 
 
 # other
-def get_basic_config():
+def get_standard_config():
     # note lists should contain float or integers in yaml ... not good for noise rates
     return {
         "circuit": {
@@ -92,8 +96,8 @@ def get_basic_config():
             "special_parameter": {},# open for future references
         },
         "noise_model": {
-            "noise_model_name": "circ",     # noise model: "circ", "bit_flip", "phase_flip", "basic" # this string defines the function that is gonna be used
-            "noise_rates":   [0.1],         # list of error rates
+            "type": "circ",     # noise model: "circ", "bit_flip", "phase_flip", "basic" # this string defines the function that is gonna be used
+            "noise_rates": [float(x) for x in np.logspace(-2.0,-0.8,dtype=float)],         # list of error rates
             "special_parameter": {},        # open for future references
         },
         "decoder": {

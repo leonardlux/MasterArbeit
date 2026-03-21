@@ -30,6 +30,7 @@ def generate_data_from_config(config: dict):
                 observable =observable,
                 )
             for i_p, p in enumerate(ps):
+                print(f"starting: d: {i_d+1}/{len(ds)}, r: {i_r+1}/{len(n_rounds)}, p: {i_p+1}/{len(ps)}")
                 # add noise
                 circ_d_r_p = add_noise(
                     circuit =       circ_d_r,  
@@ -48,7 +49,9 @@ def generate_data_from_config(config: dict):
                 )
                 # compare predicitons and obs
                 num_errors[i_d,i_r,i_p] = calc_num_errors(predictions,observable_flips)
+                print("done")
 
+    # num_errors[i_d][i_r][i_p]
     data = {
         "distances": ds,
         "rounds": n_rounds,

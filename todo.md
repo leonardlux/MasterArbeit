@@ -6,6 +6,13 @@ choice of logical repr in the end
     - but at least if I choose diff, for X and Z: d>3 fails! (Z multi, X single and X obs)
         - difference only appears for ML decoder 
 
+data collapse method only work close to threshold 
+    + should i show asymtotic behavior?
+
+ML might have numerical stability problems for asymptotic behavior
+    + is this a problem?! (is it due do my coding?)
+    + or is it a mathematical artefact (does not seem to be one)
+
 # Thematischer Bezug
 
 Read more:
@@ -17,6 +24,21 @@ Formalismus vereinheitlichen!
 Write a lot of stuff into my latex overview file 
 
 # ToDos 
+
+1. Plot log_error_rate over full noise_length
+    + optional selective distances 
+    + optional selective rounds
+    + optional show determined threshold
+
+2. Determine Threshold
+    + given data row, return threshold for each #r 
+    + optional for selective number of rounds
+    + TODO: should I return errors
+
+3. Plot data collapse fit
+    + given determined parameters
+    
+
 
 This week:
 0. more results:
@@ -69,7 +91,8 @@ show more asymptotic behavior (and explain the exponents fucntion)
 
 01. write data to file
 02. write config to file -> read config -> gen data from config -> write data
-03. write data to folder
+03. enable write data to folder
+04. start replacing old results functions with new ones 
 
 # 19.03 Thursday
 
