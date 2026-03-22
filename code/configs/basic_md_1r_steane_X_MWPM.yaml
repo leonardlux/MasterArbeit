@@ -1,6 +1,5 @@
 circuit:
   distances:
-  - 3
   - 5
   - 7
   - 9
@@ -15,7 +14,7 @@ circuit:
   special_parameter: {}
   type: steane
 decoder:
-  type: ml
+  type: mwpm
 noise_model:
   noise_rates:
   - 0.06309573444801933
@@ -71,4 +70,4 @@ noise_model:
   special_parameter: {}
   type: phase_flip
 sampling:
-  num_shots: 1000
+  num_shots: 100000

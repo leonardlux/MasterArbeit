@@ -25,6 +25,8 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+0. run scripts on cluster!
+
 1. Plot log_error_rate over full noise_length 
     + optional selective distances 
     + optional selective rounds

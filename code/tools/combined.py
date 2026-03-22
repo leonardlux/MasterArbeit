@@ -1,4 +1,6 @@
 import numpy as np
+import time
+import datetime
 
 from tools.circuits             import config_to_circ_func
 from tools.error_models         import config_to_noise_model_func, add_noise 
@@ -30,6 +32,7 @@ def generate_data_from_config(config: dict):
                 observable =observable,
                 )
             for i_p, p in enumerate(ps):
+                p_time = time.time()
                 print(f"starting: d: {i_d+1}/{len(ds)}, r: {i_r+1}/{len(n_rounds)}, p: {i_p+1}/{len(ps)}")
                 # add noise
                 circ_d_r_p = add_noise(
@@ -49,7 +52,8 @@ def generate_data_from_config(config: dict):
                 )
                 # compare predicitons and obs
                 num_errors[i_d,i_r,i_p] = calc_num_errors(predictions,observable_flips)
-                print("done")
+                print(f"done. took: {str(datetime.timedelta(seconds=time.time()-p_time))}")
+
 
     # num_errors[i_d][i_r][i_p]
     data = {
