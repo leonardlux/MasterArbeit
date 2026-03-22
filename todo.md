@@ -28,16 +28,12 @@ Write a lot of stuff into my latex overview file
 0. run scripts on cluster!
 
 1. Plot log_error_rate over full noise_length 
-    + optional selective distances 
     + optional selective rounds
-    + optional show determined threshold
     1. show data for basic noise level for broad range of ML/MWPM decoder
         + talk about interesting interaction
 
 2. Determine Threshold
-    + enable kill certain distances (or lower limit)
-    + enable limit in probability (min and max)
-    + TODO: should I return errors
+    + TODO: should return errors
 
 20. enable compare thresholds method!
     
@@ -78,7 +74,13 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
-# 21.03 Friday
+# 22.03 Sunday
+
+00. determine threshold
+    + selective distance
+    + selective noise range
+
+# 21.03 Saturday 
 
 00. solved bugs in new implementation
 01. enabled analysis from saved data
