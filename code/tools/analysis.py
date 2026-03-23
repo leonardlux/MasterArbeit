@@ -62,7 +62,8 @@ def determine_threshold(
 
     pth = np.zeros((n_r))
     err_pth = np.zeros((n_r))
-    nu = np.zeros((n_r)) 
+    nu = np.zeros((n_r))
+    err_nu = np.zeros((n_r))
 
     for i_r in range(n_r):
         if select_rounds != None and not rounds[i_r] in select_rounds:
@@ -87,6 +88,7 @@ def determine_threshold(
 
         pth[i_r], inv_nu = result.x
         nu[i_r] = 1/inv_nu
+
         err_pth[i_r], inv_nu_err = compute_error_bar(
             xs_list=xs_list,
             ys_list=ys_list,
@@ -95,6 +97,7 @@ def determine_threshold(
             guess_xc=guess_pth[i_r],
             guess_nu=guess_nu[i_r],
         )
+        err_nu[i_r] = inv_nu_err/nu[i_r]**2
     
     print(pth)
     print(err_pth)
@@ -103,7 +106,7 @@ def determine_threshold(
     data["err_p_th"] = err_pth 
 
     data["nu_fit"] = nu
-    # Do error propagation
+    data["err_nu_fit"] = err_nu
 
     return data
 
