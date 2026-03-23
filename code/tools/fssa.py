@@ -60,19 +60,19 @@ def compute_critical_exponents(xs_list, ys_list, errs_list, Ls, guess_xc, guess_
         )
     return result
 
-def compute_error_bar(xs_list, ys_list, errs_list, Ls, guess_pc, guess_nu, derivative=0, n_samples=250):
+def compute_error_bar(xs_list, ys_list, errs_list, Ls, guess_xc, guess_nu, derivative=0, n_samples=250):
     """
-    Bootstrap error bars for pc and nu by resampling the data.
+    Bootstrap error bars for pc and inv_nu by resampling the data.
     """
     pcs, inv_nus = np.zeros(n_samples), np.zeros(n_samples)
 
     for i in range(n_samples):
         # Resample ys with normal distribution based on the error bars
         ys_sampled = [np.random.normal(ys, errs) for ys, errs in zip(ys_list, errs_list)]
-        result = compute_critical_exponents(xs_list, ys_sampled, errs_list, Ls, guess_pc, guess_nu, derivative)
+        result = compute_critical_exponents(xs_list, ys_sampled, errs_list, Ls, guess_xc, guess_nu, derivative)
         pcs[i], inv_nus[i] = result.x
 
-    pc_err = np.percentile(pcs, 97.5) - np.percentile(pcs, 2.5)
+    xc_err = np.percentile(pcs, 97.5) - np.percentile(pcs, 2.5)
     inv_nu_err = np.percentile(inv_nus, 97.5) - np.percentile(inv_nus, 2.5)
 
-    return pc_err, inv_nu_err
+    return xc_err, inv_nu_err

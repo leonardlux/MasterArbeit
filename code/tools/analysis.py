@@ -62,27 +62,47 @@ def determine_threshold(
 
 
     pth = np.zeros((n_r))
+    err_pth = np.zeros((n_r))
     nu = np.zeros((n_r)) 
 
     for i_r in range(n_r):
+
+        xs_list=[ps[p_mask]]*len(distances[d_mask])
+        ys_list=log_error_rates[d_mask, i_r][:,p_mask]
+        errs_list=err_log_error_rates[d_mask, i_r][:,p_mask]
+        Ls = distances[d_mask]
+
         result = compute_critical_exponents(
-            xs_list=[ps[p_mask]]*len(distances[d_mask]),
-            ys_list=log_error_rates[d_mask, i_r][:,p_mask],
-            errs_list=err_log_error_rates[d_mask, i_r][:,p_mask],
-            Ls=distances[d_mask],
+            xs_list=xs_list,
+            ys_list=ys_list,
+            errs_list=errs_list,
+            Ls=Ls,
             guess_xc=guess_pth[i_r],
             guess_nu=guess_nu[i_r],
         )
         if print_result:
             print()
             print(result)
+
         pth[i_r], inv_nu = result.x
         nu[i_r] = 1/inv_nu
-
-        #TODO: Errorbars!
+        err_pth[i_r], inv_nu_err = compute_error_bar(
+            xs_list=xs_list,
+            ys_list=ys_list,
+            errs_list=errs_list,
+            Ls=Ls,
+            guess_xc=guess_pth[i_r],
+            guess_nu=guess_nu[i_r],
+        )
     
-    data["p_threshold"] = pth
+    print(pth)
+    print(err_pth)
+    
+    data["p_th"] = pth
+    data["err_p_th"] = err_pth 
+
     data["nu_fit"] = nu
+    # Do error propagation
 
     return data
 
@@ -93,8 +113,7 @@ def data_plot_log_error_rates(data, rounds=None, min_distance: int = 0, min_nois
     if <distances> and <rounds> are defined, only plot those.  
     """
     if not "log_error_rates" in data.keys():
-        print("WARNING: needed to calculate log_error_rates, for 'plot_log_error_rate'")
-        data = data_pre_processing(data)
+        raise ValueError("WARNING: needed to calculate log_error_rates, for 'plot_log_error_rate'")
 
     n_d, n_r, n_p = len(data["distances"]), len(data["rounds"]), len(data["noise_rates"])
     distances = data["distances"]
@@ -124,7 +143,7 @@ def data_plot_log_error_rates(data, rounds=None, min_distance: int = 0, min_nois
     pass
 
 def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0, max_noise_rate:float = 1):
-    if not "p_threshold" in data.keys():
+    if not "p_th" in data.keys():
         print("WARNING: needed to calculated p_threshold, for 'data_plot_fssa_results'")
         data = determine_threshold(data)
 
@@ -134,7 +153,7 @@ def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0
     log_error_rates = data["log_error_rates"] 
     err_log_error_rates = data["err_log_error_rates"]
 
-    p_th = data["p_threshold"] 
+    p_th = data["p_th"] 
     nu = data["nu_fit"] 
 
     # distance mask

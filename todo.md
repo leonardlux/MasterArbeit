@@ -29,23 +29,21 @@ Write a lot of stuff into my latex overview file
 
 1. Plot log_error_rate over full noise_length 
     + optional selective rounds
-    1. show data for basic noise level for broad range of ML/MWPM decoder
-        + talk about interesting interaction
-
-2. Determine Threshold
-    + TODO: should return errors
-
-20. enable compare thresholds method!
     
-3. compare threshold for basic case in one plot 
-    + with error bars!
-    + compare to literature
+2. better understand determine threshold method
+    + especially the how to determine errorbars 
 
 4. save a circuit diagram for distance 3 as a result file
+    + automate the saving process more (as a result file!)
 
 5. determine threshold (and nu for circ level function)
 
-5. add titles to plots!
+6. Solve precision problem: 
+    + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
+
+7. add titles to plots!
+
+8. error propagated the error of inv_nu to nu 
 
 ## Orderd ToDo List
 
@@ -73,6 +71,12 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+# 23.03 Monday
+
+00. look at min_distance dependency
+01. compare basic threshold to literature
+02. enable error on threshold
 
 # 22.03 Sunday
 
