@@ -125,8 +125,8 @@ def data_plot_log_error_rates(data, select_rounds: list = None, min_distance: in
     log_error_rates = data["log_error_rates"]
     err_log_error_rates = data["err_log_error_rates"]
 
-    if "p_threshold" in data.keys():
-        p_th = data["p_threshold"]
+    if "p_th" in data.keys():
+        p_th = data["p_th"]
     else:
         p_th = [None] * len(rounds) 
 

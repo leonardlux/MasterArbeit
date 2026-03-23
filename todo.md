@@ -25,25 +25,23 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+5. determine threshold (and nu for circ level function)
+    + optimize nu!
+
 0. run scripts on cluster!
 
-1. Plot log_error_rate over full noise_length 
-    + optional selective rounds
-    
 2. better understand determine threshold method
     + especially the how to determine errorbars 
-
-4. save a circuit diagram for distance 3 as a result file
-    + automate the saving process more (as a result file!)
-
-5. determine threshold (and nu for circ level function)
 
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
-7. add titles to plots!
 
-8. error propagated the error of inv_nu to nu 
+(simple stuff)
+4. save a circuit diagram for distance 3 as a result file 
+    + automate the saving process more (as a result file!)
+
+
 
 ## Orderd ToDo List
 
@@ -77,6 +75,8 @@ show more asymptotic behavior (and explain the exponents fucntion)
 00. look at min_distance dependency
 01. compare basic threshold to literature
 02. enable error on threshold
+03. error propagated the error of inv_nu to nu 
+04. optional selective rounds
 
 # 22.03 Sunday
 
