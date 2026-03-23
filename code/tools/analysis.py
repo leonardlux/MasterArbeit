@@ -40,15 +40,14 @@ def determine_threshold(
         ) -> dict:
     """
     This function determines the threshold of a given data set, for each rounds independently. 
-    if <select_distances> and <select_rounds> are defined, only calculat for those.
-    TODO: implement: select_rounds, select_distances
-    TODO: implement Error calculation
+    if select_rounds != None only calculate for the given number of qec rounds.
     """
     if not "log_error_rates" in data.keys():
         print("WARNING: needed to calculate log_error_rates, for 'determine_threshold'")
         data = data_pre_processing(data)
 
-    n_r = len(data["rounds"])
+    rounds = data["rounds"]
+    n_r = len(rounds)
     ps = data["noise_rates"]
     distances = data["distances"]
     log_error_rates = data["log_error_rates"] 
@@ -66,6 +65,8 @@ def determine_threshold(
     nu = np.zeros((n_r)) 
 
     for i_r in range(n_r):
+        if select_rounds != None and not rounds[i_r] in select_rounds:
+            continue # skip not selected rounds if 
 
         xs_list=[ps[p_mask]]*len(distances[d_mask])
         ys_list=log_error_rates[d_mask, i_r][:,p_mask]
@@ -107,15 +108,15 @@ def determine_threshold(
     return data
 
 # Plotting
-def data_plot_log_error_rates(data, rounds=None, min_distance: int = 0, min_noise_rate: float = 0, max_noise_rate: float = 1,  ):
+def data_plot_log_error_rates(data, select_rounds: list = None, min_distance: int = 0, min_noise_rate: float = 0, max_noise_rate: float = 1,  ):
     """
     This function plots all log errrot rates against the physical noise rate.
-    if <distances> and <rounds> are defined, only plot those.  
+    if select_rounds != None only calculate for the given number of qec rounds.
     """
     if not "log_error_rates" in data.keys():
         raise ValueError("WARNING: needed to calculate log_error_rates, for 'plot_log_error_rate'")
 
-    n_d, n_r, n_p = len(data["distances"]), len(data["rounds"]), len(data["noise_rates"])
+    rounds = data["rounds"]
     distances = data["distances"]
     ps = data["noise_rates"]
     log_error_rates = data["log_error_rates"]
@@ -124,14 +125,16 @@ def data_plot_log_error_rates(data, rounds=None, min_distance: int = 0, min_nois
     if "p_threshold" in data.keys():
         p_th = data["p_threshold"]
     else:
-        p_th = [None] * n_r 
+        p_th = [None] * len(rounds) 
 
     # distance mask
     d_mask = distances >= min_distance
     # probability mask
     p_mask = (ps >= min_noise_rate) & (ps <= max_noise_rate)
     # for i_d in range(n_d):
-    for i_r in range(n_r): 
+    for i_r in range(len(rounds)): 
+        if select_rounds != None and not rounds[i_r] in select_rounds:
+            continue # skip not selected rounds if 
 
         plot_diff_noise_level(
             log_error_rates = log_error_rates[d_mask, i_r][:,p_mask],
@@ -142,12 +145,12 @@ def data_plot_log_error_rates(data, rounds=None, min_distance: int = 0, min_nois
             )
     pass
 
-def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0, max_noise_rate:float = 1):
+def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0, max_noise_rate:float = 1, select_rounds: list = None):
     if not "p_th" in data.keys():
         print("WARNING: needed to calculated p_threshold, for 'data_plot_fssa_results'")
         data = determine_threshold(data)
 
-    n_r = len(data["rounds"])
+    rounds = data["rounds"]
     ps = data["noise_rates"]
     distances = data["distances"]
     log_error_rates = data["log_error_rates"] 
@@ -161,7 +164,10 @@ def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0
     # probability mask
     p_mask = (ps >= min_noise_rate) & (ps <= max_noise_rate)
 
-    for i_r in range(n_r):
+    for i_r in range(len(rounds)):
+        if select_rounds != None and not rounds[i_r] in select_rounds:
+            continue # skip not selected rounds if 
+
         plot_fssa_results(
             xs=[ps[p_mask]]*len(distances[d_mask]),
             ys=log_error_rates[d_mask, i_r][:,p_mask],
