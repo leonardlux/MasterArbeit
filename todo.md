@@ -6,8 +6,9 @@ choice of logical repr in the end
     - but at least if I choose diff, for X and Z: d>3 fails! (Z multi, X single and X obs)
         - difference only appears for ML decoder 
 
-data collapse method only work close to threshold 
+data collapse method works close to threshold 
     + should i show asymtotic behavior? (is there anything interesting)
+    + is there any way to have a systemtatic first guess for nu?
 
 ML might have numerical stability problems for asymptotic behavior
     + is this a problem?! (is it due do my coding?)
@@ -28,7 +29,15 @@ Write a lot of stuff into my latex overview file
 5. determine threshold (and nu for circ level function)
     + optimize nu!
 
+
+7. construct scripts for multi rounds analysis 
+    + fixed p
+    + determine threshold for different number of rounds
+    + (start with small sample size => use cluster to increase size -> reduce error)
+
 0. run scripts on cluster!
+    + get access to the cluster again 
+    + and setup ssh!
 
 2. better understand determine threshold method
     + especially the how to determine errorbars 
@@ -37,9 +46,18 @@ Write a lot of stuff into my latex overview file
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
 
-(simple stuff)
+## This week!
+
+1. write down error propagation derivation for luis
+
+## Simple stuff for breaks
+
 4. save a circuit diagram for distance 3 as a result file 
     + automate the saving process more (as a result file!)
+
+12. enable different order
+
+12. p_window in analysis -> from single value to list each entry is for one round
 
 
 
@@ -51,16 +69,12 @@ Write a lot of stuff into my latex overview file
 
 8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
 
-12. enable different order
-
 13. enable bell state as inital state + different logic measurement 
 
-14. write down error propagation in latex 
 
 ## Other ToDos
 0. 2 obs will be a problem for my current count logical implementation!
 2. enable complex error models (yes!)
-3. tex error propagation part
 
 ## Question from midterm
 
@@ -69,6 +83,11 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+# 24.03 Tuesday
+
+00. clean up basic and circ lvl script 
+    + reduce the amount of parameters and shorten as much as possible!
 
 # 23.03 Monday
 

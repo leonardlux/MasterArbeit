@@ -1,5 +1,6 @@
 circuit:
   distances:
+  - 3
   - 5
   - 7
   - 9

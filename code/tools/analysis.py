@@ -32,9 +32,9 @@ def determine_threshold(
         data: dict, 
         guess_nu: list, 
         guess_pth: list, 
-        min_distance: int = 0, 
-        min_noise_rate: float = 0,
-        max_noise_rate: float = 1,
+        min_distance: list = None, 
+        min_noise_rate: list = None,
+        max_noise_rate: list = None,
         select_rounds: list = None, 
         print_result: bool = True,
         ) -> dict:
@@ -53,12 +53,13 @@ def determine_threshold(
     log_error_rates = data["log_error_rates"] 
     err_log_error_rates = data["err_log_error_rates"]
 
-    # distance mask
-    d_mask = distances >= min_distance
-    # probability mask
-    p_mask = (ps >= min_noise_rate) & (ps <= max_noise_rate)
-
-
+    # initalize proper standard values
+    if min_distance == None:
+        min_distance = [0] * len(rounds)
+    if min_noise_rate == None:
+        min_noise_rate = [0] * len(rounds)
+    if max_noise_rate == None:
+        max_noise_rate = [1] *len(rounds)
 
     pth = np.zeros((n_r))
     err_pth = np.zeros((n_r))
@@ -68,6 +69,11 @@ def determine_threshold(
     for i_r in range(n_r):
         if select_rounds != None and not rounds[i_r] in select_rounds:
             continue # skip not selected rounds if 
+
+        # distance mask
+        d_mask = distances >= min_distance[i_r]
+        # probability mask
+        p_mask = (ps >= min_noise_rate[i_r]) & (ps <= max_noise_rate[i_r])
 
         xs_list=[ps[p_mask]]*len(distances[d_mask])
         ys_list=log_error_rates[d_mask, i_r][:,p_mask]
@@ -111,7 +117,7 @@ def determine_threshold(
     return data
 
 # Plotting
-def data_plot_log_error_rates(data, select_rounds: list = None, min_distance: int = 0, min_noise_rate: float = 0, max_noise_rate: float = 1,  ):
+def data_plot_log_error_rates(data, select_rounds: list = None, min_distance: list = None, min_noise_rate: list  = None, max_noise_rate: list = None,  ):
     """
     This function plots all log errrot rates against the physical noise rate.
     if select_rounds != None only calculate for the given number of qec rounds.
@@ -119,25 +125,35 @@ def data_plot_log_error_rates(data, select_rounds: list = None, min_distance: in
     if not "log_error_rates" in data.keys():
         raise ValueError("WARNING: needed to calculate log_error_rates, for 'plot_log_error_rate'")
 
+    # read data from data dict 
     rounds = data["rounds"]
     distances = data["distances"]
     ps = data["noise_rates"]
     log_error_rates = data["log_error_rates"]
     err_log_error_rates = data["err_log_error_rates"]
 
+    # initalize proper standard values
+    if min_distance == None:
+        min_distance = [0] * len(rounds)
+    if min_noise_rate == None:
+        min_noise_rate = [0] * len(rounds)
+    if max_noise_rate == None:
+        max_noise_rate = [1] *len(rounds)
+
     if "p_th" in data.keys():
         p_th = data["p_th"]
     else:
         p_th = [None] * len(rounds) 
 
-    # distance mask
-    d_mask = distances >= min_distance
-    # probability mask
-    p_mask = (ps >= min_noise_rate) & (ps <= max_noise_rate)
     # for i_d in range(n_d):
     for i_r in range(len(rounds)): 
         if select_rounds != None and not rounds[i_r] in select_rounds:
             continue # skip not selected rounds if 
+
+        # distance mask
+        d_mask = distances >= min_distance[i_r]
+        # probability mask
+        p_mask = (ps >= min_noise_rate[i_r]) & (ps <= max_noise_rate[i_r])
 
         plot_diff_noise_level(
             log_error_rates = log_error_rates[d_mask, i_r][:,p_mask],
@@ -148,7 +164,7 @@ def data_plot_log_error_rates(data, select_rounds: list = None, min_distance: in
             )
     pass
 
-def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0, max_noise_rate:float = 1, select_rounds: list = None):
+def data_plot_fssa_results(data, min_distance: list = None, min_noise_rate: list = None, max_noise_rate:list = None, select_rounds: list = None):
     if not "p_th" in data.keys():
         print("WARNING: needed to calculated p_threshold, for 'data_plot_fssa_results'")
         data = determine_threshold(data)
@@ -159,17 +175,25 @@ def data_plot_fssa_results(data, min_distance: int = 0, min_noise_rate:float = 0
     log_error_rates = data["log_error_rates"] 
     err_log_error_rates = data["err_log_error_rates"]
 
+    # initalize proper standard values
+    if min_distance == None:
+        min_distance = [0] * len(rounds)
+    if min_noise_rate == None:
+        min_noise_rate = [0] * len(rounds)
+    if max_noise_rate == None:
+        max_noise_rate = [1] *len(rounds)
+
     p_th = data["p_th"] 
     nu = data["nu_fit"] 
-
-    # distance mask
-    d_mask = distances >= min_distance
-    # probability mask
-    p_mask = (ps >= min_noise_rate) & (ps <= max_noise_rate)
 
     for i_r in range(len(rounds)):
         if select_rounds != None and not rounds[i_r] in select_rounds:
             continue # skip not selected rounds if 
+
+        # distance mask
+        d_mask = distances >= min_distance[i_r]
+        # probability mask
+        p_mask = (ps >= min_noise_rate[i_r]) & (ps <= max_noise_rate[i_r])
 
         plot_fssa_results(
             xs=[ps[p_mask]]*len(distances[d_mask]),
