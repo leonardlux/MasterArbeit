@@ -84,15 +84,15 @@ def corr_eff_noise(p, order="0p"):
     if order == "0p":
         # see calculation for arguments
         px = prob_combined_flip_channels([p, 8/15*p, 2/3*p, ])
-        pz = prob_combined_flip_channels([p, 2/3*p,         ])
+        pz = prob_combined_flip_channels([p,                ])
         pd = prob_combined_depo_channels([p, p, 4/5*p,      ])
         pxt, pyt, pzt = correlated_unified_channel(pd,px,pz)
         return pxt, pyt, pzt
     elif order == "p0":
         # see calculation for arguments
-        px = prob_combined_flip_channels([p,                        ])
-        pz = prob_combined_flip_channels([p, 2/3*p, 8/15*p, 2/3*p,  ])
-        pd = prob_combined_depo_channels([p, p, 4/5*p,              ])
+        px = prob_combined_flip_channels([p,                ])
+        pz = prob_combined_flip_channels([p, 8/15*p, 2/3*p, ])
+        pd = prob_combined_depo_channels([p, p, 4/5*p,      ])
         pxt, pyt, pzt = correlated_unified_channel(pd, px, pz)
         return pxt, pyt, pzt
     else:
@@ -126,12 +126,12 @@ def uncorr_eff_noise(p,order="0p"):
     if order == "0p":
         # see calculation for arguments
         px = prob_combined_flip_channels([p, 8/15*p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p ])
-        pz = prob_combined_flip_channels([p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p         ])
+        pz = prob_combined_flip_channels([p, 2/3*p, 2/3*p, 2/3*4/5*p         ])
         return px, pz
     elif order == "p0":
         # see calculation for arguments
         px = prob_combined_flip_channels([p, 2/3*p, 2/3*p, 2/3*4/5*p    ])
-        pz = prob_combined_flip_channels([p, 2/3*p, 8/15*p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p  ])
+        pz = prob_combined_flip_channels([p, 8/15*p, 2/3*p, 2/3*p, 2/3*p, 2/3*4/5*p  ])
         return px, pz
     else:
         raise ValueError("unknown order parameter")
