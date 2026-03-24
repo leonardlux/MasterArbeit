@@ -24,7 +24,7 @@ def data_pre_processing(data: dict) -> dict:
                 log_error_rates[i_d,i_r,i_p] = log_error_prob 
                 err_log_error_rates[i_d,i_r,i_p] = (log_error_prob*(1-log_error_prob)/num_shots)**(1/2)
 
-    data["log_error_rates"] = log_error_rates 
+    data["log_error_rates"] = log_error_rates # [distance][round][prob]
     data["err_log_error_rates"] = err_log_error_rates
     return data
 

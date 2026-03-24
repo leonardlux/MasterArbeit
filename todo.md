@@ -26,15 +26,14 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
-7. construct scripts for multi rounds analysis 
-    + fixed p
-    + determine threshold for different number of rounds
-    + (start with small sample size => use cluster to increase size -> reduce error)
-
 0. run scripts on cluster!
     + get access to the cluster again 
     + and setup ssh!
     + redo all calculations and datasets with correct error model!
+
+7. construct scripts for multi rounds analysis 
+    + determine threshold for different number of rounds
+
 
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
@@ -87,6 +86,7 @@ show more asymptotic behavior (and explain the exponents fucntion)
 01. determined threshold for circ lvl noise 1 round
 02. remove hadarmard error from propageted noise model
 03. shifting distance window!
+04. multiple rounds fixed p analysis script written
 
 # 23.03 Monday
 

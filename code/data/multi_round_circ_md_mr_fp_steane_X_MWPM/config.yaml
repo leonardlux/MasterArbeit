@@ -20,7 +20,6 @@ circuit:
   - 7
   - 8
   - 9
-  - 10
   special_parameter: {}
   type: steane
 decoder:
@@ -28,7 +27,9 @@ decoder:
 noise_model:
   noise_rates:
   - 0.005
+  - 0.001
+  - 0.0005
   special_parameter: {}
   type: circ
 sampling:
-  num_shots: 10000
+  num_shots: 100000
