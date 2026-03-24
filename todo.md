@@ -26,10 +26,6 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
-5. determine threshold (and nu for circ level function)
-    + optimize nu!
-
-
 7. construct scripts for multi rounds analysis 
     + fixed p
     + determine threshold for different number of rounds
@@ -38,12 +34,12 @@ Write a lot of stuff into my latex overview file
 0. run scripts on cluster!
     + get access to the cluster again 
     + and setup ssh!
-
-2. better understand determine threshold method
-    + especially the how to determine errorbars 
+    + redo all calculations and datasets with correct error model!
 
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
+
+7. distance 27 for luis
 
 
 ## This week!
@@ -88,6 +84,9 @@ show more asymptotic behavior (and explain the exponents fucntion)
 
 00. clean up basic and circ lvl script 
     + reduce the amount of parameters and shorten as much as possible!
+01. determined threshold for circ lvl noise 1 round
+02. remove hadarmard error from propageted noise model
+03. shifting distance window!
 
 # 23.03 Monday
 
