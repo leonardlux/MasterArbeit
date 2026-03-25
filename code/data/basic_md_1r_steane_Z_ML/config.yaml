@@ -1,5 +1,6 @@
 circuit:
   distances:
+  - 3
   - 5
   - 7
   - 9
@@ -70,4 +71,4 @@ noise_model:
   special_parameter: {}
   type: bit_flip
 sampling:
-  num_shots: 10000
+  num_shots: 1000

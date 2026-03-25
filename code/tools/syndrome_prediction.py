@@ -65,8 +65,8 @@ def predict_MWPM(
     return total_pred
 
 # ML Decoding
-# TODO: is this acutally an improvement?
-@numba.njit(parallel=True)
+# TODO: is parralism acutally an improvement? 
+@numba.njit()#parallel=True)
 def fast_decoding(d,p,observable,rel_synd):    
     num_shots, rounds, _ = rel_synd.shape
     predicitons = np.zeros((num_shots,rounds))

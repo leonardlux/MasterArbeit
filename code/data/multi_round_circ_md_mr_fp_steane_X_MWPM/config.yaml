@@ -3,10 +3,6 @@ circuit:
   - 3
   - 5
   - 7
-  - 9
-  - 11
-  - 13
-  - 15
   inital_state: p
   observable: X
   order: 0p
@@ -20,16 +16,19 @@ circuit:
   - 7
   - 8
   - 9
+  - 10
   special_parameter: {}
   type: steane
 decoder:
   type: mwpm
 noise_model:
   noise_rates:
-  - 0.005
   - 0.001
-  - 0.0005
+  - 0.0021134890398366475
+  - 0.0044668359215096305
+  - 0.009440608762859235
+  - 0.0199526231496888
   special_parameter: {}
   type: circ
 sampling:
-  num_shots: 100000
+  num_shots: 10000

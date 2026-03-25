@@ -27,13 +27,16 @@ Write a lot of stuff into my latex overview file
 # ToDos 
 
 0. run scripts on cluster!
-    + get access to the cluster again 
-    + and setup ssh!
+    + get slurm to work (write python script for this!)
+        + split up data generation from data analysis!
+        + what is my plan here? 
+            -> I can start multiple num_shots and then add those up (seems to be a good idea!)
+            -> additive grow the data set each time I want more data
+            -> delete data sets in case i make changes to the code
     + redo all calculations and datasets with correct error model!
 
 7. construct scripts for multi rounds analysis 
     + determine threshold for different number of rounds
-
 
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
@@ -78,6 +81,15 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+# 25.03 Wednesday
+
+00. got access to cluster again
+    01. copied github there
+    02. installed all dependencies
+    03. got scripts to run
+01. multi round fix p works and returns expected results
+
 
 # 24.03 Tuesday
 
