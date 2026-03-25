@@ -55,13 +55,13 @@ def determine_threshold(
     err_log_error_rates = data["err_log_error_rates"]
 
     # initalize proper standard values
-    if min_distance == None:
+    if min_distance is None:
         min_distance = [0] * len(rounds)
-    if max_distance == None:
+    if max_distance is None:
         max_distance = [100] * len(rounds)
-    if min_noise_rate == None:
+    if min_noise_rate is None:
         min_noise_rate = [0] * len(rounds)
-    if max_noise_rate == None:
+    if max_noise_rate is None:
         max_noise_rate = [1] *len(rounds)
 
     pth = np.zeros((n_r))
@@ -70,7 +70,7 @@ def determine_threshold(
     err_nu = np.zeros((n_r))
 
     for i_r in range(n_r):
-        if select_rounds != None and not rounds[i_r] in select_rounds:
+        if not select_rounds is None and not rounds[i_r] in select_rounds:
             continue # skip not selected rounds if 
 
         # distance mask
@@ -143,13 +143,13 @@ def data_plot_log_error_rates(
     err_log_error_rates = data["err_log_error_rates"]
 
     # initalize proper standard values
-    if min_distance == None:
+    if min_distance is None:
         min_distance = [0] * len(rounds)
-    if max_distance == None:
+    if max_distance is None:
         max_distance = [100] * len(rounds)
-    if min_noise_rate == None:
+    if min_noise_rate is None:
         min_noise_rate = [0] * len(rounds)
-    if max_noise_rate == None:
+    if max_noise_rate is None:
         max_noise_rate = [1] *len(rounds)
 
     if "p_th" in data.keys():
@@ -159,7 +159,7 @@ def data_plot_log_error_rates(
 
     # for i_d in range(n_d):
     for i_r in range(len(rounds)): 
-        if select_rounds != None and not rounds[i_r] in select_rounds:
+        if not select_rounds is None and not rounds[i_r] in select_rounds:
             continue # skip not selected rounds if 
 
         # distance mask
@@ -195,20 +195,20 @@ def data_plot_fssa_results(
     err_log_error_rates = data["err_log_error_rates"]
 
     # initalize proper standard values
-    if min_distance == None:
+    if min_distance is None:
         min_distance = [0] * len(rounds)
-    if max_distance == None:
+    if max_distance is None:
         max_distance = [100] * len(rounds)
-    if min_noise_rate == None:
+    if min_noise_rate is None:
         min_noise_rate = [0] * len(rounds)
-    if max_noise_rate == None:
+    if max_noise_rate is None:
         max_noise_rate = [1] *len(rounds)
 
     p_th = data["p_th"] 
     nu = data["nu_fit"] 
 
     for i_r in range(len(rounds)):
-        if select_rounds != None and not rounds[i_r] in select_rounds:
+        if not select_rounds is None and not rounds[i_r] in select_rounds:
             continue # skip not selected rounds if 
 
         # distance mask
