@@ -26,12 +26,6 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
-0. run scripts on cluster!
-    -> slurm implement arrays
-    -> check all parameters 
-    -> redo all calculations
-        using slurm
-    1. rewrite all analysis such that the absoulte path to data is given 
         
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
@@ -84,6 +78,12 @@ show more asymptotic behavior (and explain the exponents fucntion)
 01. write data to same folder if they have the same config
     + make them destinguishable by date and unique ID
 02. enable read in and combination of multiple data files into one data dict
+03. restructured both data and config data structure and accordingly result scripts
+    + result scripts analysis needs still work
+04. got slurm to work and submitted some tasks 
+    + array works
+05. checked all parameter
+06. basic, circ working again (and both datasets with 100k shots)
 
 # 25.03 Wednesday
 

@@ -30,6 +30,5 @@ Notizen/notes/images/*
 
 # data
 *.hdf5
-*.yaml
 
 /slum_outputs/*
