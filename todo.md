@@ -1,18 +1,7 @@
 
 # current questions
 
-choice of logical repr in the end
-    - should not matter
-    - but at least if I choose diff, for X and Z: d>3 fails! (Z multi, X single and X obs)
-        - difference only appears for ML decoder 
-
-data collapse method works close to threshold 
-    + should i show asymtotic behavior? (is there anything interesting)
-    + is there any way to have a systemtatic first guess for nu?
-
-ML might have numerical stability problems for asymptotic behavior
-    + is this a problem?! (is it due do my coding?)
-    + or is it a mathematical artefact (does not seem to be one)
+1. Basic noise rate and literature does not agree :/
 
 # Thematischer Bezug
 
@@ -26,12 +15,11 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+5. multi round find parameters for threshold for each round!
+    + determine if numerical precision is a problem yet
         
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
-
-7. distance 27 for luis
-
 
 ## This week!
 
@@ -73,6 +61,7 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+
 # 26.03 Thursday
 
 01. write data to same folder if they have the same config
@@ -82,8 +71,10 @@ show more asymptotic behavior (and explain the exponents fucntion)
     + result scripts analysis needs still work
 04. got slurm to work and submitted some tasks 
     + array works
-05. checked all parameter
+05. checked all parameter for basic idea of working! (it does)
 06. basic, circ working again (and both datasets with 100k shots)
+07. multi round also working again
+
 
 # 25.03 Wednesday
 
@@ -104,6 +95,7 @@ show more asymptotic behavior (and explain the exponents fucntion)
 03. shifting distance window!
 04. multiple rounds fixed p analysis script written
 
+
 # 23.03 Monday
 
 00. look at min_distance dependency
@@ -112,11 +104,13 @@ show more asymptotic behavior (and explain the exponents fucntion)
 03. error propagated the error of inv_nu to nu 
 04. optional selective rounds
 
+
 # 22.03 Sunday
 
 00. determine threshold
     + selective distance
     + selective noise range
+
 
 # 21.03 Saturday 
 
@@ -133,6 +127,7 @@ show more asymptotic behavior (and explain the exponents fucntion)
 03. enable write data to folder
 04. start replacing old results functions with new ones 
 
+
 # 19.03 Thursday
 
 00. config file
@@ -140,12 +135,14 @@ show more asymptotic behavior (and explain the exponents fucntion)
 02. deleted all knowing MWPM (not of interest correct ? otherwise reimplement correctly!)
 03. generate data from config file
 
+
 # 18.03 Wednesday
 
 00. implement |+> state
     + works for everything 
 01. jitted everything and parrallised something (little return)
     
+
 # 17.03 Tuesday 
 
 00. get rid of error of the Hadmard
