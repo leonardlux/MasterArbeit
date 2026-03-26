@@ -8,12 +8,27 @@ from pathlib import Path
 from tools.parameter import PATH_TO_CONFIG_FOLDER, PATH_TO_DATA_FOLDER, EQUAL_CONFIGS_EXCLUDE_KEY, COMPATIBLE_DICT_PARAMETER, DATA_BASE_NAME, DATA_SET_ADDITIVE_KEYS, DATA_SET_PARAMETER_KEYS 
 
 # Configs
-def write_config(configuration: dict, filepath: str, backup: bool = False):
+def get_data_folder_path_from_config(config, folder_name):
+    path = os.path.join(
+        PATH_TO_DATA_FOLDER ,
+        config["circuit"]["type"].lower(),
+        config["circuit"]["order"].lower(),
+        config["noise_model"]["type"].lower(),
+        config["decoder"]["type"].lower(),
+        config["circuit"]["observable"].lower(),
+        folder_name,
+        )
+    return path
+
+
+def write_config(config: dict, filepath: str, backup: bool = False, sub_name=""):
     if backup:
-        filepath = os.path.join(PATH_TO_CONFIG_FOLDER, filepath+".yaml")
+        filepath = os.path.join(PATH_TO_CONFIG_FOLDER, filepath, sub_name + ".yaml")
+        Path(filepath).parent.mkdir(parents=True, exist_ok=True)
     with open(filepath,"w") as file:
-        yaml.dump(configuration, file)
-    pass
+        yaml.dump(config, file)
+    
+    return filepath
 
 
 def read_config(filepath: str):
@@ -96,8 +111,9 @@ def combine_data_sets(data_sets: list,):
             base_data_set[key] += data_set[key] 
     return base_data_set 
 
+
 # write results to folders: 
-def folderpath_from_name(folder_name):
+def get_folderpath_from_name(folder_name):
     base_path = PATH_TO_DATA_FOLDER 
     folder_path = os.path.join(base_path,folder_name)
     return folder_path
@@ -105,7 +121,7 @@ def folderpath_from_name(folder_name):
 
 def write_folder(config, data, folder_name="", folder_path=""):
     if folder_name != "":
-        folder_path = folderpath_from_name(folder_name)
+        folder_path = get_data_folder_path_from_config(config,folder_name)
     # create folder
     if not os.path.exists(folder_path):
         os.makedirs(folder_path)
@@ -120,7 +136,7 @@ def write_folder(config, data, folder_name="", folder_path=""):
 
 def read_folder(folder_name="",folder_path=""):
     if folder_name != "":
-        folder_path = folderpath_from_name(folder_name)
+        folder_path = get_folderpath_from_name(folder_name)
     # config
     config_filepath = os.path.join(folder_path, "config.yaml")
     config = read_config(config_filepath)
@@ -133,11 +149,13 @@ def read_folder(folder_name="",folder_path=""):
 def smart_write_folder(config, data, folder_name="", folder_path="", unique_id: int = None):
     # enable saving of of multiple independet data rows to the same folder
     if folder_name != "":
-        folder_path = folderpath_from_name(folder_name)
+        folder_path = get_data_folder_path_from_config(config, folder_name)
 
     if not os.path.exists(folder_path):
         # no previous folder 
         write_folder(config, data, folder_path=folder_path)
+        print("New folder setup!")
+        print(folder_path)
     else:
         # folder exist already
         pre_existing_config = read_config(os.path.join(folder_path, "config.yaml"))
@@ -152,23 +170,25 @@ def smart_write_folder(config, data, folder_name="", folder_path="", unique_id: 
             filename += ".hdf5"
             filepath = os.path.join(folder_path, filename) 
             write_data(data, filepath)
+            print(f"Config already present, written to file: ")
+            print(filepath)
             # either just write new data file or add data to existing data file
             pass
         elif compatible:
-            # add data as new file!
             # TODO!
             print("Not yet implemented how to treat compatible configs!")
             pass
         else:
             # TODO!
-            # should I warn the user?
             raise UserWarning("Folder already exists! and Configs are not compatible")
         pass
 
 
-def smart_read_folder(folder_name="",folder_path=""):
-    if folder_name != "":
-        folder_path = folderpath_from_name(folder_name)
+def smart_read_folder(folder_path="", folder_name="", basic_config = None):
+    # basic_config only has basic parameters
+    if folder_path == "":
+        folder_path = get_data_folder_path_from_config(basic_config,folder_name)
+
     # config
     config_filepath = os.path.join(folder_path, "config.yaml")
     config = read_config(config_filepath)

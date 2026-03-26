@@ -23,6 +23,7 @@ def generate_data_from_config(config: dict):
     ps = config["noise_model"]["noise_rates"]
 
     num_errors = np.zeros((len(ds),len(n_rounds),len(ps)))
+    total_time = time.time()
     for i_d, d in enumerate(ds):
         for i_r, rounds in enumerate(n_rounds):
             # generate circ layout
@@ -54,6 +55,7 @@ def generate_data_from_config(config: dict):
                 num_errors[i_d,i_r,i_p] = calc_num_errors(predictions,observable_flips)
                 print(f"done. took: {str(datetime.timedelta(seconds=time.time()-p_time))}")
 
+    print(f"Completly done: {str(datetime.timedelta(seconds=time.time()-total_time))}")
 
     # num_errors[i_d][i_r][i_p]
     data = {
@@ -68,5 +70,6 @@ def generate_data_from_config(config: dict):
 def generate_new_data_from_config_file(config_filepath, output_folder_name, unique_id: int = None):
     config = read_config(config_filepath)
     data = generate_data_from_config(config)
+    print(f"num_shots:{data["num_shots"]}")
     smart_write_folder(config, data, folder_name=output_folder_name, unique_id=unique_id)
 

@@ -27,9 +27,11 @@ Write a lot of stuff into my latex overview file
 # ToDos 
 
 0. run scripts on cluster!
-    -> start slurm script
+    -> slurm implement arrays
+    -> check all parameters 
     -> redo all calculations
         using slurm
+    1. rewrite all analysis such that the absoulte path to data is given 
         
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
