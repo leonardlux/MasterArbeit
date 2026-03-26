@@ -27,17 +27,10 @@ Write a lot of stuff into my latex overview file
 # ToDos 
 
 0. run scripts on cluster!
-    + get slurm to work (write python script for this!)
-        + split up data generation from data analysis!
-        + what is my plan here? 
-            -> I can start multiple num_shots and then add those up (seems to be a good idea!)
-            -> additive grow the data set each time I want more data
-            -> delete data sets in case i make changes to the code
-    + redo all calculations and datasets with correct error model!
-
-7. construct scripts for multi rounds analysis 
-    + determine threshold for different number of rounds
-
+    -> start slurm script
+    -> redo all calculations
+        using slurm
+        
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
@@ -69,6 +62,8 @@ Write a lot of stuff into my latex overview file
 
 13. enable bell state as inital state + different logic measurement 
 
+14. write data to file with similar but not identical configs
+
 
 ## Other ToDos
 0. 2 obs will be a problem for my current count logical implementation!
@@ -82,6 +77,12 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 26.03 Thursday
+
+01. write data to same folder if they have the same config
+    + make them destinguishable by date and unique ID
+02. enable read in and combination of multiple data files into one data dict
+
 # 25.03 Wednesday
 
 00. got access to cluster again
@@ -89,6 +90,7 @@ show more asymptotic behavior (and explain the exponents fucntion)
     02. installed all dependencies
     03. got scripts to run
 01. multi round fix p works and returns expected results
+02. multi round determine threshold and plot for each round
 
 
 # 24.03 Tuesday
