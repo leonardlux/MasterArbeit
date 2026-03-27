@@ -15,13 +15,12 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
-5. multi round find parameters for threshold for each round!
-    + determine if numerical precision is a problem yet
         
+## This week!
+
 6. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
-## This week!
 
 1. write down error propagation derivation for luis
 
@@ -46,7 +45,9 @@ Write a lot of stuff into my latex overview file
 
 13. enable bell state as inital state + different logic measurement 
 
-14. write data to file with similar but not identical configs
+14. combine data sets with different distances and different noise rates
+
+15. simplfy the file.py file and how it handles stuff.
 
 
 ## Other ToDos
@@ -61,6 +62,10 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 27.03 Friday
+
+01. Multi round analysis combined into one file
+02. analysis done for multi round and got some interesitng results
 
 # 26.03 Thursday
 
