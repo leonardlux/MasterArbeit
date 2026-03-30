@@ -1,0 +1,236 @@
+\section{Detector Error Model}
+
+In this section we want to determine the error model which we use to construct the decoders. 
+
+For that we determine the probability with which the detectors detects certain errors. 
+We call this the \enquote{detection error model}.
+
+\begin{enumerate}
+    \item \textcolor{red}{Put here a nice description, how we determine the difference between the data qubit and the ancilla qubit as measurement error.}
+    \item \textcolor{red}{Show circuit with error locations}
+    \item \textcolor{red}{Describe the whole appraoch}
+\end{enumerate}
+
+
+
+\subsection{General Statements}
+We first discuss all the general statements that hold for all Pauli channels before showing how each individual pauli channel behaves. 
+
+
+\subsubsection{Error Channels of our Noise Model}
+
+Our circuit level noise model consists of the following Pauli error channels:
+
+Bit-flip error channel:
+\begin{equation}
+    N_{X}(\rho) = (1-p) \rho + p \cdot X \rho X
+\end{equation}
+which we use to simulate measurement errors. 
+For this we place those error channels before the ancialla qubit measurement.
+
+
+Depolarizing one qubit channel:
+\begin{equation}
+    N_{D}(\rho) = (1-p) \rho + \frac{p}{3} \sum^3_{i=1} E_i \rho E_i
+\end{equation}
+\begin{equation*}
+    E_i \in \{ X, Y, Z \}
+\end{equation*}
+which are placed after the initialization of the logical qubits, to mimic a fault tolerant prepartion procedure.
+
+Depolarizing two qubit channel
+\begin{equation}
+    N_{D_2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
+\end{equation}
+\begin{equation*}
+    E_i \in \{E_k \otimes E_l | E_k,E_l \in \{I,X,Y,Z\} \} \setminus \{I\otimes  I\}
+\end{equation*}
+which are placed after each CNOT to mimic simulate a gate errors.
+
+
+\subsubsection{Pauli Channel Commute}
+
+It is easy to show that all Pauli channels commute.
+We first  define two arb. Pauli channels.\footnote{Complex conjugate of a Pauli is the Pauli ${P}^\dag={P}$}
+
+\begin{equation}
+    N_1 (\rho) = \sum_P p_P {P} \rho {P}
+\end{equation}
+
+\begin{equation}
+    N_2 (\rho) = \sum_Q p_Q {Q} \rho {Q}
+\end{equation}
+
+We also know that all Paulis either commute or anticommute and therefore we can write
+\begin{equation}
+    {P}{Q} = (-1)^\sigma {Q} {P},
+\end{equation}
+where $\sigma$ is either $0$ if they commute or $1$ if they anticommute.
+
+If we look at the composition of the two arb. Pauli channels, using the above identity for pauli channels
+\begin{align*}
+    N_2  (N_1 (\rho)) & = \sum_{P,Q} p_P p_Q {Q} {P} \rho {P} {Q} \\
+    & = \sum_{P,Q} p_P\  p_Q (-1)^\sigma {P} {Q} \rho (-1)^\sigma {Q} {P} \\
+    & = (-1)^{2\cdot\sigma} \sum_{P,Q} p_P p_Q  {P} {Q} \rho  {Q} {P} \\
+    & = (1)^\sigma \sum_{P,Q} p_P p_Q  {P} {Q} \rho  {Q} {P}
+    = N_1  (N_2 (\rho))
+\end{align*}
+we can see that they commute.
+
+
+\subsubsection{Pauli Operator and CNOTs}
+
+To move the error channels through the circuit we need to move them through the CNOT gates.
+Therefore we state here the basic CNOTs error propagation identities. 
+
+$X$-Errors pass trivial through the NOT part of the CNOT and a propagted to the other qubit by the control side.
+And $Z$-Errors behave the opposite way.
+
+\subsubsection{Stabilizer Equivalence}
+
+We can define stabilizer equivalences ($\tilde{s}$) based on the measurement we perform to determine our stabilizer.
+For example if we measure our stabilizer in the $Z$-basis, 
+phase-flips will not change the stabilizer measurement and therefore we can group them together with the identity.
+By the same idea both $Y$- and $X$-errors lead to the same syndrome and can be group as such together in the sense of stabilizer equivalence. 
+
+For $Z$-measurements:
+\begin{align*}
+    X & \overset{\tilde{s}}{\rightarrow} X \\
+    Y & \overset{\tilde{s}}{\rightarrow} X \\
+    Z & \overset{\tilde{s}}{\rightarrow} I \\
+    I & \overset{\tilde{s}}{\rightarrow} I \\
+\end{align*}
+
+For $X$-measurements:
+\begin{align*}
+    Z & \overset{\tilde{s}}{\rightarrow} Z \\
+    Y & \overset{\tilde{s}}{\rightarrow} Z \\
+    X & \overset{\tilde{s}}{\rightarrow} I \\
+    I & \overset{\tilde{s}}{\rightarrow} I \\
+\end{align*}
+
+A depolarizing channel which is infront of a $Z$-measurement can be therefore rewritten as
+\begin{align*}
+    N_D(\rho) = & \left( 1- \frac{4}{3} p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^3 \hat{E_i} \\
+\overset{\tilde{s}}{\rightarrow} & \left(  1- \frac{2}{3}p_D\right) + \frac{2}{3} p_D \hat{X}
+\end{align*}
+a bit flip channel with probability $p_x = 2/3 p_D$.
+
+
+\subsubsection{Compostion of Channels (Serial Combination)}
+
+In this section we find general formulars for the composition of single qubit depolarizing channels (depo) and bit- and phase-flip channels.
+These are the only channels which will appear after commuting the channels to the end of the circuit and tracing out the data qubit
+and therefore the only one of interest. 
+
+To make the calculations shorter we rewrite the depo channel, 
+by including the identity as $E_0=I$ in the sum, s.t. 
+\begin{align*}
+    N_{D1}(\rho)    &= (1-p) \rho  + \frac{1}{3} p \sum_{i=1}^3 E_i \rho E_i \\
+                    &= (1-\frac{4}{3}p)\rho + \frac{1}{3} p \sum_{i=0}^{3} E_i \rho E_i.
+\end{align*}
+Note that the summation starts at $i=0$ and therefore 
+\begin{equation*}
+    E_i \in \{ I, X, Y, Z\}. 
+\end{equation*}
+
+
+Furthermore we to save on space we rewrite the channels as a mixture\footnote{
+    \textcolor{red}{Unsure if this is the correct term.}} 
+of (Pauli-)channels using the notation
+
+\begin{equation*}
+    \hat{E_i} \hat{=} E_i \rho E_i^\dag.
+\end{equation*}
+
+
+\paragraph{Depo-Depo Channel}
+
+The serial combination of depo channels can be rewritten as 
+\begin{align*}
+    N_{D;p_2}(N_{D;p_1}(\rho)) &= \left( \left(1-\frac{4}{3}p_1\right) \hat{I} + \frac{1}{3} p_1 \sum_{i=0}^{3}\hat{E_i} \right)
+    \cdot \left( \left(1-\frac{4}{3}p_2\right) \hat{I} + \frac{1}{3} p_2 \sum_{i=0}^{3}\hat{E_i} \right) \\
+    &= \left(1-\frac{4}{3}p_1\right)\left(1-\frac{4}{3}p_2\right) \hat{I} \\
+    &  \ \ \ \ + \frac{1}{3}\left((1-\frac{4}{3}p_1)p_2 + (1-\frac{4}{3}p_2)p_1 + \frac{4}{3}p_1 p_2\right) \sum_{i=0}^{3} \hat{E_i} \\
+    &= \left( 1- \frac{4}{3}\left( p_1 + p_2 - \frac{4}{3}p_1 p_2\right) \right) \hat{I} 
+    + \frac{1}{3} \left( p_1 + p_2 - \frac{4}{3}p_1 p_2\right) \sum_{i=0}^{3} \hat{E_i} \\
+    &= (1-\frac{4}{3}p_c)\hat{I} + \frac{1}{3} p_c \sum_{i=0}^{3} \hat{E_i}\\
+    &= N_{D;p_c}(\rho)
+\end{align*}
+
+Because we include the identity operator in the sum, the product of the sums becomes a trivial cyclic/symmetric remapping 
+\begin{equation*}
+    \left( \sum_{i=0}^{3} \hat{E_i}\right) \cdot \left( \sum_{i=0}^{3} \hat{E_i}\right) = 4 \left( \sum_{i=0}^{3} \hat{E_i}\right) .
+\end{equation*}
+
+From above calculation we can conclude that the composition of two depolarizing one qubit channels 
+is just a depolarizing one qubit channel with the combined probability 
+\begin{equation*}
+    p_c = f_{2}(p_1,p_2) = p_1 + p_2 - \frac{4}{3}p_1 p_2 = p_1 + (1- \frac{4}{3}p_1) p_2
+\end{equation*}
+
+Note that the combined probability is indepent of the ordering of the channels (as expected).
+
+Using the function for two probabilities $f_{2}$ we can define a recursive function $f_{n}$ to determine the combine probability of the composition of multiple depolarizing channels.
+\begin{align*}
+    f_{n}(p_1,p_2,p_3,...,p_n) &= f_{2}\left(p_1,f_{n-1}(p_2,p_3,...,p_n)\right) \\
+    &= f_{2}(p_1,f_{2}(p_2,f_{n-2}(p_3,...,p_n)))
+\end{align*} 
+
+
+\paragraph{Flip-Flip Channel}
+
+An even number of flips cancels each other and an odd number of flips leads to a resulting flip error.
+Therefore the composition of multiple (bit-/phase-)flip channels is once again a (bit-/phase-)flip channel with the combined probability
+\begin{equation*}
+    p_c = \sum_{\vec{n}\in\{\vec{n} \text{ odd}\}} \prod_i p_i^{n_i} \cdot \left( 1-p_i\right)^{1-n_i}
+\end{equation*}
+where we sum over all possible odd occupation vectors $\vec{n}$ of errors.\footnote{The occupation vector is defined s.t. if $n_i = 1$ the $i$-th flip channel flips the bit}.
+An occupation vector is defined as odd if 
+\begin{equation*}
+    \left(\sum_i n_i\right) \mod 2 = 1.
+\end{equation*}
+
+
+
+
+\paragraph{Depo-(Bit-)Flip Channel}
+
+The composition of a (bit-)flip and depo channel takes the form
+\begin{align*}
+    N_{X}(N_{D}(\rho)) &= \left( (1-p_x) \hat{I} + p_x \hat{X}\right)
+    \cdot \left( \left(1-\frac{4}{3}p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^{3}\hat{E_i} \right) \\
+    &= (1-p_x)\left(1-\frac{4}{3}p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^{3}\hat{E_i}  + p_x\left(1-\frac{4}{3}p_D\right) \hat{X}
+\end{align*}
+where we used
+\begin{equation*}
+    \sum_{i=0}^{3} \hat{X}\hat{E_i} = 
+    \sum_{i=0}^{3} \hat{E_i}. 
+\end{equation*}
+
+
+\paragraph{All Channels}
+
+To find the composition of bit- and phase-flip and depo channel 
+we combine the previous results with an phase-flip channel to get 
+\begin{align*}
+    N_{final} =&N_Z(N_X(N_D(\rho))) \\
+    =& \left((1-p_z)\hat{I} + p_z \hat{Z}\right) \\
+    & \cdot \left((1-p_x)\left(1-\frac{4}{3}p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^{3}\hat{E_i}  + p_x\left(1-\frac{4}{3}p_D\right) \hat{X}\right) \\
+    =& \frac{1}{3} p_D \sum_{i=0}^{3} \hat{E_i} \\
+    &+ \left(1-\frac{4}{3}p_D \right)\cdot\left((1-p_x)(1-p_z) \hat{I}+ (1-p_x) p_z \hat{Z} + p_x (1-p_z) \hat{X} + p_x p_z \hat{Y}\right)
+\end{align*}
+
+From this combination we can extract the final probabilities $p_{i}^t$ of detecting each Pauli $E_i$ 
+dependend on the defining probabilities of the depo $p_D$, bit-flip $p_x$ and phase-flip $p_Z$ channels.
+\begin{align}
+    p_0^t = p_I^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot(1-p_z) \\
+    p_1^t = p_x^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) p_x \cdot(1-p_z) \\
+    p_2^t = p_y^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) p_x\cdot p_z\\
+    p_3^t = p_z^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot p_z \\
+\end{align}
+
+
+
+
+
