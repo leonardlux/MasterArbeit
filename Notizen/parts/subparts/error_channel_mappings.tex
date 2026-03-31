@@ -5,19 +5,90 @@ In this section we want to determine the error model which we use to construct t
 For that we determine the probability with which the detectors detects certain errors. 
 We call this the \enquote{detection error model}.
 
+We will use the following approach and as starting point we have a circuit diagram with the circuit level noise model
 \begin{enumerate}
-    \item \textcolor{red}{Put here a nice description, how we determine the difference between the data qubit and the ancilla qubit as measurement error.}
-    \item \textcolor{red}{Show circuit with error locations}
-    \item \textcolor{red}{Describe the whole appraoch}
+    \item Start with circuit diagram with circuit level noise 
+    \begin{itemize}
+        \item individual Pauli noise channels at given postitions (see: \ref{sssec:error_channel_noise_model})
+        \item individual Pauli channel commute $\rightarrow$ treat them indepently (shown in \ref{sssec:pauli_channel_commute}) 
+    \end{itemize}
+    \item Propagate/Commute noise channels to the end of the circuit/before the measurements
+    \begin{itemize}
+        \item Just propagation through CNOTs (shown in \ref{sssec:propagation_cnot})
+    \end{itemize}
+    \item Trace out the data qubit
+    \item Use stabilizer equivalence (discussed in \ref{sssec:stab_equivalence})
+    \begin{itemize}
+        \item Remove trivial operator
+        \item Opt. Rename error operators according to syndrome intepretation (switch to syndrome base of reference?)
+    \end{itemize}
+    \item Combine all noise channels to a single collective channel (equation derived in \ref{sssec:composition_of_channels})
+    \item Determine \enquote{forced} uncorrelated noise model for ML decoder
 \end{enumerate}
 
+\begin{figure}
+\begin{quantikz}
+    % Data qubit
+    \lstick{$\ket{\Psi_L}$}&\gate[1,style={noisy},]{D_1}&   % 1: init
+    \targ{}&\gate[1,style={noisy}]{D_2}\wire[d][1]{q}&      % 2: 1. CNOT 
+    \ctrl{2}&\gate[1,style={noisy}]{D_2}\wire[d][2]{q}&     % 3: 2. CNOT
+    % &&                                                      % 4: 
+    &&\\                                                    % 5: 
+    % 0 ancilla qubit
+    \lstick{$\ket{0_L}$}&\gate[1,style={noisy},]{D_1}&      % 1: init
+    \ctrl{-1}&\gate[1,style={noisy}]{D_2}&                  % 2: 1. CNOT
+    &&                                                      % 3: 2. CNOT
+    % \gate[]{H}&                                             % 4: 1. change basis aka H
+    % & 
+    % \gate[1,style={noisy},]{D_1}&                           %    2: Error (No errors on H)
+    \gate[1,style={noisy},]{Z}&\meter{$X$}&\setwiretype{c}\\% 5: stabilizer measurement
+    % p ancilla qubit 
+    \lstick{$\ket{+_L}$}&\gate[1,style={noisy},]{D_1}&      % 1: init
+    &&                                                      % 2: 1. CNOT
+    \targ{-2}&\gate[1,style={noisy}]{D_2}&                  % 3: 2. CNOT
+    % &&                                                      % 4: 
+    \gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
+\end{quantikz}
+\caption{Steane circuit diagram with circuit level noise. Here the channel are marked at their postitions}
+\label{circ_dia:start_circ_lvl_noise}
+\end{figure}
 
+\begin{figure}
+\begin{quantikz}
+    % Data qubit
+    \lstick{$\ket{\Psi_L}$}&\gate[1,style={noisy},]{p_{sp.\Psi}}&   % 1: init
+    \targ{}&\gate[1,style={noisy}]{p_{D2;0}}\wire[d][1]{q}&      % 2: 1. CNOT 
+    \ctrl{2}&\gate[1,style={noisy}]{p_{D2;p}}\wire[d][2]{q}&     % 3: 2. CNOT
+    % &&                                                      % 4: 
+    &&\\                                                    % 5: 
+    % 0 ancilla qubit
+    \lstick{$\ket{0_L}$}&\gate[1,style={noisy},]{p_{sp.0}}&      % 1: init
+    \ctrl{-1}&\gate[1,style={noisy}]{p_{D2;0}}&                  % 2: 1. CNOT
+    &&                                                      % 3: 2. CNOT
+    % \gate[]{H}&                                             % 4: 1. change basis aka H
+    % & 
+    % \gate[1,style={noisy},]{D_1}&                           %    2: Error (No errors on H)
+    \gate[1,style={noisy},]{p_{m0}}&\meter{$X$}&\setwiretype{c}\\% 5: stabilizer measurement
+    % p ancilla qubit 
+    \lstick{$\ket{+_L}$}&\gate[1,style={noisy},]{p_{sp.p}}&      % 1: init
+    &&                                                      % 2: 1. CNOT
+    \targ{-2}&\gate[1,style={noisy}]{p_{D2;p}}&                  % 3: 2. CNOT
+    % &&                                                      % 4: 
+    \gate[1,style={noisy},]{p_{mp}}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
+\end{quantikz}
+\caption{Steane circuit diagram with circuit level noise. The corresponding probability for each channel is defined here.}
+\label{circ_dia:start_circ_lvl_noise_define_probabilities}
+\end{figure}
+
+\textcolor{red}{Include circuit diagram with propagated noise}
+
+\textcolor{red}{Include circuit diagram traced out data -> indepent channel}
 
 \subsection{General Statements}
 We first discuss all the general statements that hold for all Pauli channels before showing how each individual pauli channel behaves. 
 
 
-\subsubsection{Error Channels of our Noise Model}
+\subsubsection{Error Channels of our Noise Model}\label{sssec:error_channel_noise_model}
 
 Our circuit level noise model consists of the following Pauli error channels:
 
@@ -27,7 +98,8 @@ Bit-flip error channel:
 \end{equation}
 which we use to simulate measurement errors. 
 For this we place those error channels before the ancialla qubit measurement.
-
+For $Z$-measurements we need to apply bit-flips before the measurements. 
+For $X$-measurements we need to apply phase-flips before the measurements.
 
 Depolarizing one qubit channel:
 \begin{equation}
@@ -36,7 +108,7 @@ Depolarizing one qubit channel:
 \begin{equation*}
     E_i \in \{ X, Y, Z \}
 \end{equation*}
-which are placed after the initialization of the logical qubits, to mimic a fault tolerant prepartion procedure.
+which are placed after the each initialization of a logical qubits, to simulate a fault tolerant prepartion procedure.
 
 Depolarizing two qubit channel
 \begin{equation}
@@ -45,10 +117,13 @@ Depolarizing two qubit channel
 \begin{equation*}
     E_i \in \{E_k \otimes E_l | E_k,E_l \in \{I,X,Y,Z\} \} \setminus \{I\otimes  I\}
 \end{equation*}
-which are placed after each CNOT to mimic simulate a gate errors.
+which are placed after each CNOT to simulate a gate errors.
+
+The complete noise model setup can be seen in figure \ref{circ_dia:start_circ_lvl_noise}.
+The corresponding defining noise rate and its label is shown in figure \ref{circ_dia:start_circ_lvl_noise_define_probabilities}.
 
 
-\subsubsection{Pauli Channel Commute}
+\subsubsection{Pauli Channel Commute}\label{sssec:pauli_channel_commute}
 
 It is easy to show that all Pauli channels commute.
 We first  define two arb. Pauli channels.\footnote{Complex conjugate of a Pauli is the Pauli ${P}^\dag={P}$}
@@ -77,16 +152,29 @@ If we look at the composition of the two arb. Pauli channels, using the above id
 \end{align*}
 we can see that they commute.
 
+Because all Pauli channel commute we can first move them indepently of one another to the end of the circuit.
 
-\subsubsection{Pauli Operator and CNOTs}
+\subsubsection{Pauli Operator and CNOTs}\label{sssec:propagation_cnot}
 
 To move the error channels through the circuit we need to move them through the CNOT gates.
 Therefore we state here the basic CNOTs error propagation identities. 
 
 $X$-Errors pass trivial through the NOT part of the CNOT and a propagted to the other qubit by the control side.
 And $Z$-Errors behave the opposite way.
+\textcolor{red}{Are equaitons needed here? (quite basic)}
 
-\subsubsection{Stabilizer Equivalence}
+We will use the following notation
+\begin{equation*}
+    Y^{\ket{\Psi}} \overset{\text{CNOT}}{\rightarrow} Y^{\ket{\Psi}}X^{\ket{+}}  
+\end{equation*}
+to show how an Pauli of a given error channel is passed through the circuit.
+In this case a $X$-Pauli is propagated from the logical qubit $\ket{\Psi}$ onto the ancilla $\ket{+}$ qubit\footnote{
+    Note that the notation of logical qubit is inprecise. It should be called a qubit from the logical qubit. 
+    But because all operations are transversal we can neglect this precision in favor of readable text.
+}.
+
+
+\subsubsection{Stabilizer Equivalence}\label{sssec:stab_equivalence}
 
 We can define stabilizer equivalences ($\tilde{s}$) based on the measurement we perform to determine our stabilizer.
 For example if we measure our stabilizer in the $Z$-basis, 
@@ -95,18 +183,18 @@ By the same idea both $Y$- and $X$-errors lead to the same syndrome and can be g
 
 For $Z$-measurements:
 \begin{align*}
-    X & \overset{\tilde{s}}{\rightarrow} X \\
-    Y & \overset{\tilde{s}}{\rightarrow} X \\
-    Z & \overset{\tilde{s}}{\rightarrow} I \\
-    I & \overset{\tilde{s}}{\rightarrow} I \\
+    X^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} X^{\ket{+}} \\
+    Y^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} X^{\ket{+}} \\
+    Z^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{+}} \\
+    I^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{+}} \\
 \end{align*}
 
 For $X$-measurements:
 \begin{align*}
-    Z & \overset{\tilde{s}}{\rightarrow} Z \\
-    Y & \overset{\tilde{s}}{\rightarrow} Z \\
-    X & \overset{\tilde{s}}{\rightarrow} I \\
-    I & \overset{\tilde{s}}{\rightarrow} I \\
+    Z^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} Z^{\ket{0}} \\
+    Y^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} Z^{\ket{0}} \\
+    X^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{0}} \\
+    I^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{0}} \\
 \end{align*}
 
 A depolarizing channel which is infront of a $Z$-measurement can be therefore rewritten as
@@ -117,7 +205,7 @@ A depolarizing channel which is infront of a $Z$-measurement can be therefore re
 a bit flip channel with probability $p_x = 2/3 p_D$.
 
 
-\subsubsection{Compostion of Channels (Serial Combination)}
+\subsubsection{Compostion of Channels (Serial Combination)}\label{sssec:composition_of_channels}
 
 In this section we find general formulars for the composition of single qubit depolarizing channels (depo) and bit- and phase-flip channels.
 These are the only channels which will appear after commuting the channels to the end of the circuit and tracing out the data qubit
@@ -230,7 +318,47 @@ dependend on the defining probabilities of the depo $p_D$, bit-flip $p_x$ and ph
     p_3^t = p_z^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot p_z \\
 \end{align}
 
+\subsubsection{Different order}\label{ssec:different_order}
 
+To get the result for a different ordering of the CNOTs we just need to change each $X$ Pauli to a $Z$ and also the otherway. 
+We use as a default order: first the CNOT of the logical qubit and ancilla $\ket{0}$ is performed and then the CNOT between the logical qubit and the other ($\ket{+}$) is performed.
+\textcolor{red}{Explain a bit further}
 
+\subsection{Propagate Channels till the end}
 
+In this section we describe how each channel is
+\begin{itemize}
+    \item propagated through the circuit
+    \item changed by tracing out the data qubit
+    \item influenced by stabilizer symmetry 
+\end{itemize} 
+to end up with an channel describtion that is located at the end of the circuit.
 
+\begin{figure}
+\begin{quantikz}
+    % Data qubit
+    \lstick{$\ket{\Psi_L}$}&
+    \targ{}&
+    \ctrl{2}&
+    \trash{}
+    % &                                                      
+    \\                                                    
+    % 0 ancilla qubit
+    \lstick{$\ket{0_L}$}&
+    \ctrl{-1}&
+    &
+    &
+    \gate[1,style={noisy}]{D'}\wire[d][1]{q}&
+    \gate[1,style={noisy},]{Z}&\meter{$X$}&\setwiretype{c}\\% 5: stabilizer measurement
+    % p ancilla qubit 
+    \lstick{$\ket{+_L}$}&
+    &
+    \targ{-2}&
+    &
+    \gate[1,style={noisy}]{D'}&
+    % &&                                                      % 4: 
+    \gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
+\end{quantikz}
+\caption{The arrow on the top line symbolizes the tracing out of this qubit.}
+\label{circ_dia:propagated_noise}
+\end{figure}

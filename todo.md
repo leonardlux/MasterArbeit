@@ -62,6 +62,14 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 31.03 Tuesday
+
+01. Writing down error propagation for luis
+
+# 30.03 Monday
+
+01. Start writing down error propagation in latex for luis
+
 # 27.03 Friday
 
 01. Multi round analysis combined into one file
