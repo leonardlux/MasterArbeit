@@ -1,7 +1,7 @@
 import numpy as np
 import pymatching
 
-from tools.circuits import generate_surface_code_circuit
+from tools.circuits import generate_simple_surface_code_circuit
 from tools.error_models import add_noise, construct_basic_noise_model 
 from tools.error_propagation import uncorr_eff_noise
 from tools.syndrome import split_syndromes, split_and_xor_syndrome 
@@ -28,7 +28,7 @@ def gen_mwpm_matcher(d, p, z_stab: bool = True, noise_model = "basic"):
     # determine relevant noise
     pr = px if z_stab else pz
 
-    circ = generate_surface_code_circuit(
+    circ = generate_simple_surface_code_circuit(
         d,
         Z_stab=z_stab, 
         X_stab = not z_stab, 

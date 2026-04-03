@@ -93,15 +93,15 @@ def rel_meas(circuit, meas):
     # get relative inxex by absolute measurement index
     return meas - circuit.num_measurements
 
-def add_detectors(circuit, targets, offsets_def_ancillas:list, offsets_measurements:list):
+def add_detectors(circuit, targets, offsets_stabilizer_measurements:list, offsets_measurements:list):
     """
     circuit: needed for num_measurements 
     targets: defines which qubits recombine to a stabilizer (by index)
-    offsets_def_ancillas: offset of index of classical stabilizer measurements which define teh codespace
+    offsets_stabilizer_measurements: offset of index of classical stabilizer measurements which should be included in detector 
     offsets_measurements: offset of index of individual bits which should be recombined to stabilizer measurements
     """
     for i, targets in enumerate(targets):
-        sign_defining_ancilla = [i + offset for offset in offsets_def_ancillas]  
+        sign_defining_ancilla = [i + offset for offset in offsets_stabilizer_measurements]  
         recombined_stabilizer = [t + offset for t in targets for offset in offsets_measurements] 
         rel_meas_indices = [rel_meas(circuit,x) for x in [*sign_defining_ancilla,*recombined_stabilizer]]
         circuit.append("DETECTOR",[stim.target_rec(x) for x in rel_meas_indices])
@@ -171,9 +171,10 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
 
     return circuit
 
-def generate_surface_code_circuit(distance: int = 3, observable: int = "Z", Z_stab: bool = True, X_stab: bool = True, ):
+def generate_simple_surface_code_circuit(distance: int = 3, observable: int = "Z", Z_stab: bool = True, X_stab: bool = True, ):
     """
     This functions generates a surface code ciruit with stabilizer readout.
+    Note that Z_stab, and X_stab only switch the detectors on or off, the ciruit layout is unchanged.
     """
     d = distance
     if observable == "Z":
@@ -234,6 +235,103 @@ def generate_surface_code_circuit(distance: int = 3, observable: int = "Z", Z_st
             [offset_ancilla_psi_Z_dc, offset_ancilla_psi_Z],
             [], # we do not recombine measurements into stabilizers
             )    
+
+    # Measure observable 
+    targets = []
+    for i_qubit in i_logical_measurement_targets:
+        targets += [d**2 + (d-1)**2 - i_qubit] 
+
+    surface_code_circ.append(
+        "OBSERVABLE_INCLUDE",
+        [stim.target_rec(-(i)) for i in targets ],
+        0, # 0. log measurement
+        )
+
+    return surface_code_circ
+
+def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observable: int = "Z", Z_stab: bool = True, X_stab: bool = True):
+    """
+    This functions generates a surface code ciruit with d-times stabilizer readout for each round.
+    Note that Z_stab, and X_stab only switch the detectors on or off, the ciruit layout is unchanged.
+    """
+    new_round_tag = "new_round"
+    new_round_tag = "new_stab"
+    d = distance
+    if observable == "Z":
+        init_log_state = "0" 
+        i_logical_measurement_targets = index_log_Z(d)
+    elif observable == "X":
+        init_log_state = "p"
+        i_logical_measurement_targets = index_log_X(d)
+    else:
+        raise ValueError(f"unkown observable value: {observable}")
+    # initialize
+    surface_code_circ = generate_surface_code_log_qubit_circuit(
+        distance,
+        state=init_log_state,
+        final_tag="psi_data",
+        )
+    index_physical, _, _ = index_qubits_surface_code(distance)
+    for i_r in range(rounds):
+        if i_r != 0:
+            surface_code_circ.append("I", index_physical, tag=new_round_tag)
+        # each round
+        for i_d in range(distance):
+            # in each rounds we need to measure the stabilizer d-times
+            # measure stabilizer 
+            surface_code_circ = measure_surface_code_stabilizer(
+                distance,
+                surface_code_circ,
+            ) 
+    # Measure observable by measuremnt of logical data from main qubit |Psi>
+    if observable == "X":
+        surface_code_circ.append("H",index_physical, tag="obs_change_of_basis")
+    surface_code_circ.append("M",index_physical,tag="obs_flip_measure") 
+
+    n_stab = d*(d-1)
+    n_round = 2*d*n_stab  
+    n_qubits = d**2 + (d-1)**2 
+    """
+    Measurement catalogue:
+    pf = Pauli frame (relevant) 
+    # Initial:
+    0           <   i   <   n_stab: |Psi> X-stab. meas.    -(pf)-> steane X-stab = Z-error detector  
+    1*n_stab    <=  i   < 2*n_stab: |Psi> Z-stab. meas.    -(pf)-> steane Z-stab = X-error detector 
+    # i_r : QEC Rounds max: rounds
+    # i_d : Stabilizer Repetition (d times)
+    2*n_stab + i_d*2*n_stab + i_r*2*d*n_stab  <=  i   < 3*n_stab + i_d*2*n_stab + i_r*2*d*n_stab: |Psi> X-stab. meas.    -> steane X-stab = Z-error detector 
+    3*n_stab + i_d*2*n_stab + i_r*2*d*n_stab  <=  i   < 4*n_stab + i_d*2*n_stab + i_r*2*d*n_stab: |Psi> Z-stab. meas.    -> steane Z-stab = X-error detector
+
+    # Observable
+    (rounds * d + 1) * 2*n_stab  <=  i   < (rounds * d + 1) * 2*n_stab + n_qubits: |Psi> data qubit meas. -> Z-observable => final obs 
+    """
+    # generate detectors    
+    offset_ancilla_psi_X_pf = 0
+    offset_ancilla_psi_Z_pf = 1*d*(d-1)  
+    offset_ancilla_psi_X    = 2*d*(d-1)  
+    offset_ancilla_psi_Z    = 3*d*(d-1)  
+
+    targets_X, targets_Z = index_stab_targets(distance)
+    # X-stabilizer 
+    for i_r in range(rounds):
+        for i_d in range(distance):
+            current_offset_due_to_loop = i_r * n_round + i_d * 2 * n_stab  
+            if X_stab:
+                surface_code_circ = add_detectors(
+                    surface_code_circ,
+                    targets_X, 
+                    [offset_ancilla_psi_X_pf, offset_ancilla_psi_X + current_offset_due_to_loop],
+                    [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
+                    )
+
+            # Z-stabilizer 
+            if Z_stab:
+                surface_code_circ= add_detectors(
+                    surface_code_circ,
+                    targets_Z, 
+                    [offset_ancilla_psi_Z_pf, offset_ancilla_psi_Z + current_offset_due_to_loop],
+                    [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
+                    )    
 
     # Measure observable 
     targets = []
