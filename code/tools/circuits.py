@@ -249,7 +249,7 @@ def generate_simple_surface_code_circuit(distance: int = 3, observable: int = "Z
 
     return surface_code_circ
 
-def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observable: int = "Z", Z_stab: bool = True, X_stab: bool = True):
+def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observable: int = "Z", ft_stab: bool = True):
     """
     This functions generates a surface code ciruit with d-times stabilizer readout for each round.
     Note that Z_stab, and X_stab only switch the detectors on or off, the ciruit layout is unchanged.
@@ -274,7 +274,8 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
     index_physical, _, _ = index_qubits_surface_code(distance)
     for i_r in range(rounds):
         if i_r != 0:
-            surface_code_circ.append("I", index_physical, tag=new_round_tag)
+            pass 
+            # surface_code_circ.append("I", index_physical, tag=new_round_tag) # not sure if I should include this?
         # each round
         for i_d in range(distance):
             # in each rounds we need to measure the stabilizer d-times
@@ -310,29 +311,43 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
     offset_ancilla_psi_Z_pf = 1*d*(d-1)  
     offset_ancilla_psi_X    = 2*d*(d-1)  
     offset_ancilla_psi_Z    = 3*d*(d-1)  
+    
+    offset_obs_psi = (rounds * d + 1) * 2*n_stab  
 
     targets_X, targets_Z = index_stab_targets(distance)
-    # X-stabilizer 
     for i_r in range(rounds):
         for i_d in range(distance):
             current_offset_due_to_loop = i_r * n_round + i_d * 2 * n_stab  
-            if X_stab:
-                surface_code_circ = add_detectors(
-                    surface_code_circ,
-                    targets_X, 
-                    [offset_ancilla_psi_X_pf, offset_ancilla_psi_X + current_offset_due_to_loop],
-                    [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
-                    )
+            # X-stabilizer
+            surface_code_circ = add_detectors(
+                surface_code_circ,
+                targets_X, 
+                [offset_ancilla_psi_X_pf, offset_ancilla_psi_X + current_offset_due_to_loop],
+                [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
+                )
 
             # Z-stabilizer 
-            if Z_stab:
-                surface_code_circ= add_detectors(
-                    surface_code_circ,
-                    targets_Z, 
-                    [offset_ancilla_psi_Z_pf, offset_ancilla_psi_Z + current_offset_due_to_loop],
-                    [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
-                    )    
+            surface_code_circ= add_detectors(
+                surface_code_circ,
+                targets_Z, 
+                [offset_ancilla_psi_Z_pf, offset_ancilla_psi_Z + current_offset_due_to_loop],
+                [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
+                )    
 
+    # Detector on |Psi> from observable measurement
+    if ft_stab: 
+        if observable == "Z":
+            ft_targets = targets_Z
+            ft_ancilla = offset_ancilla_psi_Z_pf 
+        else:
+            ft_targets = targets_X
+            ft_ancilla = offset_ancilla_psi_X_pf 
+        surface_code_circ = add_detectors(
+            surface_code_circ,
+            ft_targets,
+            [ft_ancilla],
+            [offset_obs_psi],
+            )
     # Measure observable 
     targets = []
     for i_qubit in i_logical_measurement_targets:
@@ -522,5 +537,7 @@ def config_to_circ_func(config):
     value = config["circuit"]["type"]
     if  value == "steane":
         return generate_steane_circuit
+    elif value == "surface":
+        return generate_ft_surface_code_circuit
     else:
         raise ValueError(f"unkown config parameter: circ, type: {value}")

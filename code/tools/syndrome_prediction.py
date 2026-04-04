@@ -4,8 +4,8 @@ import numba
 
 from tools.error_models import add_noise
 from tools.ml_decoder import decode_half_syndrome,  decode_half_syndrome_aron
-from tools.mwpm_decoder import gen_mwpm_matcher
-from tools.syndrome import split_and_xor_syndrome, reorder_syndromes 
+from tools.mwpm_decoder import gen_mwpm_matcher, gen_mwpm_matcher_surface_code
+from tools.syndrome import split_and_xor_syndrome, reorder_syndromes, preprocess_surface_code_syndromes
 from tools.pauli_frame_track import syndrome_to_pauli_flips 
 from tools.error_propagation import uncorr_eff_noise
 
@@ -64,8 +64,48 @@ def predict_MWPM(
 
     return total_pred
 
+
+# Surface code:
+def predict_MWPM_surface_code(
+        detection_events, 
+        distance: int, 
+        error_rate: float, 
+        rounds: int,
+        observable: str = "Z",
+        noise_model: str = "circ",
+    ):
+    d = distance
+    p = error_rate
+    qec_round_syndromes, ft_synds = preprocess_surface_code_syndromes(
+        d= d,
+        rounds=rounds,
+        syndromes=detection_events,
+        observable=observable,
+    )
+
+    # Actual Decoding:
+    num_shots, rounds, _ = qec_round_syndromes.shape
+    predicitons = np.zeros((rounds, num_shots))
+    matcher = gen_mwpm_matcher_surface_code(d, p, noise_model, observable=observable)
+    for i_round in range(rounds):
+        predicitons[i_round] = matcher.decode_batch(qec_round_syndromes[:,i_round,:]).flatten()
+        # .flatten() is needed because we always assume that only one observable is measured (in ML, and I wanted to adapt to this problem)
+    # combine rounds together
+    multi_round_pred =np.sum(predicitons,axis=0)%2
+
+    # FT Decoding (Same as usual)
+    z_stab = True if observable == "Z" else False
+    matcher = gen_mwpm_matcher(d, p, z_stab, noise_model)
+    ft_predictions = matcher.decode_batch(ft_synds).flatten()
+
+    total_pred = (multi_round_pred + ft_predictions)%2
+    total_pred = np.array(total_pred, dtype=bool)
+
+    return total_pred
+
+
 # ML Decoding
-# TODO: is parralism acutally an improvement? 
+# TODO: is parralism acutally an improvement? not if I just want to use a single core!
 @numba.njit()#parallel=True)
 def fast_decoding(d,p,observable,rel_synd):    
     num_shots, rounds, _ = rel_synd.shape
@@ -144,6 +184,9 @@ def predict_ML(
     total_pred = np.array(total_pred, dtype=bool) # convert to boolean values
     return total_pred 
 
+
+
+# NOT NEEDED ?!
 def generate_log_error_rates_diff_p(
         circuits:list,
         noise_model_fct,
@@ -186,10 +229,19 @@ def generate_log_error_rates_diff_p(
     return log_error_rates, y_errs
 
 def config_to_predict_func(config):
+    circuit_type = config["circuit"]["type"]
     value = config["decoder"]["type"]
-    if value == "ml":
-        return predict_ML 
-    elif value == "mwpm":
-        return predict_MWPM
+    if circuit_type == "steane":
+        if value == "ml":
+            return predict_ML 
+        elif value == "mwpm":
+            return predict_MWPM
+        else:
+            raise ValueError()
+    elif circuit_type == "surface":
+        if value == "mwpm":
+            return predict_MWPM_surface_code
+        else:
+            raise ValueError()
     else:
-        raise ValueError(f"unkown config parameter: circ, type: {value}")
+        raise ValueError()

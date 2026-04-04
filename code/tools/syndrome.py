@@ -27,7 +27,6 @@ def split_syndromes(d,syndromes):
 
     return x_syndromes, z_syndromes, ft_syndromes
 
-# Everything following might be broken!
 def split_syndromes_rounds(d, rounds, syndromes):
     """
     n_stab = d*(d-1)
@@ -90,3 +89,30 @@ def split_and_xor_syndrome(d, rounds, syndromes, ft_stab_z=True):
 def reorder_syndromes(old_order):
     new_order = old_order.swapaxes(0, 1)
     return new_order
+
+
+# Surface code:
+def preprocess_surface_code_syndromes(d, rounds, syndromes, observable):
+    n_stab = d*(d-1)
+    n_qec_round = 2*n_stab *d
+
+    # split up and seperate each round
+    qec_round_syndromes, ft_syndromes = np.split(syndromes,[rounds*n_qec_round],axis=1)
+    qec_round_syndromes = qec_round_syndromes.reshape(syndromes.shape[0],rounds,n_qec_round)
+
+    # XOR the different qec_rounds 
+    last_syndromes = qec_round_syndromes[:,:,-2*n_stab:]
+    for i_r in range(rounds-1):
+        # first round is alread fixed
+        qec_round_syndromes[:,i_r+1,:] = qec_round_syndromes[:,i_r+1,:] ^ np.repeat(last_syndromes[:,i_r,:],repeats=d,axis=-1) 
+    # FT syndrome
+    if observable == "Z":
+        ft_syndromes ^= last_syndromes[:,-1,:n_stab]
+    elif observable == "X":
+        ft_syndromes ^= last_syndromes[:,-1,-n_stab:]
+    else:
+        raise ValueError("Unkown observable")
+
+    return qec_round_syndromes, ft_syndromes
+    
+    

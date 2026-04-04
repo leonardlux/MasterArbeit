@@ -15,6 +15,8 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
+1. solve overwriting problem somehow: 
+    either raise error, or do something else.... otherwise that is an big fault waiting to happen!
         
 ## This week!
 
