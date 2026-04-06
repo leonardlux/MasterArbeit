@@ -70,7 +70,7 @@ def plot_diff_noise_level(
     cm = 1/2.54 # to convert inches to cm
     if seperate_figure:
         plt.figure()
-        plt.subplots(figsize=(15*cm,7*cm))
+        plt.subplots(figsize=(15*cm,10*cm),constrained_layout=True)
         plt.loglog()
         plt.xlabel("$p_{phy}$")
         plt.ylabel("$p_{log}$")
@@ -132,7 +132,7 @@ def overlay_different_slopes(
         ):
     cm = 1/2.54 # to convert inches to cm
     plt.figure()
-    plt.subplots(figsize=(15*cm,7*cm))
+    plt.subplots(figsize=(15*cm,10*cm),constrained_layout=True)
     plt.loglog()
     plt.xlabel("physical error rate")
     plt.ylabel("logical error rate")
@@ -172,7 +172,7 @@ def plot_fssa_results(
         return d**(1/nu)*(x-pc)
     cm = 1/2.54 # to convert inches to cm
     plt.figure()
-    plt.subplots(figsize=(15*cm,7*cm))
+    plt.subplots(figsize=(15*cm,10*cm),constrained_layout=True)
     plt.xlabel("$d^{1/\\nu}(p_{phy}-p_{th})$")
     plt.ylabel("$p_{log}$")
     plt.title(title)
