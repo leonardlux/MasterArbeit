@@ -571,9 +571,9 @@ We have discussed how to form the composition of those channels in section \ref{
 Equation \ref{eq:depo_depo_composition} is used for depo-depo composition and equation \ref{eq:composition_fli_flip}
 The approach then is to first determine the probability of the channel which is the composition of all channels of the same type. 
 \begin{align}
-    &p^c_x \left(p_{m\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}},\frac{2}{3}p_{sp.\ket{+}} \right) \\
+    &p^c_x \left(\frac{2}{3}p_{sp.\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}, p_{m\ket{+}} \right) \\
     &p^c_z \left(p_{m\ket{0}} \right) \\
-    &p^c_{D'} \left(p_{m\ket{\Psi}}, \frac{4}{5}p_{D2\ket{0}},p_{sp.\ket{+}} \right)  
+    &p^c_{D'} \left(p_{sp.\ket{\Psi}},p_{sp.\ket{0}}, \frac{4}{5}p_{D2\ket{0}} \right)  
 \end{align}\label{eq_align:stab_depo_probability}
 
 And then we can combine those using equation \ref{eq:total_comp_I}-\ref{eq:total_comp_Z},
@@ -607,7 +607,7 @@ and taking into account the depolarizing channel as discussed in section \ref{pa
 The resulting probabilities $p_{x}^{c'}, p_{z}^{c'}$ for the remaining bit- and phase-flip channel can be calculated using again the determined equaitons with the parameters. 
 \begin{align}
     p^{c'}_x \left(p^{c}_x, \frac{2}{3}p^{c}_D\right) &=p^{c'}_x \left(p_{m\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}},\frac{2}{3}p_{sp.\ket{+}}, \frac{2}{3}p_{m\ket{\Psi}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{0}},\frac{2}{3}p_{sp.\ket{+}}\right) \\
-    p^{c'}_z \left(p^{c}_z, \frac{2}{3}p^{c}_D\right) &=p^{c'}_z \left(p_{m\ket{0}},\frac{2}{3}p_{m\ket{\Psi}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{0}},\frac{2}{3}p_{sp.\ket{+}} \right)   
+    p^{c'}_z \left(p^{c}_z, \frac{2}{3}p^{c}_D\right) &=p^{c'}_z \left(p_{m\ket{0}},\frac{2}{3}p_{sp.\ket{\Psi}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{0}},\frac{2}{3}p_{sp.\ket{0}} \right)   
 \end{align}
 
 To calculate again the composition of all of those channel we use again the equation \ref{eq:composition_fli_flip}.
