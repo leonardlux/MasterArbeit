@@ -127,6 +127,8 @@ def data_plot_log_error_rates(
         max_distance: list = None, 
         min_noise_rate: list  = None, 
         max_noise_rate: list = None,  
+        filename: str = "",
+        title: str = "",
         ):
     """
     This function plots all log errrot rates against the physical noise rate.
@@ -154,8 +156,10 @@ def data_plot_log_error_rates(
 
     if "p_th" in data.keys():
         p_th = data["p_th"]
+        err_p_th = data["err_p_th"]
     else:
         p_th = [None] * len(rounds) 
+        err_p_th = [None] * len(rounds) 
 
     # for i_d in range(n_d):
     for i_r in range(len(rounds)): 
@@ -173,6 +177,9 @@ def data_plot_log_error_rates(
             distances = distances[d_mask],
             noise_set = ps[p_mask],
             p_th=p_th[i_r],
+            err_p_th=err_p_th[i_r],
+            filename=filename,
+            title=title,
             )
     pass
 
@@ -183,6 +190,8 @@ def data_plot_fssa_results(
         min_noise_rate: list = None, 
         max_noise_rate:list = None, 
         select_rounds: list = None,
+        filename: str = "",
+        title: str = "",
         ):
     if not "p_th" in data.keys():
         print("WARNING: needed to calculated p_threshold, for 'data_plot_fssa_results'")
@@ -205,6 +214,7 @@ def data_plot_fssa_results(
         max_noise_rate = [1] *len(rounds)
 
     p_th = data["p_th"] 
+    err_pth = data["err_p_th"]
     nu = data["nu_fit"] 
 
     for i_r in range(len(rounds)):
@@ -222,6 +232,8 @@ def data_plot_fssa_results(
             yerrs=err_log_error_rates[d_mask, i_r][:,p_mask],
             distances=distances[d_mask],
             pc = p_th[i_r],
-            nu = nu[i_r]
+            nu = nu[i_r],
+            filename=filename,
+            title=title,
         )
     pass
