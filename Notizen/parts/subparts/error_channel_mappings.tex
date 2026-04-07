@@ -1,132 +1,149 @@
 \section{Detector Error Model}
 
-In this section we want to determine the error model which we use to construct the decoders. 
+In this section we determine the error model which we use to construct the decoders. 
+Those error models are interested in the modeling the probability distribution of errors in front of the detectors.
+This error model is not interested in the errors on the data qubit $\ket{\Psi}$. 
 
-For that we determine the probability with which the detectors detects certain errors. 
-We call this the \enquote{detection error model}.
-
-We will use the following approach and as starting point we have a circuit diagram with the circuit level noise model
+To determine the error model in front of the decoders, we will call it: \enquote{detector error model} we use the following approach
 \begin{enumerate}
-    \item Start with circuit diagram with circuit level noise 
+    \item Starting with circuit diagram with circuit level noise 
     \begin{itemize}
-        \item individual Pauli noise channels at given postitions (see: \ref{sssec:error_channel_noise_model})
-        \item individual Pauli channel commute $\rightarrow$ treat them indepently (shown in \ref{sssec:pauli_channel_commute}) 
+        \item It consists of individual Pauli noise channels at given postitions (see: \ref{sssec:error_channel_noise_model} and figure \ref{circ_dia:start_circ_lvl_noise}).
+        \item The individual Pauli channels commute (shown in \ref{sssec:pauli_channel_commute}) therefore they can be treated indepently. 
     \end{itemize}
-    \item Propagate/Commute noise channels to the end of the circuit/before the measurements
+    \item Propagate each noise channel indepently to the end of the circuit
     \begin{itemize}
-        \item Just propagation through CNOTs (shown in \ref{sssec:propagation_cnot})
+        \item How to propagate channels through CNOTs is discussed in \ref{sssec:propagation_cnot}
+        \item The process for each individual channel is discussed in section \ref{ssec:moving_each_channel_to_the_end}
     \end{itemize}
     \item Trace out the data qubit
-    \item Use stabilizer equivalence (discussed in \ref{sssec:stab_equivalence})
+    \item Use stabilizer equivalence 
     \begin{itemize}
-        \item Remove trivial operator
-        \item Opt. Rename error operators according to syndrome intepretation (switch to syndrome base of reference?)
+        \item Rename error operators according to syndrome intepretation as discussed in section \ref{sssec:stab_equivalence}
     \end{itemize}
-    \item Combine all noise channels to a single collective channel (equation derived in \ref{sssec:composition_of_channels})
-    \item Determine \enquote{forced} uncorrelated noise model for ML decoder
+    \item Recombine the individual noise channels to a single collective channel 
+    \begin{itemize}
+        \item The equations for this process are derived in section \ref{sssec:composition_of_channels}
+    \end{itemize}
+    \item Determine correlated and \enquote{forced} uncorrelated detector noise model 
 \end{enumerate}
 
 \begin{figure}
 \begin{quantikz}
     % Data qubit
-    \lstick{$\ket{\Psi_L}$}&\gate[1,style={noisy},]{D_1}&   % 1: init
-    \targ{}&\gate[1,style={noisy}]{D_2}\wire[d][1]{q}&      % 2: 1. CNOT 
-    \ctrl{2}&\gate[1,style={noisy}]{D_2}\wire[d][2]{q}&     % 3: 2. CNOT
+    \lstick{$\ket{\Psi_L}$}&\qwbundle{n}&\gate[1,style={noisy},]{D}&   % 1: init
+    \targ{}&\gate[1,style={noisy}]{D2}\wire[d][1]{q}&      % 2: 1. CNOT 
+    \ctrl{2}&\gate[1,style={noisy}]{D2}\wire[d][2]{q}&     % 3: 2. CNOT
     % &&                                                      % 4: 
     &&\\                                                    % 5: 
     % 0 ancilla qubit
-    \lstick{$\ket{0_L}$}&\gate[1,style={noisy},]{D_1}&      % 1: init
-    \ctrl{-1}&\gate[1,style={noisy}]{D_2}&                  % 2: 1. CNOT
+    \lstick{$\ket{0_L}$}&\qwbundle{n}&\gate[1,style={noisy},]{D}&      % 1: init
+    \ctrl{-1}&\gate[1,style={noisy}]{D2}&                  % 2: 1. CNOT
     &&                                                      % 3: 2. CNOT
     % \gate[]{H}&                                             % 4: 1. change basis aka H
     % & 
     % \gate[1,style={noisy},]{D_1}&                           %    2: Error (No errors on H)
     \gate[1,style={noisy},]{Z}&\meter{$X$}&\setwiretype{c}\\% 5: stabilizer measurement
     % p ancilla qubit 
-    \lstick{$\ket{+_L}$}&\gate[1,style={noisy},]{D_1}&      % 1: init
+    \lstick{$\ket{+_L}$}&\qwbundle{n}&\gate[1,style={noisy},]{D}&      % 1: init
     &&                                                      % 2: 1. CNOT
-    \targ{-2}&\gate[1,style={noisy}]{D_2}&                  % 3: 2. CNOT
+    \targ{-2}&\gate[1,style={noisy}]{D2}&                  % 3: 2. CNOT
     % &&                                                      % 4: 
     \gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
 \end{quantikz}
-\caption{Steane circuit diagram with circuit level noise. Here the channel are marked at their postitions}
+\caption{
+    Steane circuit diagram with circuit level noise. 
+    Here the channel are marked at their postitions.
+    The notation indicates logical qubits.
+    }
 \label{circ_dia:start_circ_lvl_noise}
 \end{figure}
 
 \begin{figure}
 \begin{quantikz}
     % Data qubit
-    \lstick{$\ket{\Psi_L}$}&\gate[1,style={noisy},]{p_{sp.\Psi}}&   % 1: init
-    \targ{}&\gate[1,style={noisy}]{p_{D2;0}}\wire[d][1]{q}&      % 2: 1. CNOT 
-    \ctrl{2}&\gate[1,style={noisy}]{p_{D2;p}}\wire[d][2]{q}&     % 3: 2. CNOT
+    \lstick{$\rho_{\ket{\Psi},i}$}&\gate[1,style={noisy},]{p_{sp.\ket{\Psi}}}&   % 1: init
+    \targ{}&\gate[1,style={noisy}]{p_{D2\ket{0}}}\wire[d][1]{q}&      % 2: 1. CNOT 
+    \ctrl{2}&\gate[1,style={noisy}]{p_{D2\ket{+}}}\wire[d][2]{q}&     % 3: 2. CNOT
     % &&                                                      % 4: 
     &&\\                                                    % 5: 
     % 0 ancilla qubit
-    \lstick{$\ket{0_L}$}&\gate[1,style={noisy},]{p_{sp.0}}&      % 1: init
-    \ctrl{-1}&\gate[1,style={noisy}]{p_{D2;0}}&                  % 2: 1. CNOT
+    \lstick{$\rho_{\ket{0},i}$}&\gate[1,style={noisy},]{p_{sp.\ket{0}}}&      % 1: init
+    \ctrl{-1}&\gate[1,style={noisy}]{p_{D2\ket{0}}}&                  % 2: 1. CNOT
     &&                                                      % 3: 2. CNOT
     % \gate[]{H}&                                             % 4: 1. change basis aka H
     % & 
     % \gate[1,style={noisy},]{D_1}&                           %    2: Error (No errors on H)
-    \gate[1,style={noisy},]{p_{m0}}&\meter{$X$}&\setwiretype{c}\\% 5: stabilizer measurement
+    \gate[1,style={noisy},]{p_{m\ket{0}}}&\meter{$X$}&\setwiretype{c}\\% 5: stabilizer measurement
     % p ancilla qubit 
-    \lstick{$\ket{+_L}$}&\gate[1,style={noisy},]{p_{sp.p}}&      % 1: init
+    \lstick{$\rho_{\ket{+},i}$}&\gate[1,style={noisy},]{p_{sp.\ket{+}}}&      % 1: init
     &&                                                      % 2: 1. CNOT
-    \targ{-2}&\gate[1,style={noisy}]{p_{D2;p}}&                  % 3: 2. CNOT
+    \targ{-2}&\gate[1,style={noisy}]{p_{D2\ket{+}}}&                  % 3: 2. CNOT
     % &&                                                      % 4: 
-    \gate[1,style={noisy},]{p_{mp}}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
+    \gate[1,style={noisy},]{p_{m\ket{+}}}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
 \end{quantikz}
-\caption{Steane circuit diagram with circuit level noise. The corresponding probability for each channel is defined here.}
+\caption{
+    Steane circuit diagram with circuit level noise. 
+    The corresponding probability for each channel is defined here.
+    The notation indicates physical qubits.
+}
 \label{circ_dia:start_circ_lvl_noise_define_probabilities}
 \end{figure}
 
-\textcolor{red}{Include circuit diagram with propagated noise}
+To structure this process I decided to first derive a general statements and needed equations in section \ref{ssec:general_statements},
+before treating each indepently channel in section \ref{ssec:moving_each_channel_to_the_end}. 
+The recombination is then discussed in section \ref{ssec:composition_of_all_channels}, there we also get final results. 
 
-\textcolor{red}{Include circuit diagram traced out data -> indepent channel}
-
-\subsection{General Statements}
+\subsection{General Statements}\label{ssec:general_statements}
 We first discuss all the general statements that hold for all Pauli channels before showing how each individual pauli channel behaves. 
 
 
 \subsubsection{Error Channels of our Noise Model}\label{sssec:error_channel_noise_model}
-
 Our circuit level noise model consists of the following Pauli error channels:
 
 Bit-flip error channel:
 \begin{equation}
     N_{X}(\rho) = (1-p) \rho + p \cdot X \rho X
 \end{equation}
-which we use to simulate measurement errors. 
-For this we place those error channels before the ancialla qubit measurement.
-For $Z$-measurements we need to apply bit-flips before the measurements. 
-For $X$-measurements we need to apply phase-flips before the measurements.
+placed before the $Z$-measurements, to model measurements errors.
+For $Z$-measurements we need to apply bit-flips before the measurements, as shown. 
+For $X$-measurements we need to apply phase-flips before the measurements, so each Pauli $X$ gets exchanged for a Pauli $Z$ in the above equation.
+The with this type of channel associated probabilities will get the subscript $m$, as in $p_{m\ket{0}}$.
 
-Depolarizing one qubit channel:
+Another type of channel is the depolarizing one qubit channel
 \begin{equation}
     N_{D}(\rho) = (1-p) \rho + \frac{p}{3} \sum^3_{i=1} E_i \rho E_i
 \end{equation}
 \begin{equation*}
     E_i \in \{ X, Y, Z \}
 \end{equation*}
-which are placed after the each initialization of a logical qubits, to simulate a fault tolerant prepartion procedure.
+which is placed after the each initialization of a logical qubits, to simulate a fault tolerant preparation procedure.
+The with this type of channel associated probabilities will get the subscript $sp.$, as in $p_{sp.\ket{\Psi}}$.
 
-Depolarizing two qubit channel
+The last type of used channel is the depolarizing two qubit channel
 \begin{equation}
-    N_{D_2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
+    N_{D2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
 \end{equation}
+with
 \begin{equation*}
-    E_i \in \{E_k \otimes E_l | E_k,E_l \in \{I,X,Y,Z\} \} \setminus \{I\otimes  I\}
+    E_i \in \{E_k \otimes E_l | E_k,E_l \in \{I,X,Y,Z\} \} \setminus \{I\otimes  I\}.
 \end{equation*}
-which are placed after each CNOT to simulate a gate errors.
+This channel is placed after each CNOT gate on the same qubits, to model faulty gates.
+The probabilities relating to those type of channels will get the subscript $D2$, as in $p_{D2\ket{0}}$, where the named state is the connected ancilla state.
 
 The complete noise model setup can be seen in figure \ref{circ_dia:start_circ_lvl_noise}.
-The corresponding defining noise rate and its label is shown in figure \ref{circ_dia:start_circ_lvl_noise_define_probabilities}.
+The corresponding defining noise rate for each channel and its notation is shown in figure \ref{circ_dia:start_circ_lvl_noise_define_probabilities}.
+
+\paragraph{Regarding Logical Qubits and Physical Qubits}
+An point to note is that those error channel also act transversaly. 
+Therefore the whole setup of steane type quantum correction is transversal an we only have to look at one set of physical data and physical ancialla qubits to determine the behaviour for the whole circuit.
+To have a clean notation one could differentiate between logical qubits and physical qubits by notation of the initial state as shown in figure \ref{circ_dia:start_circ_lvl_noise} for logical qubits and in figure \ref{circ_dia:start_circ_lvl_noise_define_probabilities} for physical qubits.
+But this notation is quite cumbersome, therefore we will use kat notation to refer to certain (physical) qubits: data qubit been $\ket{\Psi}$, and ancialla qubits using $\ket{0}$ and $\ket{+}$ dependening to which logical state they belong.
 
 
 \subsubsection{Pauli Channel Commute}\label{sssec:pauli_channel_commute}
 
-It is easy to show that all Pauli channels commute.
-We first  define two arb. Pauli channels.\footnote{Complex conjugate of a Pauli is the Pauli ${P}^\dag={P}$}
+To show that all Pauli channel commute we first define two arbitrary Pauli channels.\footnote{Complex conjugate of a Pauli is the Pauli ${P}^\dag={P}$}
 
 \begin{equation}
     N_1 (\rho) = \sum_P p_P {P} \rho {P}
@@ -142,7 +159,7 @@ We also know that all Paulis either commute or anticommute and therefore we can 
 \end{equation}
 where $\sigma$ is either $0$ if they commute or $1$ if they anticommute.
 
-If we look at the composition of the two arb. Pauli channels, using the above identity for pauli channels
+If we look at the composition of the two arbitrary Pauli channels, using the above identity for Paulis
 \begin{align*}
     N_2  (N_1 (\rho)) & = \sum_{P,Q} p_P p_Q {Q} {P} \rho {P} {Q} \\
     & = \sum_{P,Q} p_P\  p_Q (-1)^\sigma {P} {Q} \rho (-1)^\sigma {Q} {P} \\
@@ -150,17 +167,17 @@ If we look at the composition of the two arb. Pauli channels, using the above id
     & = (1)^\sigma \sum_{P,Q} p_P p_Q  {P} {Q} \rho  {Q} {P}
     = N_1  (N_2 (\rho))
 \end{align*}
-we can see that they commute.
+we can see that the channels commute.
 
-Because all Pauli channel commute we can first move them indepently of one another to the end of the circuit.
+Because all Pauli channel commute we can move them indepently of one another to the end of the circuit before recombining them at the end.
 
 \subsubsection{Pauli Operator and CNOTs}\label{sssec:propagation_cnot}
 
-To move the error channels through the circuit we need to move them through the CNOT gates.
+To move the error channels through the circuit we need to propagate them through the CNOT gates.
 Therefore we state here the basic CNOTs error propagation identities. 
 
 $X$-Errors pass trivial through the NOT part of the CNOT and a propagted to the other qubit by the control side.
-And $Z$-Errors behave the opposite way.
+$Z$-Errors behave the exact opposite way.
 \textcolor{red}{Are equaitons needed here? (quite basic)}
 
 We will use the following notation
@@ -168,33 +185,35 @@ We will use the following notation
     Y^{\ket{\Psi}} \overset{\text{CNOT}}{\rightarrow} Y^{\ket{\Psi}}X^{\ket{+}}  
 \end{equation*}
 to show how an Pauli of a given error channel is passed through the circuit.
-In this case a $X$-Pauli is propagated from the logical qubit $\ket{\Psi}$ onto the ancilla $\ket{+}$ qubit\footnote{
+In this case a $X$-Pauli is propagated from the logical qubit $\ket{\Psi}$ onto the ancilla qubit $\ket{+}$ by a CNOT gate with the control part on the data qubit.\footnote{
     Note that the notation of logical qubit is inprecise. It should be called a qubit from the logical qubit. 
     But because all operations are transversal we can neglect this precision in favor of readable text.
 }.
 
+The general idea is it to write down how each Pauli (channel) is propagated through the ciruit and then just replace the orignal Pauli channel in the equations with the propagated ones.
 
 \subsubsection{Stabilizer Equivalence}\label{sssec:stab_equivalence}
+We only care about error which show up in our syndrome therefore we can simplify our noise model a bit.
 
 We can define stabilizer equivalences ($\tilde{s}$) based on the measurement we perform to determine our stabilizer.
-For example if we measure our stabilizer in the $Z$-basis, 
-phase-flips will not change the stabilizer measurement and therefore we can group them together with the identity.
-By the same idea both $Y$- and $X$-errors lead to the same syndrome and can be group as such together in the sense of stabilizer equivalence. 
+For example if we measure in the $Z$-basis on the anciall qubit $\ket{+}$, 
+phase-flips will not change the measurement and therefore we can group them together with the identity.
+By the same idea both $Y$- and $X$-errors lead to the same syndrome and can be group together. 
 
 For $Z$-measurements:
 \begin{align*}
-    X^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} X^{\ket{+}} \\
-    Y^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} X^{\ket{+}} \\
-    Z^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{+}} \\
-    I^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{+}} \\
+    X^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} X^{s} \\
+    Y^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} X^{s} \\
+    Z^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} I^{s} \\
+    I^{\ket{+}} & \overset{\tilde{s}}{\rightarrow} I^{s} \\
 \end{align*}
 
 For $X$-measurements:
 \begin{align*}
-    Z^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} Z^{\ket{0}} \\
-    Y^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} Z^{\ket{0}} \\
-    X^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{0}} \\
-    I^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} I^{\ket{0}} \\
+    Z^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} Z^{s} \\
+    Y^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} Z^{s} \\
+    X^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} I^{s} \\
+    I^{\ket{0}} & \overset{\tilde{s}}{\rightarrow} I^{s} \\
 \end{align*}
 
 A depolarizing channel which is infront of a $Z$-measurement can be therefore rewritten as
@@ -207,9 +226,10 @@ a bit flip channel with probability $p_x = 2/3 p_D$.
 
 \subsubsection{Compostion of Channels (Serial Combination)}\label{sssec:composition_of_channels}
 
-In this section we find general formulars for the composition of single qubit depolarizing channels (depo) and bit- and phase-flip channels.
-These are the only channels which will appear after commuting the channels to the end of the circuit and tracing out the data qubit
-and therefore the only one of interest. 
+After propagating each channel individualy towards the end of the circuit, we are left with mulitple channels that we need to recombine.
+To simplify this task we determine general formulars for the composition of single qubit depolarizing channels (depo), bit- and phase-flip (flip) channels.
+These are the only channels which will appear after propagating the channels through the CNOTs and tracing out the data qubit, as seen in section \ref{ssec:moving_each_channel_to_the_end},
+and therefore the only once of interest. 
 
 To make the calculations shorter we rewrite the depo channel, 
 by including the identity as $E_0=I$ in the sum, s.t. 
@@ -222,7 +242,6 @@ Note that the summation starts at $i=0$ and therefore
     E_i \in \{ I, X, Y, Z\}. 
 \end{equation*}
 
-
 Furthermore we to save on space we rewrite the channels as a mixture\footnote{
     \textcolor{red}{Unsure if this is the correct term.}} 
 of (Pauli-)channels using the notation
@@ -230,6 +249,12 @@ of (Pauli-)channels using the notation
 \begin{equation*}
     \hat{E_i} \hat{=} E_i \rho E_i^\dag.
 \end{equation*}
+
+The advantage of also including the identity inside of the sumation is that products of the sum with other Paulis become easier to calculate
+\begin{equation}
+    \sum_{i=0}^{3} \hat{Q} \cdot \hat{E}_i = \sum_{i=0}^{3} \hat{E}_i\ , \forall \hat{Q} \in \{ \hat{I}, \hat{X}, \hat{Y}, \hat{Z}\}. 
+    \label{eq:sum_trick}
+\end{equation}
 
 
 \paragraph{Depo-Depo Channel}
@@ -246,18 +271,18 @@ The serial combination of depo channels can be rewritten as
     &= N_{D;p_c}(\rho)
 \end{align*}
 
-Because we include the identity operator in the sum, the product of the sums becomes a trivial cyclic/symmetric remapping 
+Because we include the identity operator in the sum, the product of the sums becomes easy to calculate using the equation \ref{eq:sum_trick} 
 \begin{equation*}
     \left( \sum_{i=0}^{3} \hat{E_i}\right) \cdot \left( \sum_{i=0}^{3} \hat{E_i}\right) = 4 \left( \sum_{i=0}^{3} \hat{E_i}\right) .
 \end{equation*}
 
-From above calculation we can conclude that the composition of two depolarizing one qubit channels 
+We can identify that the composition of two depolarizing one qubit channels 
 is just a depolarizing one qubit channel with the combined probability 
 \begin{equation*}
-    p_c = f_{2}(p_1,p_2) = p_1 + p_2 - \frac{4}{3}p_1 p_2 = p_1 + (1- \frac{4}{3}p_1) p_2
+    p^c = f_{2}(p_1,p_2) = p_1 + p_2 - \frac{4}{3}p_1 p_2 = p_1 + (1- \frac{4}{3}p_1) p_2
 \end{equation*}
 
-Note that the combined probability is indepent of the ordering of the channels (as expected).
+Note that the combined probability is indepent of the ordering of the channels (as expected after our analysis from section \ref{sssec:pauli_channel_commute}).
 
 Using the function for two probabilities $f_{2}$ we can define a recursive function $f_{n}$ to determine the combine probability of the composition of multiple depolarizing channels.
 \begin{align*}
@@ -265,10 +290,16 @@ Using the function for two probabilities $f_{2}$ we can define a recursive funct
     &= f_{2}(p_1,f_{2}(p_2,f_{n-2}(p_3,...,p_n)))
 \end{align*} 
 
+We will later use the noation
+\begin{equation}
+    p_D^c(p_1,p_2,...,p_n) = f_{n}(p_1,p_2,...,p_n)
+    \label{eq:depo_depo_composition}
+\end{equation}
+to make it more readable.
 
 \paragraph{Flip-Flip Channel}
 
-An even number of flips cancels each other and an odd number of flips leads to a resulting flip error.
+To compose mulitple flip channels we only need to use that an even number of flips cancels each other and an odd number of flips leads to a resulting flip error.
 Therefore the composition of multiple (bit-/phase-)flip channels is once again a (bit-/phase-)flip channel with the combined probability
 \begin{equation*}
     p_c = \sum_{\vec{n}\in\{\vec{n} \text{ odd}\}} \prod_i p_i^{n_i} \cdot \left( 1-p_i\right)^{1-n_i}
@@ -279,6 +310,11 @@ An occupation vector is defined as odd if
     \left(\sum_i n_i\right) \mod 2 = 1.
 \end{equation*}
 
+We once again define a notation for later use:
+\begin{equation}
+    p_{x/z}^c(p_1,p_2,...,p_m) = \sum_{\vec{n}\in\{\vec{n} \text{ odd}\}} \prod_{i=1}^m p_i^{n_i} \cdot \left( 1-p_i\right)^{1-n_i}
+    \label{eq:composition_fli_flip}
+\end{equation}
 
 
 
@@ -290,7 +326,7 @@ The composition of a (bit-)flip and depo channel takes the form
     \cdot \left( \left(1-\frac{4}{3}p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^{3}\hat{E_i} \right) \\
     &= (1-p_x)\left(1-\frac{4}{3}p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^{3}\hat{E_i}  + p_x\left(1-\frac{4}{3}p_D\right) \hat{X}
 \end{align*}
-where we used
+where we used the trick from equation \ref{eq:sum_trick}
 \begin{equation*}
     \sum_{i=0}^{3} \hat{X}\hat{E_i} = 
     \sum_{i=0}^{3} \hat{E_i}. 
@@ -312,35 +348,194 @@ we combine the previous results with an phase-flip channel to get
 From this combination we can extract the final probabilities $p_{i}^t$ of detecting each Pauli $E_i$ 
 dependend on the defining probabilities of the depo $p_D$, bit-flip $p_x$ and phase-flip $p_Z$ channels.
 \begin{align}
-    p_0^t = p_I^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot(1-p_z) \\
-    p_1^t = p_x^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) p_x \cdot(1-p_z) \\
-    p_2^t = p_y^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) p_x\cdot p_z\\
-    p_3^t = p_z^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot p_z \\
+    p_0^t = p_I^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot(1-p_z) \label{eq:total_comp_I}\\
+    p_1^t = p_x^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) p_x \cdot(1-p_z) \label{eq:total_comp_X}\\
+    p_2^t = p_y^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) p_x\cdot p_z\label{eq:total_comp_Y}\\
+    p_3^t = p_z^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot p_z\label{eq:total_comp_Z} 
 \end{align}
 
-\subsubsection{Different order}\label{ssec:different_order}
+\textcolor{red}{Point out under what conditions we have uncorrealted X and Z noise}
 
-To get the result for a different ordering of the CNOTs we just need to change each $X$ Pauli to a $Z$ and also the otherway. 
-We use as a default order: first the CNOT of the logical qubit and ancilla $\ket{0}$ is performed and then the CNOT between the logical qubit and the other ($\ket{+}$) is performed.
-\textcolor{red}{Explain a bit further}
+\paragraph{Depo to Flip}\label{para:depo_to_flip}
+Here we derive shorly what happends with the depolarizing channel, 
+when either the $X$ or $Z$ Pauli become equal to the identity,
+for example due to stabilizer equivalence.
 
-\subsection{Propagate Channels till the end}
+\begin{align*}
+    N_D (\rho) &= \left(1-\frac{4}{3}p_D\right) \hat{I} + \frac{1}{3} p_D \sum_{i=0}^{3} E_i \\
+    \overset{\hat{Z} \rightarrow \hat{I}}{\rightarrow} & \left( 1- \frac{2}{3}p_D \right) \hat{I}+ \frac{2}{3} p_D \hat{X}
+\end{align*}
+Note that we also used $\hat{Y} \rightarrow \hat{X}$.
+And we can see that the result is a bit-flip channel with $p_x = \frac{2}{3} p_D$.
+
+
+
+\subsection{Propagate Channels}\label{ssec:moving_each_channel_to_the_end}
 
 In this section we describe how each channel is
 \begin{itemize}
-    \item propagated through the circuit
-    \item changed by tracing out the data qubit
-    \item influenced by stabilizer symmetry 
+    \item changed by propagation through the CNOTs
+    \item simplified by tracing out the data qubit
+    \item influenced by stabilizer equivalence 
 \end{itemize} 
-to end up with an channel describtion that is located at the end of the circuit.
+to end up with an channel infront of the detectors, which is cotains only relevant noise for the syndrome
+
+We will then form the composition of all channels to get the unified detector error model.
+We will only derive explicitly the detector error model for order of CNOTs shown in figure \ref{circ_dia:start_circ_lvl_noise}.
+A short note about the influence of the ordering is discussed in \ref{ssec:different_order}.
+
+
+\subsubsection{State Preparations Noise}
+
+We look at each error channel from the state preparation ($p_{sp.\ket{\Psi}},p_{sp.\ket{0}},p_{sp.\ket{+}}$) independently. 
+
+Starting with the depolarizing channel on the data state ($\ket{\Psi}$) .
+We first take a look how each Pauli is propagated through the CNOTs,
+then simplified by the trace over the data qubit and lastly how the stabilizer equivalence simplifies the expression. 
+
+\begin{align*}
+    X^{\ket{\Psi}}  
+    &\overset{\text{CNOTs}}{\rightarrow} X^{\ket{\Psi}} X^{\ket{+}} 
+    &\overset{tr}{\rightarrow} &X^{\ket{+}}   
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+    Z^{\ket{\Psi}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Z^{\ket{\Psi}} Z^{\ket{0}} 
+    &\overset{tr}{\rightarrow} & Z^{\ket{0}}  
+    &\overset{\tilde{s}}{\rightarrow} Z^s  \\
+    Y^{\ket{\Psi}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Y^{\ket{\Psi}} Z^{\ket{0}} X^{\ket{+}}
+    &\overset{tr}{\rightarrow} & Z^{\ket{0}} X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} Y^s  \\
+\end{align*} 
+As one would expect for error on the inital data state, the structure in the form of the syndrome equivalence is the same as the orignal depolarizing noise channel.
+
+The resulting channel is a of the form 
+\begin{align*}
+    N_{sp.\ket{\Psi}} (\rho) &= (1-p_{sp.\ket{\Psi}}) \hat{I} + \frac{1}{3}p_{sp.\ket{\Psi}}(\hat{X}^{\ket{+}} + \hat{Z}^{\ket{0}} + \hat{X}^{\ket{+}} \hat{Z}^{\ket{0}})\\
+        &=  (1-p_{sp.\ket{\Psi}}) \hat{I^s} + \frac{1}{3} p_{sp.\ket{\Psi}}\sum_{i=1}^3 E_{i}^s\\
+\end{align*}
+Therefore the state preparation noise channel of the data state takes the form of a \enquote{depolarizing} channel in regard to the syndrome. 
+Therefore we will call it a depo' channel and mark it with $D'$.
+
+The state preparation of the data qubit contributes a depo' channel with $p_{D'} = p_{sp.\ket{\Psi}}$.
+
+To continue with the state preparation of the $\ket{0}$ ancilla.
+Here we take the same steps 
+\begin{align*}
+    X^{\ket{0}}  
+    &\overset{\text{CNOTs}}{\rightarrow} X^{\ket{0}} X^{\ket{\Psi}} X^{\ket{+}}
+    &\overset{tr}{\rightarrow} &X^{\ket{0}} X^{\ket{+}}
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+    Z^{\ket{0}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Z^{\ket{0}} 
+    &\overset{tr}{\rightarrow} & Z^{\ket{0}}   
+    &\overset{\tilde{s}}{\rightarrow} Z^s  \\
+    Y^{\ket{0}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Y^{\ket{0}} X^{\ket{\Psi}} X^{\ket{+}}
+    &\overset{tr}{\rightarrow} & Z^{\ket{0}} X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} Y^s  \\
+\end{align*} 
+and using those results we get 
+\begin{align*}
+    N_{sp.\ket{0}} (\rho) &= (1-p_{sp.\ket{0}}) \hat{I} + \frac{1}{3}p_{sp.\ket{0}}(\hat{X}^{\ket{+}} + \hat{Z}^{\ket{0}} + \hat{X}^{\ket{+}} \hat{Z}^{\ket{0}})\\
+        &=  (1-p_{sp.\ket{0}}) \hat{I^s} + \frac{1}{3} p_{sp.\ket{0}}\sum_{i=1}^3 E_{i}^s\\
+\end{align*}
+which is also a depo' channel with $p_{D'} = p_{sp.\ket{0}}$.
+
+
+The last state preparation is of the $\ket{+}$ ancilla. 
+\begin{align*}
+    X^{\ket{+}}  
+    &\overset{\text{CNOTs}}{\rightarrow} X^{\ket{+}} 
+    &\overset{tr}{\rightarrow} & X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+    Z^{\ket{+}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Z^{\ket{+}} Z^{\ket{\Psi}} 
+    &\overset{tr}{\rightarrow} & Z^{\ket{+}}   
+    &\overset{\tilde{s}}{\rightarrow} I^s  \\
+    Y^{\ket{+}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Y^{\ket{+}} Z^{\ket{\Psi}} 
+    &\overset{tr}{\rightarrow} & Y^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+\end{align*} 
+applying those mapping to the channel results in 
+\begin{align*}
+    N_{sp.\ket{+}} (\rho) &= \left(1-\frac{2}{3}p_{sp.\ket{+}}\right) \hat{I} + \frac{2}{3}p_{sp.\ket{0}} \hat{X}^{}
+\end{align*}
+which can be identified as a bit-flip channel on $\ket{+}$ with $p_x=\frac{2}{3} p_{sp.\ket{+}}$
+
+\subsubsection{Two Qubit Gate Noise}
+Next we look at how two qubit depolarizing channel propagate through the circuit.
+
+Starting with the first channel between $\ket{0}$ and $\ket{\Psi}$.
+We will show only relevant terms, so those which are not equal to identity after passing them through the process. 
+\begin{align*}
+    X^{\ket{\Psi}} 
+    &\overset{\text{CNOTs}}{\rightarrow} X^{\ket{\Psi}}  X^{\ket{+}}  
+    &\overset{tr}{\rightarrow} & X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+    Y^{\ket{\Psi}} 
+    &\overset{\text{CNOTs}}{\rightarrow} Y^{\ket{\Psi}}  X^{\ket{+}}  
+    &\overset{tr}{\rightarrow} & X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+    Z^{\ket{0}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Z^{\ket{0}} 
+    &\overset{tr}{\rightarrow} & Z^{\ket{0}}   
+    &\overset{\tilde{s}}{\rightarrow} Z^s  \\
+    Y^{\ket{0}}  
+    &\overset{\text{CNOTs}}{\rightarrow} Y^{\ket{0}} 
+    &\overset{tr}{\rightarrow} & Y^{\ket{0}}   
+    &\overset{\tilde{s}}{\rightarrow} Z^s  \\
+\end{align*} 
+applying those mapping to the channel equation (and taking the not shown mapping to identities into account)  we get
+\begin{align*}
+    N_{D2\ket{0}} &= \left(1- \frac{16}{15} p_{D2\ket{0}} \right) \hat{I} + \frac{1}{15} p_{D2\ket{0}}(2\hat{I} + 2\hat{Z}^{\ket{0}}) \otimes (2\hat{I} + 2\hat{X}^{\ket{+}})\\
+    &= \left(1- \frac{16}{15} p_{D2\ket{0}} \right) \hat{I} + \frac{4}{15}p_{D2\ket{0}} \sum_{i=0}^{3} \hat{E}_i^s 
+\end{align*}
+This is again the depo' channel with $p_{D'} = \frac{4}{5} p_{D2\ket{0}}$
+
+
+Onto the second two qubit depolarizing channel, between $\ket{\Psi}$ and $\ket{+}$.
+Here the logic is nearly trivial because we do not need to propagate it through any CNOTs.
+We once again only show the none identity mappings.
+\begin{align*}
+    X^{\ket{+}} 
+    &\overset{\text{CNOTs}}{\rightarrow} X^{\ket{+}}  
+    &\overset{tr}{\rightarrow} & X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+    Y^{\ket{+}} 
+    &\overset{\text{CNOTs}}{\rightarrow} Y^{\ket{+}} 
+    &\overset{tr}{\rightarrow} & X^{\ket{+}} 
+    &\overset{\tilde{s}}{\rightarrow} X^s  \\
+\end{align*}
+It is easy to see that we get out a bit-flip channel on the $\ket{+}$ qubit.
+We just need to make a short calculation to see how the probabilities change.
+\begin{align*}
+    N_{D2\ket{+}} &= \left(1- p_{D2\ket{+}} \right) \hat{I} + \frac{1}{15} p_{D2\ket{+}}(3\hat{I} + 4 \hat{X}^{\ket{+}} + 4\hat{I} + 4 \hat{X}^{\ket{+}}) \\
+    &= \left(1- \frac{8}{15} p_{D2\ket{+}} \right) \hat{I} + \frac{8}{15}p_{D2\ket{+}}  \hat{X}^{s}
+\end{align*}
+And we can identify a resulting bit-flip channel with $p_x = \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}$.
+
+
+\subsubsection{Measurements Noise}
+Both measurement error channels ($p_{m\ket{0}},p_{m\ket{+}}$) stay unchanged.
+And contribute as phase-/bit-flip channel:
+\begin{equation*}
+    N_{m\ket{0}} (\rho) =(1-p_{m\ket{0}})\hat{I} + p_{m\ket{0}} \hat{X}^{\ket{0}} =  (1-p_{m\ket{0}})\hat{I} + p_{m\ket0} \hat{X}^s
+\end{equation*}
+
+\begin{equation*}
+    N_{m\ket{p}} (\rho) =  (1-p_{m\ket{p}})\hat{I} + p_{m\ket{+}} \hat{Z}^{\ket{+}} = (1-p_{m\ket{+}})\hat{I} + p_{m\ket{+}} \hat{Z}^s
+\end{equation*}
 
 \begin{figure}
+\centering
 \begin{quantikz}
     % Data qubit
     \lstick{$\ket{\Psi_L}$}&
     \targ{}&
     \ctrl{2}&
-    \trash{}
+    \meter{trace}
     % &                                                      
     \\                                                    
     % 0 ancilla qubit
@@ -359,6 +554,67 @@ to end up with an channel describtion that is located at the end of the circuit.
     % &&                                                      % 4: 
     \gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\% 5: stabilizer measurement
 \end{quantikz}
-\caption{The arrow on the top line symbolizes the tracing out of this qubit.}
+\caption{Circuit diagram with final posisble error models shown.}
 \label{circ_dia:propagated_noise}
 \end{figure}
+
+\subsection{Compostion of channels}\label{ssec:composition_of_all_channels}
+In this section we recombine all individual channels to form a unified channel and therefore determine the final detector error model using the equation derived in section \ref{sssec:composition_of_channels}.
+
+For the uncorrealted version of the decoder we determine the probability of a bit-/phase-flip regardless of the probability of a phase-/bit-flip.
+This is done by tracing out the other channel.
+
+\subsubsection{Correlated Noise Model}
+For the correlated case we just need to construct the composition of all channels.
+As we have seen earlier there exist only three different types of channels $D',X,Z$ as shown in figure \ref{circ_dia:propagated_noise}.
+We have discussed how to form the composition of those channels in section \ref{sssec:composition_of_channels}.
+Equation \ref{eq:depo_depo_composition} is used for depo-depo composition and equation \ref{eq:composition_fli_flip}
+The approach then is to first determine the probability of the channel which is the composition of all channels of the same type. 
+\begin{align}
+    &p^c_x \left(\frac{2}{3}p_{sp.\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}, p_{m\ket{+}} \right) \\
+    &p^c_z \left(p_{m\ket{0}} \right) \\
+    &p^c_{D'} \left(p_{sp.\ket{\Psi}},p_{sp.\ket{0}}, \frac{4}{5}p_{D2\ket{0}} \right)  
+\end{align}\label{eq_align:stab_depo_probability}
+
+And then we can combine those using equation \ref{eq:total_comp_I}-\ref{eq:total_comp_Z},
+to get the probability for each kind of pauli error possible.
+
+This is then our final decoder error model.
+
+This is done in my code and note explicitly because there are a lot of terms.
+
+\subsubsection{Uncorrealted Noise Model}
+
+For the (forced) uncorrealted noise we look at $X$ or $Z$ measurements indepently measurements indepently.
+Therefore the stabilizer equivalence change dependening on which measurement we look at.
+For the $Z$-detector:
+\begin{align}
+    \hat{X}^s  &\rightarrow \hat{X}^{s_z} \\
+    \hat{Z}^s  &\rightarrow \hat{I}^{s_z} \\
+    \hat{Y}^s  &\rightarrow \hat{X}^{s_z}
+\end{align}
+
+For the $X$-detector:
+\begin{align}
+    \hat{X}^s  &\rightarrow \hat{I}^{s_x} \\
+    \hat{Z}^s  &\rightarrow \hat{Z}^{s_x} \\
+    \hat{Y}^s  &\rightarrow \hat{Z}^{s_x}
+\end{align}
+
+To get to the defining probabilities we can therefore take the composition of the previous bit-/phase-flip channel 
+and taking into account the depolarizing channel as discussed in section \ref{para:depo_to_flip} (Depo to flip). 
+
+The resulting probabilities $p_{x}^{c'}, p_{z}^{c'}$ for the remaining bit- and phase-flip channel can be calculated using again the determined equaitons with the parameters. 
+\begin{align}
+    p^{c'}_x \left(p^{c}_x, \frac{2}{3}p^{c}_D\right) &=p^{c'}_x \left(p_{m\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}},\frac{2}{3}p_{sp.\ket{+}}, \frac{2}{3}p_{m\ket{\Psi}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{0}},\frac{2}{3}p_{sp.\ket{+}}\right) \\
+    p^{c'}_z \left(p^{c}_z, \frac{2}{3}p^{c}_D\right) &=p^{c'}_z \left(p_{m\ket{0}},\frac{2}{3}p_{sp.\ket{\Psi}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{0}},\frac{2}{3}p_{sp.\ket{0}} \right)   
+\end{align}
+
+To calculate again the composition of all of those channel we use again the equation \ref{eq:composition_fli_flip}.
+
+\subsection{Different order}\label{ssec:different_order}
+
+To get the result for a different ordering of the CNOTs we just need to change each $X$ Pauli to a $Z$ and also the otherway. 
+So there is no real difference expecpt for switching the $p_x^t$ and $p_z^t$ values in our detector error model. 
+
+We use as a default order: first the CNOT of the logical qubit and ancilla $\ket{0}$ is performed and then the CNOT between the logical qubit and the other ($\ket{+}$) is performed.
