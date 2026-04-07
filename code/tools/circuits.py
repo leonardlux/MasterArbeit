@@ -318,11 +318,29 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
     for i_r in range(rounds):
         for i_d in range(distance):
             current_offset_due_to_loop = i_r * n_round + i_d * 2 * n_stab  
+            # define offsets of ancilla qubits (taken previous once into account)
+            if i_r != 0 and i_d != 0:
+                offsets_x = [
+                    offset_ancilla_psi_X_pf, 
+                    offset_ancilla_psi_X + current_offset_due_to_loop,
+                    prev_offset_ancilla_X,
+                    ]
+                offsets_z = [
+                    offset_ancilla_psi_Z_pf, 
+                    offset_ancilla_psi_Z + current_offset_due_to_loop,
+                    prev_offset_ancilla_Z,
+                    ]
+            else:
+                offsets_x = [offset_ancilla_psi_X_pf, offset_ancilla_psi_X + current_offset_due_to_loop]
+                offsets_z = [offset_ancilla_psi_Z_pf, offset_ancilla_psi_Z + current_offset_due_to_loop]
+            prev_offset_ancilla_X = offset_ancilla_psi_X + current_offset_due_to_loop
+            prev_offset_ancilla_Z = offset_ancilla_psi_Z + current_offset_due_to_loop
+
             # X-stabilizer
             surface_code_circ = add_detectors(
                 surface_code_circ,
                 targets_X, 
-                [offset_ancilla_psi_X_pf, offset_ancilla_psi_X + current_offset_due_to_loop],
+                offsets_x,
                 [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
                 )
 
@@ -330,7 +348,7 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
             surface_code_circ= add_detectors(
                 surface_code_circ,
                 targets_Z, 
-                [offset_ancilla_psi_Z_pf, offset_ancilla_psi_Z + current_offset_due_to_loop],
+                offsets_z,
                 [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
                 )    
 

@@ -1,7 +1,11 @@
 
 # current questions
 
-1. Basic noise rate and literature does not agree :/
+Title: Characterization of Steane Type Error Correction
+
++ Presentation:
+    + Last weeks of July 
+    + Second half of August
 
 # Thematischer Bezug
 
@@ -15,16 +19,17 @@ Write a lot of stuff into my latex overview file
 
 # ToDos 
 
-1. solve overwriting problem somehow: 
-    either raise error, or do something else.... otherwise that is an big fault waiting to happen!
         
 ## This week!
 
-6. Solve precision problem: 
+00. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
-1. write down error propagation derivation for luis
+01. data collapse method with log error rate per round
 
+02. win or lose beeing local in time (MWPM for multiple QEC)
+
+03. state preparation of ancilla qubit
 
 ## Simple stuff for breaks
 
@@ -35,7 +40,8 @@ Write a lot of stuff into my latex overview file
 
 12. p_window in analysis -> from single value to list each entry is for one round
 
-
+1. solve overwriting problem somehow: 
+    either raise error, or do something else.... otherwise that is an big fault waiting to happen!
 
 ## Orderd ToDo List
 

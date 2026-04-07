@@ -1,4 +1,8 @@
 from tools.combined import generate_data_from_config
+from tools.circuits import generate_ft_surface_code_circuit
+from tools.error_models import add_noise, construct_circuit_noise_model
+from tools.graphics import save_circuit_diagram
+
 import numpy as np
 
 config = {
@@ -25,6 +29,10 @@ config = {
             "num_shots": 1000,       # number of shots per configuration
         },
     }
+d=3
+rounds = 1
+circ = generate_ft_surface_code_circuit(d,rounds,)
 
-x = generate_data_from_config(config)
-print(x)
+n_circ = add_noise(circ, construct_circuit_noise_model(0.1))
+
+save_circuit_diagram(n_circ,"/home/fu494742/MasterArbeit/images/test.svg")
