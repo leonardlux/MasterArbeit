@@ -29,36 +29,41 @@ def index_stab_targets(distance: int = 3, offset: int = 0, tag: str = ""):
     d = distance
     # targeted qubits for X-/Z-stabilizers
     targets_X, targets_Z = [],[] 
+    # N=0, E=1, S=2, W=3 
+    reorder_X = [2,3,1,0]
+    reorder_Z = [2,1,3,0]
     # Vertices/Sites = X-stabilizer
     for row in range(d-1):
         for col in range(d):
-            targets = [
+            targets = np.array([
                 row*(2*d-1) + col, # top
                 row*(2*d-1) + d + col, # right  
                 (row+1)*(2*d-1) + col, # bottom
                 row*(2*d-1) + d + col-1, # left 
-                ]
+                ])
+            targets = list(targets[reorder_X])
             # BC: cutting out not existing qubits
             if col==0: # left edge 
-                del targets[3] # del left qubit
+                del targets[reorder_X.index(3)] # del left qubit
             elif col==d-1: # right edge 
-                del targets[1] # del right qubit 
+                del targets[reorder_X.index(1)] # del right qubit 
             targets = np.array(targets) + offset 
             targets_X.append(targets)
     # Plaquette = Z-stabilizer
     for row in range(d):
         for col in range(d-1):
-            targets = [
+            targets = np.array([
                 (row-1)*(2*d-1) + d + col, # top 
                 row*(2*d-1) + col+1, # right 
                 row*(2*d-1) + d + col, # bottom 
                 row*(2*d-1) + col, # left 
-                ]
+                ])
+            targets = list(targets[reorder_Z])
             # BC: cutting out not existing qubits
             if row==0: # top row 
-                del targets[0]  
+                del targets[reorder_Z.index(0)]  
             elif row==d-1: # bottom row
-                del targets[2] 
+                del targets[reorder_Z.index(2)] 
             targets = np.array(targets) + offset 
             targets_Z.append(targets)
     return targets_X, targets_Z
@@ -93,7 +98,7 @@ def rel_meas(circuit, meas):
     # get relative inxex by absolute measurement index
     return meas - circuit.num_measurements
 
-def add_detectors(circuit, targets, offsets_stabilizer_measurements:list, offsets_measurements:list):
+def add_detectors(circuit, targets, offsets_stabilizer_measurements:list, offsets_measurements_to_be_stabilizer:list):
     """
     circuit: needed for num_measurements 
     targets: defines which qubits recombine to a stabilizer (by index)
@@ -102,7 +107,7 @@ def add_detectors(circuit, targets, offsets_stabilizer_measurements:list, offset
     """
     for i, targets in enumerate(targets):
         sign_defining_ancilla = [i + offset for offset in offsets_stabilizer_measurements]  
-        recombined_stabilizer = [t + offset for t in targets for offset in offsets_measurements] 
+        recombined_stabilizer = [t + offset for t in targets for offset in offsets_measurements_to_be_stabilizer] 
         rel_meas_indices = [rel_meas(circuit,x) for x in [*sign_defining_ancilla,*recombined_stabilizer]]
         circuit.append("DETECTOR",[stim.target_rec(x) for x in rel_meas_indices])
     return circuit
@@ -127,7 +132,7 @@ def measure_surface_code_stabilizer(distance, circuit, offset=0, tag=""):
 
     return circuit
 
-def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: str = "0", final_tag: str = "" ):
+def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: str = "0", final_tag: str = "", marker_tag="l_qubit_init" ):
     """
     This function adds a log qubit, encoded in surface code, to the circuit. 
     In this process it:
@@ -142,8 +147,6 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
     :param final_tag: tag that will be assigned to physical data index after init 
     :type final_tag: str
     """
-    marker_tag = "l_qubit_init"
-
     circuit = stim.Circuit()
 
     index_physical, index_X_ancilla, index_Z_ancilla = index_qubits_surface_code(distance, offset)
@@ -283,6 +286,7 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
             surface_code_circ = measure_surface_code_stabilizer(
                 distance,
                 surface_code_circ,
+                tag="faulty"
             ) 
     # Measure observable by measuremnt of logical data from main qubit |Psi>
     if observable == "X":
@@ -315,55 +319,47 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
     offset_obs_psi = (rounds * d + 1) * 2*n_stab  
 
     targets_X, targets_Z = index_stab_targets(distance)
+
+    prev_offset_ancilla_X = offset_ancilla_psi_X_pf
+    prev_offset_ancilla_Z = offset_ancilla_psi_Z_pf
     for i_r in range(rounds):
         for i_d in range(distance):
             current_offset_due_to_loop = i_r * n_round + i_d * 2 * n_stab  
-            # define offsets of ancilla qubits (taken previous once into account)
-            if i_r != 0 and i_d != 0:
-                offsets_x = [
-                    offset_ancilla_psi_X_pf, 
-                    offset_ancilla_psi_X + current_offset_due_to_loop,
-                    prev_offset_ancilla_X,
-                    ]
-                offsets_z = [
-                    offset_ancilla_psi_Z_pf, 
-                    offset_ancilla_psi_Z + current_offset_due_to_loop,
-                    prev_offset_ancilla_Z,
-                    ]
-            else:
-                offsets_x = [offset_ancilla_psi_X_pf, offset_ancilla_psi_X + current_offset_due_to_loop]
-                offsets_z = [offset_ancilla_psi_Z_pf, offset_ancilla_psi_Z + current_offset_due_to_loop]
-            prev_offset_ancilla_X = offset_ancilla_psi_X + current_offset_due_to_loop
-            prev_offset_ancilla_Z = offset_ancilla_psi_Z + current_offset_due_to_loop
-
             # X-stabilizer
             surface_code_circ = add_detectors(
-                surface_code_circ,
-                targets_X, 
-                offsets_x,
-                [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
+                circuit=surface_code_circ,
+                targets=targets_X, 
+                offsets_stabilizer_measurements=[
+                    offset_ancilla_psi_X + current_offset_due_to_loop,
+                    prev_offset_ancilla_X,
+                ],
+                offsets_measurements_to_be_stabilizer=[], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
                 )
-
             # Z-stabilizer 
             surface_code_circ= add_detectors(
-                surface_code_circ,
-                targets_Z, 
-                offsets_z,
-                [], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
+                circuit=surface_code_circ,
+                targets=targets_Z, 
+                offsets_stabilizer_measurements=[
+                    offset_ancilla_psi_Z + current_offset_due_to_loop,
+                    prev_offset_ancilla_Z,
+                ],
+                offsets_measurements_to_be_stabilizer=[], # we do not recombine measurements into stabilizers, we measure stabilizer directly!
                 )    
+            prev_offset_ancilla_X = offset_ancilla_psi_X + current_offset_due_to_loop
+            prev_offset_ancilla_Z = offset_ancilla_psi_Z + current_offset_due_to_loop
 
     # Detector on |Psi> from observable measurement
     if ft_stab: 
         if observable == "Z":
             ft_targets = targets_Z
-            ft_ancilla = offset_ancilla_psi_Z_pf 
+            prev_measurement = prev_offset_ancilla_Z # already xor with prev. measurement
         else:
             ft_targets = targets_X
-            ft_ancilla = offset_ancilla_psi_X_pf 
+            prev_measurement = prev_offset_ancilla_X
         surface_code_circ = add_detectors(
             surface_code_circ,
             ft_targets,
-            [ft_ancilla],
+            [prev_measurement],
             [offset_obs_psi],
             )
     # Measure observable 

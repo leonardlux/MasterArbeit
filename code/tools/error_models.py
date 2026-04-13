@@ -24,7 +24,7 @@ def add_noise(
             targets = circ_instr.targets_copy()
             for i in range(0, len(targets), 2):
                 pair = targets[i:i+2]
-                split_up_circ.append(circ_instr.name,pair)
+                split_up_circ.append(circ_instr.name,pair,tag=circ_instr.tag)
                 split_up_circ.append("TICK")
         else:
             split_up_circ.append(circ_instr)

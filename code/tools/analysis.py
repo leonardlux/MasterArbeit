@@ -129,6 +129,7 @@ def data_plot_log_error_rates(
         max_noise_rate: list = None,  
         filename: str = "",
         title: str = "",
+        reference_lines: bool = False,
         ):
     """
     This function plots all log errrot rates against the physical noise rate.
@@ -180,6 +181,7 @@ def data_plot_log_error_rates(
             err_p_th=err_p_th[i_r],
             filename=filename,
             title=title,
+            reference_lines=reference_lines,
             )
     pass
 

@@ -100,19 +100,6 @@ def preprocess_surface_code_syndromes(d, rounds, syndromes, observable):
     qec_round_syndromes, ft_syndromes = np.split(syndromes,[rounds*n_qec_round],axis=1)
     qec_round_syndromes = qec_round_syndromes.reshape(syndromes.shape[0],rounds,n_qec_round)
 
-    # XOR the different qec_rounds 
-    last_syndromes = qec_round_syndromes[:,:,-2*n_stab:]
-    for i_r in range(rounds-1):
-        # first round is alread fixed
-        qec_round_syndromes[:,i_r+1,:] = qec_round_syndromes[:,i_r+1,:] ^ np.repeat(last_syndromes[:,i_r,:],repeats=d,axis=-1) 
-    # FT syndrome
-    if observable == "Z":
-        ft_syndromes ^= last_syndromes[:,-1,:n_stab]
-    elif observable == "X":
-        ft_syndromes ^= last_syndromes[:,-1,-n_stab:]
-    else:
-        raise ValueError("Unkown observable")
-
     return qec_round_syndromes, ft_syndromes
     
     

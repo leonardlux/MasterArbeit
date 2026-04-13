@@ -51,6 +51,6 @@ def gen_mwpm_matcher_surface_code(d, p, noise_model, observable):
     # i just want to have a single round noise model:
     circ = generate_ft_surface_code_circuit(d,rounds=1,observable=observable,ft_stab=False)
     noisy_circ = add_noise(circ, noise_model_func(p))
-    detector_error_model = noisy_circ.detector_error_model()
+    detector_error_model = noisy_circ.detector_error_model(decompose_errors=True)
     matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
     return matcher
