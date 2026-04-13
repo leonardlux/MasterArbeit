@@ -38,6 +38,7 @@ def determine_threshold(
         max_noise_rate: list = None,
         select_rounds: list = None, 
         print_result: bool = True,
+        log_error_rate_per_round: bool = False,
         ) -> dict:
     """
     This function determines the threshold of a given data set, for each rounds independently. 
@@ -47,12 +48,16 @@ def determine_threshold(
         print("WARNING: needed to calculate log_error_rates, for 'determine_threshold'")
         data = data_pre_processing(data)
 
-    rounds = data["rounds"]
+    rounds = np.array(data["rounds"])
     n_r = len(rounds)
     ps = data["noise_rates"]
     distances = data["distances"]
-    log_error_rates = data["log_error_rates"] 
+    log_error_rates = np.array(data["log_error_rates"] )
     err_log_error_rates = data["err_log_error_rates"]
+    if log_error_rate_per_round:
+        for i_d in range(len(distances)):
+            for i_r in range(n_r):
+                log_error_rates[i_d,i_r] = log_error_rates[i_d,i_r]/rounds[i_r]
 
     # initalize proper standard values
     if min_distance is None:
@@ -108,14 +113,18 @@ def determine_threshold(
         )
         err_nu[i_r] = inv_nu_err/nu[i_r]**2
     
-    print(pth)
-    print(err_pth)
-    
-    data["p_th"] = pth
-    data["err_p_th"] = err_pth 
+    if log_error_rate_per_round: 
+        data["p_th_per_round"] = pth
+        data["err_p_th_per_round"] = err_pth 
 
-    data["nu_fit"] = nu
-    data["err_nu_fit"] = err_nu
+        data["nu_fit_per_round"] = nu
+        data["err_nu_fit_per_round"] = err_nu
+    else:
+        data["p_th"] = pth
+        data["err_p_th"] = err_pth 
+
+        data["nu_fit"] = nu
+        data["err_nu_fit"] = err_nu
 
     return data
 

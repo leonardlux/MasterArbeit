@@ -25,8 +25,6 @@ Write a lot of stuff into my latex overview file
 00. Solve precision problem: 
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
-01. data collapse method with log error rate per round
-
 02. win or lose beeing local in time (MWPM for multiple QEC)
 
 03. state preparation of ancilla qubit
@@ -70,7 +68,10 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 13.04 Monday
 
+01. threshold log error rate per round implemented -> nothing changed
+    + make from a theory point of view sense 
 
 # 30.03 Monday - 02.04. Thursday 
 
