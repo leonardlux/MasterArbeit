@@ -16,8 +16,23 @@ def add_noise(
         "l_qubit_init",
         "obs_flip_measure",
     }
+
+    # Split up all cnots! in time seperate steps, sucht that errors can be added after each
+    split_up_circ = stim.Circuit()
+    for circ_instr in circuit:
+        if circ_instr.name == "CX":
+            targets = circ_instr.targets_copy()
+            for i in range(0, len(targets), 2):
+                pair = targets[i:i+2]
+                split_up_circ.append(circ_instr.name,pair,tag=circ_instr.tag)
+                split_up_circ.append("TICK")
+        else:
+            split_up_circ.append(circ_instr)
+
+        
+
     # I use the "I" Operation to add some inital error onto my model
-    for  circ_instr in circuit:
+    for  circ_instr in split_up_circ:
         # circ_instr = circuit instruction
         if circ_instr.tag in faultless_tags: 
             # Skip all possible errors 

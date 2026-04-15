@@ -4,6 +4,7 @@
 
 PATH_TO_CONFIG_FOLDER = "/home/fu494742/MasterArbeit/code/configs"
 PATH_TO_DATA_FOLDER =  "/home/fu494742/MasterArbeit/code/data"
+PATH_TO_IMAGE_FOLDER = "/home/fu494742/MasterArbeit/images"
 
 DATA_BASE_NAME = "data"
 

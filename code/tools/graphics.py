@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt 
 from scipy.optimize import curve_fit
+from tools.parameter import PATH_TO_IMAGE_FOLDER
 
 def save_circuit_diagram(circuit,savepath):
     diagram = circuit.diagram("timeline-svg")
@@ -57,21 +58,22 @@ def plot_diff_noise_level(
         distances,
         noise_set,
         filename = "",
-        plot_path = "/home/leo/Documents/MasterArbeit/code/images",
+        plot_path = PATH_TO_IMAGE_FOLDER,
         fit_slopes = False,
         reference_lines = False,
         title="",
         seperate_figure=True,
         prelabel="",
         p_th = None,
+        err_p_th = None,
     ):
     cm = 1/2.54 # to convert inches to cm
     if seperate_figure:
         plt.figure()
-        plt.subplots(figsize=(20*cm,10*cm))
+        plt.subplots(figsize=(15*cm,10*cm),constrained_layout=True)
         plt.loglog()
-        plt.xlabel("physical error rate")
-        plt.ylabel("logical error rate")
+        plt.xlabel("$p_{phy}$")
+        plt.ylabel("$p_{log}$")
 
     for i, log_error_prob in enumerate(log_error_rates):
 
@@ -104,14 +106,17 @@ def plot_diff_noise_level(
         plt.plot(noise_set,noise_set,label="$p$",c="green")
 
     if p_th != None:
-        plt.axvline(p_th,label="$p_{th}$")
+        plt.axvline(p_th,label="$p_{th}$",color="g")
+        if err_p_th:
+            plt.axvspan(p_th-err_p_th,p_th+err_p_th,color="g",alpha=0.3)
 
-    if filename != "":
-        plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
     if seperate_figure:
         plt.title(title)
         plt.grid()
         plt.legend()
+    if filename != "":
+        plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
+    if seperate_figure:
         plt.show()
     pass
 
@@ -127,7 +132,7 @@ def overlay_different_slopes(
         ):
     cm = 1/2.54 # to convert inches to cm
     plt.figure()
-    plt.subplots(figsize=(20*cm,10*cm))
+    plt.subplots(figsize=(15*cm,10*cm),constrained_layout=True)
     plt.loglog()
     plt.xlabel("physical error rate")
     plt.ylabel("logical error rate")
@@ -152,11 +157,28 @@ def overlay_different_slopes(
     plt.show()
     pass
 
-def plot_fssa_results(xs,ys,yerrs,pc,nu,distances):
+def plot_fssa_results(
+        xs,
+        ys,
+        yerrs,
+        pc,
+        nu,
+        distances,
+        title="",
+        filename: str = "",
+        plot_path: str = PATH_TO_IMAGE_FOLDER,
+        ):
     def fit_func(x,d):
         return d**(1/nu)*(x-pc)
+    cm = 1/2.54 # to convert inches to cm
     plt.figure()
+    plt.subplots(figsize=(15*cm,10*cm),constrained_layout=True)
+    plt.xlabel("$d^{1/\\nu}(p_{phy}-p_{th})$")
+    plt.ylabel("$p_{log}$")
+    plt.title(title)
     for x, y, yerr, d in zip(xs,ys,yerrs,distances):
         plt.errorbar(fit_func(x,d),y,yerr=yerr,label=f"d={d}") 
     plt.legend()
+    if filename != "":
+        plt.savefig(plot_path +"/"+ filename +".pdf") # # TODO clean up using OS or similar
     plt.show()
