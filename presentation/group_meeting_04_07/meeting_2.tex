@@ -12,10 +12,10 @@
 
 \usetheme{Antibes}
 
-\title{Steane Type Error Correction - Error Propagation}
+\title{Steane Type Error Correction - Some Results }
 \subtitle{Short Long Update}
 \author{Leonard Lux}
-\date{24.02.2026}
+\date{07.04.2026}
 
 \begin{document}
 
@@ -184,7 +184,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 \begin{frame}{Detector Error Model}
     \begin{block}{Resulting Probabilities (correlated)}
         \begin{equation*}
-            p_{(i,j)}^{(MLD)} = \frac{1}{3}p_{D'^c} + (1- \frac{4}{3}p_{D'}^c)\cdot p_{x,i}^c \cdot p_{z,j}^c
+            p_{(i,j)}^{(MLD)} = \frac{1}{3}p_{D'}^c + (1- \frac{4}{3}p_{D'}^c)\cdot p_{x,i}^c \cdot p_{z,j}^c
         \end{equation*}
         \vspace{0.5cm}
         \begin{equation*}
@@ -248,7 +248,7 @@ with scaling function $f(x)$
 \end{itemize}
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/code_capacity_ml_z_log_error_rate_complete.pdf}
+    \includegraphics[width=0.65\textwidth]{plots/code_capacity_ml_z_log_error_rate_complete.pdf}
 \end{figure}
 \begin{itemize}
     \item Numeric stability problems visible
@@ -263,7 +263,7 @@ with scaling function $f(x)$
 \end{itemize}
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/code_capacity_mwpm_z_log_error_rate_complete.pdf}
+    \includegraphics[width=0.7\textwidth]{plots/code_capacity_mwpm_z_log_error_rate_complete.pdf}
 \end{figure}
 \begin{itemize}
     \item Numeric stability problems not visible 
@@ -279,14 +279,14 @@ with scaling function $f(x)$
 
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{plots/code_capacity_ml_z_fssa.pdf}
+    \includegraphics[width=0.7\textwidth]{plots/code_capacity_ml_z_fssa.pdf}
 \end{figure}
 \end{frame}
 
 \begin{frame}{Code Capacity Model}
 \begin{figure}
     \centering
-    \includegraphics[width=\textwidth]{plots/code_capacity_ml_z_log_error_rate_zoom.pdf}
+    \includegraphics[width=0.8\textwidth]{plots/code_capacity_ml_z_log_error_rate_zoom.pdf}
 \end{figure}
 \end{frame}
 
@@ -321,7 +321,7 @@ MWPM & X & $10.330 \pm 0.062$ & 10.31 \\
     \end{itemize}
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/circ_ml_z_log_error_rate_complete.pdf}
+    \includegraphics[width=0.65\textwidth]{plots/circ_ml_z_log_error_rate_complete.pdf}
 \end{figure}
 \begin{itemize}
     \item Numerical instability visible
@@ -361,11 +361,12 @@ MWPM & X & $3.287 \pm 0.034$  \\
     \item Parameters:
     \begin{itemize}
         \item 100k shots
+        \item distances: $5,7,9$
     \end{itemize}
 \end{itemize}
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/multi_round_Z_obs_log.pdf}
+    \includegraphics[width=0.7\textwidth]{plots/multi_round_Z_obs_log.pdf}
 \end{figure}
 \end{frame}
 
@@ -374,6 +375,9 @@ MWPM & X & $3.287 \pm 0.034$  \\
     \centering
     \includegraphics[width=0.8\textwidth]{plots/multi_round_ML_log.pdf}
 \end{figure}
+\begin{itemize}
+    \item Difference between $Z$ and $X$ becomes less significant 
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Multiple Rounds}
@@ -384,14 +388,48 @@ MWPM & X & $3.287 \pm 0.034$  \\
 \end{frame}
 
 \begin{frame}{Multiple Rounds}
-\begin{itemize}
-    \item Multiple rounds all possible curves
-\end{itemize}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
 \begin{figure}
     \centering
-    \includegraphics[width=0.8\textwidth]{plots/multi_round_all_log.pdf}
+    \includegraphics[width=0.9\textwidth]{plots/multi_round_all_log.pdf}
 \end{figure}
+    \end{column} 
+    \begin{column}{0.5\textwidth}
+       \begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\hline
+Decoder & Obs. & Threshold (\%) \\
+\hline
+ML   & Z & $1.988 \pm 0.041$ \\
+ML   & X & $1.982 \pm 0.038$ \\
+MWPM & Z & $1.854 \pm 0.031$ \\
+MWPM & X & $1.930 \pm 0.066$ \\
+\hline
+\end{tabular}
+\label{tab:final_results}
+\end{table} 
+    \end{column} 
+\end{columns}
 \end{frame}
+
+\section{Outlook}
+\begin{frame}{Outlook}
+    \begin{itemize}
+        \item Compare to repeated stabilizer readout
+        \begin{itemize}
+            \item MWPM decoder 
+            \item Compare multiround behaviour
+        \end{itemize}
+        \item Check out numerical instability problem
+        \item Try correlated decoder
+        \begin{itemize}
+            \item Also in eff. ML decoding paper 
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
 \begin{frame}
     \begin{center}
         Thanks for listening!

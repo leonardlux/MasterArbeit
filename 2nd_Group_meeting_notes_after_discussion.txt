@@ -1,0 +1,14 @@
+Numerical instability
+
+data collapse rusing log errror rate per round
+
+win or lose by local in time (using mwpm)
+
+state prepartation of the ancilla (and check different ways)
+
+
+Characterization of Steane Type Error Correction
+
+
+Last Week of July Presentation
+or Second half of august
