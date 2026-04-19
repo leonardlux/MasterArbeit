@@ -75,7 +75,8 @@ def correlated_unified_channel(pd,px,pz):
     pxt = 1/3*pd + (1-4/3*pd)* px * (1-pz)
     pzt = 1/3*pd + (1-4/3*pd)* (1-px) * pz
     pyt = 1/3*pd + (1-4/3*pd)* px * pz 
-    return pxt, pyt, pzt 
+    pit = 1/3*pd + (1-4/3*pd)* (1-px) * (1-pz)
+    return pxt, pyt, pzt, pit 
 
 def corr_eff_noise(p, order="0p"):
     # assuming equal noise level everywhere (and circ level noise)
@@ -83,18 +84,18 @@ def corr_eff_noise(p, order="0p"):
     # order 0p
     if order == "0p":
         # see calculation for arguments
-        px = prob_combined_flip_channels([p, 8/15*p, 2/3*p, ])
+        px = prob_combined_flip_channels([p, 2/3*4/5*p, 2/3*p, ])
         pz = prob_combined_flip_channels([p,                ])
         pd = prob_combined_depo_channels([p, p, 4/5*p,      ])
-        pxt, pyt, pzt = correlated_unified_channel(pd,px,pz)
-        return pxt, pyt, pzt
+        pxt, pyt, pzt, pit = correlated_unified_channel(pd,px,pz)
+        return pxt, pyt, pzt, pit
     elif order == "p0":
         # see calculation for arguments
         px = prob_combined_flip_channels([p,                ])
         pz = prob_combined_flip_channels([p, 8/15*p, 2/3*p, ])
         pd = prob_combined_depo_channels([p, p, 4/5*p,      ])
-        pxt, pyt, pzt = correlated_unified_channel(pd, px, pz)
-        return pxt, pyt, pzt
+        pxt, pyt, pzt, pit = correlated_unified_channel(pd, px, pz)
+        return pxt, pyt, pzt, pit
     else:
         raise ValueError("unknown order parameter")
 

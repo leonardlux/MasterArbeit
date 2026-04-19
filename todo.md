@@ -68,6 +68,12 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# 17.04 Friday
+
+01. Worked on todo regarding error model:
+    + product channel and symmetry depolirzing channel
+    + all physical p are equal
+
 # 13.04 Monday
 
 01. threshold log error rate per round implemented -> nothing changed

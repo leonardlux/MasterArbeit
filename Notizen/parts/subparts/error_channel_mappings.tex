@@ -223,6 +223,8 @@ A depolarizing channel which is infront of a $Z$-measurement can be therefore re
 \end{align*}
 a bit flip channel with probability $p_x = 2/3 p_D$.
 
+And a combined $X^sZ^s$ operator will be written as $Y^s$.
+
 
 \subsubsection{Compostion of Channels (Serial Combination)}\label{sssec:composition_of_channels}
 
@@ -574,7 +576,8 @@ The approach then is to first determine the probability of the channel which is 
     &p^c_x \left(\frac{2}{3}p_{sp.\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}, p_{m\ket{+}} \right) \\
     &p^c_z \left(p_{m\ket{0}} \right) \\
     &p^c_{D'} \left(p_{sp.\ket{\Psi}},p_{sp.\ket{0}}, \frac{4}{5}p_{D2\ket{0}} \right)  
-\end{align}\label{eq_align:stab_depo_probability}
+    \label{eq_align:stab_depo_probability}
+\end{align}
 
 And then we can combine those using equation \ref{eq:total_comp_I}-\ref{eq:total_comp_Z},
 to get the probability for each kind of pauli error possible.
@@ -618,3 +621,127 @@ To get the result for a different ordering of the CNOTs we just need to change e
 So there is no real difference expecpt for switching the $p_x^t$ and $p_z^t$ values in our detector error model. 
 
 We use as a default order: first the CNOT of the logical qubit and ancilla $\ket{0}$ is performed and then the CNOT between the logical qubit and the other ($\ket{+}$) is performed.
+
+\subsection{Unfold Polynomials}\label{ssec:full_equations}
+
+In this section we write down the full version of the equations shown in \ref{eq_align:stab_depo_probability}, using equation \ref{eq:depo_depo_composition} and \ref{eq:composition_fli_flip}.
+
+\begin{align*}
+    p^c_x \left(\frac{2}{3}p_{sp.\ket{+}}, \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}, p_{m\ket{+}} \right) =  
+    &   \left(1-\frac{2}{3}p_{sp.\ket{+}}\right) \left(1- \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}\right) \left(p_{m\ket{+}} \right)  \\ 
+    & + \left(1-\frac{2}{3}p_{sp.\ket{+}}\right) \left(\frac{2}{3}\frac{4}{5}p_{D2\ket{+}}\right) \left(1-p_{m\ket{+}} \right)\\  
+    & + \left(\frac{2}{3}p_{sp.\ket{+}}\right) \left(1-\frac{2}{3}\frac{4}{5}p_{D2\ket{+}}\right) \left(1-p_{m\ket{+}} \right)\\  
+    & + \frac{2}{3}p_{sp.\ket{+}}\frac{2}{3}\frac{4}{5}p_{D2\ket{+}}p_{m\ket{+}} \\  
+    = & \ 4\cdot \left( \frac{2}{3}p_{sp.\ket{+}}\cdot\frac{2}{3}\frac{4}{5}p_{D2\ket{+}}\cdot p_{m\ket{+}}\right) \\
+    & -2 \cdot \left(
+        \frac{2}{3}p_{sp.\ket{+}}\cdot \frac{2}{3}\frac{4}{5} p_{D2\ket{+}}
+        + \frac{2}{3}p_{sp.\ket{+}}\cdot p_{m\ket{+}}
+        + \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}\cdot p_{m\ket{+}} 
+     \right) \\
+    & + \left( \frac{2}{3}p_{sp.\ket{+}}+ \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}+ p_{m\ket{+}}\right) \\
+\end{align*}
+
+\begin{align*}
+    p^c_z \left(p_{m\ket{0}} \right) =  p_{m\ket{0}}\\
+\end{align*}
+
+\begin{align*}
+    p^c_{D'} \left(p_{sp.\ket{\Psi}},p_{sp.\ket{0}}, \frac{4}{5}p_{D2\ket{0}} \right) = 
+    &   \left(p_{sp.\ket{\Psi}} + p_{sp.\ket{0}} + \frac{4}{5}p_{D2\ket{0}} \right) \\
+    & -\frac{4}{3} \left(
+        p_{sp.\ket{\Psi}}p_{sp.\ket{0}} 
+        + p_{sp.\ket{\Psi}}\frac{4}{5}p_{D2\ket{0}} 
+        + p_{sp.\ket{0}} \frac{4}{5}p_{D2\ket{0}} 
+        \right) \\
+    & +\frac{16}{9} \left(p_{sp.\ket{\Psi}}\cdot p_{sp.\ket{0}} \cdot \frac{4}{5}p_{D2\ket{0}} \right) \\
+\end{align*}
+
+The above probabilities then can be combined to get the final probabilities, as shown in eq. \ref{eq:total_comp_I} - \ref{eq:total_comp_Z} 
+\begin{align}
+    p_0^t = p_I^t =& \frac{1}{3} p_{D'}^c + \left( 1-\frac{4}{3}p_{D'}^c\right) (1-p_x^c)\cdot(1-p_z^c) \\
+    p_1^t = p_x^t =& \frac{1}{3} p_{D'}^c + \left( 1-\frac{4}{3}p_{D'}^c\right) p_x^c \cdot(1-p_z^c) \\
+    p_2^t = p_y^t =& \frac{1}{3} p_{D'}^c + \left( 1-\frac{4}{3}p_{D'}^c\right) p_x^c\cdot p_z^c\\
+    p_3^t = p_z^t =& \frac{1}{3} p_{D'}^c + \left( 1-\frac{4}{3}p_{D'}^c\right) (1-p_x^c)\cdot p_z^c
+\end{align}
+I do not think that writing out the whole equations clears up more.
+
+The stabilizer channel can be written as:
+\begin{equation}
+    N_{stab} (\rho) = \sum_{i=0}^{3} p_i^t E_i \rho E_i
+\end{equation}
+if we want to model it on a single logical surface qubit (see section on stabilizer equivalence sec.\ref{sssec:stab_equivalence}).
+
+\subsubsection{Uniform probability expanded}
+If we set $p_{sp.}=p_{D2}=p_{m}=p$ we get for the syndrome channel the probabilities: 
+
+\begin{align*}
+p_{I}^t(p) &= -\frac{16384\,p^7}{6075} + \frac{2048\,p^6}{135} - \frac{220736\,p^5}{6075} + \frac{99152\,p^4}{2025} - \frac{27388\,p^3}{675} + \frac{4663\,p^2}{225} - 6p + 1 \\
+p_{x}^t(p) &= \frac{16384\,p^7}{6075} - \frac{2048\,p^6}{135} + \frac{220736\,p^5}{6075} - \frac{95312\,p^4}{2025} + \frac{7876\,p^3}{225} - \frac{367\,p^2}{25} + \frac{47\,p}{15} \\
+p_{y}^t(p) &= -\frac{16384\,p^7}{6075} + \frac{75776\,p^6}{6075} - \frac{9664\,p^5}{405} + \frac{15664\,p^4}{675} - \frac{7324\,p^3}{675} + \frac{47\,p^2}{45} + \frac{14\,p}{15} \\
+p_{z}^t(p) &= \frac{16384\,p^7}{6075} - \frac{75776\,p^6}{6075} + \frac{9664\,p^5}{405} - \frac{5648\,p^4}{225} + \frac{11084\,p^3}{675} - \frac{319\,p^2}{45} + \frac{29\,p}{15} 
+\end{align*}
+
+
+\subsubsection{Product Channel}
+
+Here we determine under which paramters the sydrome channel for the correlated noise factorizes into a product channel (product of indepent bit- and phase-flip channels).
+
+\begin{equation}
+    p_{t,ij} = \frac{1}{3} p_D^c + \left( 1- \frac{4}{3} p_D^c \right) p_{x,i}^c \cdot p_{z,j}^c 
+\end{equation}
+factorizes if it can be rewritten as 
+\begin{equation}
+    p_{t,ij} = \tilde{p}_{x,i}^c \cdot \tilde{p}_{z,i}^c. 
+\end{equation}
+From this equation we can identity, that $\underline{p}_t$, written as a matrix, has linearly dependend columns (rows).
+Therefore the rank (dimension) of the matrix is $1$ and
+\begin{equation}
+    \det(\underline{p}_t) = 0
+\end{equation}
+follows as a condition.
+
+By evaluating the determinant we get the following cases for which the syndrome channel factorizes
+\begin{align}
+    p_D^c &= 0 \ \ \ \rightarrow  \  p_{t,ij} =  p_{x,i}^c \cdot p_{z,j}^c\\
+    p_D^c &= 3/4 \rightarrow\   p_{t,ij} = \frac{1}{4} \\
+    p_x^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c + \left(1-\frac{4}{3}p_D^c\right)p_{z,j}^c\\
+    p_z^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c + \left(1-\frac{4}{3}p_D^c\right)p_{x,i}^c
+\end{align}
+
+We can look back at equation \ref{eq_align:stab_depo_probability} and above to determine the following conditions for $p_{sp.},p_{m}$ and $p_{D2}$
+
+\begin{align}
+    p_D^c &= 0 \ \ \ \rightarrow  \ p_{sp.\ket{\Psi}} =  p_{sp.\ket{0}} = p_{D2\ket{0}} = 0   \\
+    p_D^c &= 3/4 \rightarrow\  \text{\textcolor{red}{not to interesting but maybe todo}} \\
+    p_z^c &= 1/2 \rightarrow \ p_{m\ket{0}} = 1/2 \\
+    p_x^c &= 1/2 \rightarrow \ \text{see below} 
+\end{align}
+
+for $p_x^c=1/2$ we need to satsify:
+
+\begin{equation}
+    \left(2\cdot \frac{2}{3}p_{sp.\ket{+}}-1\right)
+    \left(2\cdot \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}-1\right)
+    \left(2\cdot p_{m\ket{+}}-1\right) = 0
+\end{equation}
+
+\subsubsection{Symmetry Depolarizing Channel}
+
+We require:
+\begin{equation}
+    p_{t,01}=p_{t,10}=p_{t,11}
+\end{equation}
+Therefore $p_D=3/4$ is obviously a solution, as seen above.
+
+Or 
+\begin{equation}
+    p_{x}\cdot p_{z} = 
+    (1-p_{x})\cdot p_{z} = 
+    p_{x}\cdot (1-p_{z})  
+\end{equation}
+which leads to 
+\begin{equation}
+    p_x = p_z = 1/2.
+\end{equation}
+
+These are the two possible solutions for a symmetric depolarizing channel.
