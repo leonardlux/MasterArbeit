@@ -44,8 +44,7 @@ Write a lot of stuff into my latex overview file
 ## Orderd ToDo List
 
 10. compare to d rounds stabilizer measurement as one QEC cycle
-    + for each of the d put error on data qubit
-    + check order of stabilizer cnots in surface code (to get the free distance improvement)
+    + get syndrome from matching graph result unsing parity matrix and then do correct error corrections
 
 8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
 
@@ -53,12 +52,19 @@ Write a lot of stuff into my latex overview file
 
 14. combine data sets with different distances and different noise rates
 
-15. simplfy the file.py file and how it handles stuff.
+
+# this week meeting: (toDos) 
+
+2. data qubit correlation
+3. qubit init as function and use different methods, compare 
+4. numerical problmes 
+5. update notes, add questions and answers -> what is really relevant
 
 
 ## Other ToDos
 0. 2 obs will be a problem for my current count logical implementation!
 2. enable complex error models (yes!)
+15. simplfy the file.py file and how it handles stuff.
 
 ## Question from midterm
 
@@ -67,6 +73,22 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+# 28.04 Tuesday 
+
+00. ML Decoder works on open boundary conditions
+01. finally jitted my ML implementation
+02. TODO: implement switching of decoder method in config!
+
+
+
+
+# 23.04 Thursday
+
+01. meeting 
+02. error model with correlation with data qubit
+03. linear order terms 
+
 
 # 17.04 Friday
 

@@ -280,9 +280,10 @@ Because we include the identity operator in the sum, the product of the sums bec
 
 We can identify that the composition of two depolarizing one qubit channels 
 is just a depolarizing one qubit channel with the combined probability 
-\begin{equation*}
-    p^c = f_{2}(p_1,p_2) = p_1 + p_2 - \frac{4}{3}p_1 p_2 = p_1 + (1- \frac{4}{3}p_1) p_2
-\end{equation*}
+\begin{equation}
+    p^c_D = f_{2}(p_1,p_2) = p_1 + p_2 - \frac{4}{3}p_1 p_2 = p_1 + (1- \frac{4}{3}p_1) p_2
+    \label{eq:composition_depo_depo_prob_simple}
+\end{equation}
 
 Note that the combined probability is indepent of the ordering of the channels (as expected after our analysis from section \ref{sssec:pauli_channel_commute}).
 
@@ -298,6 +299,13 @@ We will later use the noation
     \label{eq:depo_depo_composition}
 \end{equation}
 to make it more readable.
+
+We can also reexpress equation \ref{eq:composition_depo_depo_prob_simple} as a proper mixture 
+\begin{equation}
+    p^c_D(p_1,p_2) = p_1 (1-p_2) + (1-p_1) p_2 + \frac{2}{3} p_1 p_2
+\end{equation}
+from which we can conclude that $p^c_D=0$ is only possible for $p_1=p_2=0$.
+
 
 \paragraph{Flip-Flip Channel}
 
@@ -356,7 +364,7 @@ dependend on the defining probabilities of the depo $p_D$, bit-flip $p_x$ and ph
     p_3^t = p_z^t =& \frac{1}{3} p_D + \left( 1-\frac{4}{3}p_D\right) (1-p_x)\cdot p_z\label{eq:total_comp_Z} 
 \end{align}
 
-\textcolor{red}{Point out under what conditions we have uncorrealted X and Z noise}
+\textcolor{red}{Discuss those channels as proper mixtures}
 
 \paragraph{Depo to Flip}\label{para:depo_to_flip}
 Here we derive shorly what happends with the depolarizing channel, 
@@ -675,11 +683,22 @@ if we want to model it on a single logical surface qubit (see section on stabili
 If we set $p_{sp.}=p_{D2}=p_{m}=p$ we get for the syndrome channel the probabilities: 
 
 \begin{align*}
-p_{I}^t(p) &= -\frac{16384\,p^7}{6075} + \frac{2048\,p^6}{135} - \frac{220736\,p^5}{6075} + \frac{99152\,p^4}{2025} - \frac{27388\,p^3}{675} + \frac{4663\,p^2}{225} - 6p + 1 \\
-p_{x}^t(p) &= \frac{16384\,p^7}{6075} - \frac{2048\,p^6}{135} + \frac{220736\,p^5}{6075} - \frac{95312\,p^4}{2025} + \frac{7876\,p^3}{225} - \frac{367\,p^2}{25} + \frac{47\,p}{15} \\
-p_{y}^t(p) &= -\frac{16384\,p^7}{6075} + \frac{75776\,p^6}{6075} - \frac{9664\,p^5}{405} + \frac{15664\,p^4}{675} - \frac{7324\,p^3}{675} + \frac{47\,p^2}{45} + \frac{14\,p}{15} \\
-p_{z}^t(p) &= \frac{16384\,p^7}{6075} - \frac{75776\,p^6}{6075} + \frac{9664\,p^5}{405} - \frac{5648\,p^4}{225} + \frac{11084\,p^3}{675} - \frac{319\,p^2}{45} + \frac{29\,p}{15} 
+p_{I}^t(p) &= \left[-\frac{16384\,p^7}{6075} + \frac{2048\,p^6}{135} - \frac{220736\,p^5}{6075}\right] + \frac{99152\,p^4}{2025} - \frac{27388\,p^3}{675} + \frac{4663\,p^2}{225} - 6p + 1 \\
+p_{x}^t(p) &= \left[\frac{16384\,p^7}{6075} - \frac{2048\,p^6}{135} + \frac{220736\,p^5}{6075}\right] - \frac{95312\,p^4}{2025} + \frac{7876\,p^3}{225} - \frac{367\,p^2}{25} + \frac{47\,p}{15} \\
+p_{y}^t(p) &= \left[-\frac{16384\,p^7}{6075} + \frac{75776\,p^6}{6075} - \frac{9664\,p^5}{405}\right] + \frac{15664\,p^4}{675} - \frac{7324\,p^3}{675} + \frac{47\,p^2}{45} + \frac{14\,p}{15} \\
+p_{z}^t(p) &= \left[\frac{16384\,p^7}{6075} - \frac{75776\,p^6}{6075} + \frac{9664\,p^5}{405}\right] - \frac{5648\,p^4}{225} + \frac{11084\,p^3}{675} - \frac{319\,p^2}{45} + \frac{29\,p}{15} 
 \end{align*}
+
+Note that there is some structure to the polynomial expression. 
+From order $p^7$ down to order $p^5$ there is a symmetry between $I,X$ and $Y,Z$
+\begin{align*}
+    p_I^t(p) + o(p^5) &= -p_x^t(p) + o(p^5) = \left[-\frac{16384\,p^7}{6075} + \frac{2048\,p^6}{135} - \frac{220736\,p^5}{6075}\right] \\
+    p_y^t(p) + o(p^5) &= -p_z^t(p) + o(p^5) = \left[-\frac{16384\,p^7}{6075} + \frac{75776\,p^6}{6075} - \frac{9664\,p^5}{405}\right]
+\end{align*} 
+
+We can also observe that after the first order the sign of each order term oscillates.
+
+\textcolor{red}{Maybe add first order derivation (which single error event end up where? already in notes on tablet)}
 
 
 \subsubsection{Product Channel}
@@ -704,9 +723,15 @@ By evaluating the determinant we get the following cases for which the syndrome 
 \begin{align}
     p_D^c &= 0 \ \ \ \rightarrow  \  p_{t,ij} =  p_{x,i}^c \cdot p_{z,j}^c\\
     p_D^c &= 3/4 \rightarrow\   p_{t,ij} = \frac{1}{4} \\
-    p_x^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c + \left(1-\frac{4}{3}p_D^c\right)p_{z,j}^c\\
-    p_z^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c + \left(1-\frac{4}{3}p_D^c\right)p_{x,i}^c
+    p_x^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c + \frac{1}{2}\left(1-\frac{4}{3}p_D^c\right)p_{z,j}^c\\
+    p_z^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c + \frac{1}{2}\left(1-\frac{4}{3}p_D^c\right)p_{x,i}^c
 \end{align}
+
+The last two equations can be rewritten as a propper mixture as 
+\begin{align*}
+    p_x^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c (1-p_{z,j}^c) + (1-p_D^c) p_{z,j}^c \\
+    p_z^c &= 1/2 \rightarrow \  p_{t,ij} =  \frac{1}{3}p_D^c (1-p_{x,i}^c) + (1-p_D^c) p_{x,i}^c.
+\end{align*}
 
 We can look back at equation \ref{eq_align:stab_depo_probability} and above to determine the following conditions for $p_{sp.},p_{m}$ and $p_{D2}$
 
@@ -720,10 +745,12 @@ We can look back at equation \ref{eq_align:stab_depo_probability} and above to d
 for $p_x^c=1/2$ we need to satsify:
 
 \begin{equation}
-    \left(2\cdot \frac{2}{3}p_{sp.\ket{+}}-1\right)
-    \left(2\cdot \frac{2}{3}\frac{4}{5}p_{D2\ket{+}}-1\right)
-    \left(2\cdot p_{m\ket{+}}-1\right) = 0
+    \left(p_{sp.\ket{+}}- \frac{3}{4}\right)
+    \left(p_{D2\ket{+}}-\frac{15}{16}\right)
+    \left(p_{m\ket{+}}-\frac{1}{2}\right) = 0
 \end{equation}
+
+\textcolor{red}{rewrite simply as 3 different results.... but are there only those results?!}
 
 \subsubsection{Symmetry Depolarizing Channel}
 
@@ -731,17 +758,26 @@ We require:
 \begin{equation}
     p_{t,01}=p_{t,10}=p_{t,11}
 \end{equation}
+with,
+\begin{equation}
+    p_{t,ij} = \frac{1}{3} p_D^c + \left( 1- \frac{4}{3} p_D^c \right) p_{x,i}^c \cdot p_{z,j}^c 
+\end{equation}
+
 Therefore $p_D=3/4$ is obviously a solution, as seen above.
 
-Or 
+Otherwise we can reformulate the problem as 
 \begin{equation}
-    p_{x}\cdot p_{z} = 
-    (1-p_{x})\cdot p_{z} = 
-    p_{x}\cdot (1-p_{z})  
+    p_{x}^c\cdot p_{z}^c = 
+    (1-p_{x}^c)\cdot p_{z}^c = 
+    p_{x}^c\cdot (1-p_{z}^c)  
 \end{equation}
 which leads to 
-\begin{equation}
-    p_x = p_z = 1/2.
-\end{equation}
+\begin{align*}
+    p_x^c &= p_z^c = 1/2\\
+    p_x^c &= p_z^c = 0 
+\end{align*}
+These are the three possible solutions for a symmetric depolarizing channel.
 
-These are the two possible solutions for a symmetric depolarizing channel.
+Where $p=1/2$ is the fully depolarizing case aka. cutting wires.
+
+And $p=0$ is the case where we start with only depolarizing noise and therefore only get depolarizing noise.

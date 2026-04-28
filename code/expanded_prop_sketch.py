@@ -1,7 +1,7 @@
 import numpy as np 
 import matplotlib.pyplot as plt
 
-# from tools.error_propagation import corr_eff_noise, prob_combined_flip_channels, prob_combined_depo_channels
+from tools.error_propagation import corr_eff_noise, prob_combined_flip_channels, prob_combined_depo_channels
 
 # Compositions
 def pcz(p):
@@ -66,22 +66,22 @@ if False:
     plt.ylabel("prob. of composition")
     plt.show()
 
-if False:
-    ps = np.linspace(0,1)
+if True:
+    ps = np.linspace(0,1.5,1000)
     plt.figure()
     plt.title("Syndrome channel")
 
     # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),0,0),label="I")
     plt.plot(ps,pti(ps),label="I_exp")
-    # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),0,0)-pti(ps),label="diff I")
+    # # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),0,0)-pti(ps),label="diff I")
 
     # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),1,0),label="X")
     plt.plot(ps,ptx(ps),label="X_exp")
-    # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),1,0)-ptx(ps),label="diff X")
+    # # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),1,0)-ptx(ps),label="diff X")
 
     # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),0,1),label="Z")
     plt.plot(ps,ptz(ps),label="Z_exp")
-    # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),0,1)-ptz(ps),label="Z diff")
+    # # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),0,1)-ptz(ps),label="Z diff")
 
     # plt.plot(ps,ptij(pcd(ps),pcx(ps),pcz(ps),1,1),label="Y")
     plt.plot(ps,pty(ps),label="Y_exp")

@@ -105,8 +105,7 @@ def predict_MWPM_surface_code(
 
 
 # ML Decoding
-# TODO: is parralism acutally an improvement? not if I just want to use a single core!
-@numba.njit()#parallel=True)
+@numba.njit
 def fast_decoding(d,p,observable,rel_synd):    
     num_shots, rounds, _ = rel_synd.shape
     predicitons = np.zeros((num_shots,rounds))
@@ -123,7 +122,7 @@ def fast_decoding(d,p,observable,rel_synd):
     multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
     return multi_round_pred, multi_round_pauli_flip
 
-# TODO Jit this one!
+@numba.njit
 def slow_decoding(d,p,observable,rel_synd):    
     num_shots, rounds, _ = rel_synd.shape
     predicitons = np.zeros((num_shots,rounds))
@@ -150,7 +149,7 @@ def predict_ML(
         noise_model: str = "circ",
     ):
     # select decoding implementation that gonna be used
-    decoding_func = fast_decoding 
+    decoding_func = slow_decoding 
     d = distance
     # Adapt noise to given noise model
     if noise_model == "circ":
@@ -173,7 +172,7 @@ def predict_ML(
     # rel_synd[shot][round][i_stab]
 
     # Actual Decoding: 
-    multi_round_pred, multi_round_pauli_flip = decoding_func(d,p,observable,rel_synd)
+    multi_round_pred, multi_round_pauli_flip = decoding_func(d, p, observable, rel_synd)
 
     # FT Decoding (MWPM)
     z_stab = True if observable == "Z" else False
@@ -184,49 +183,6 @@ def predict_ML(
     total_pred = np.array(total_pred, dtype=bool) # convert to boolean values
     return total_pred 
 
-
-
-# NOT NEEDED ?!
-def generate_log_error_rates_diff_p(
-        circuits:list,
-        noise_model_fct,
-        distances,
-        rounds=1,
-        observable:int = "Z",
-        noise_set = np.logspace(-2,-0.1),
-        num_shots = 10_000, 
-        noise_model = "circ",
-        count_log_error_fct = predict_ML,
-    ):
-    log_error_rates = []
-    y_errs = []
-    for i,circuit in enumerate(circuits):
-        log_error_prob = []
-        for noise in noise_set:
-            noisy_circuit = add_noise(
-                circuit,
-                noise_model_fct(noise),
-                )
-            detection_events, observable_flips = sample_ciruit(noisy_circuit, num_shots)
-            predictions = count_log_error_fct(
-                    detection_events, 
-                    rounds=rounds,
-                    error_rate = noise,
-                    distance = distances[i],
-                    noise_model = noise_model,
-                    observable = observable,
-                    ) 
-            num_errors = calc_num_errors(predictions, observable_flips)
-            log_error_prob.append(
-                num_errors/num_shots
-               )
-        
-        log_error_prob = np.array(log_error_prob)
-        y_err = (log_error_prob*(1-log_error_prob)/num_shots)**(1/2)
-
-        log_error_rates.append(log_error_prob)
-        y_errs.append(y_err)
-    return log_error_rates, y_errs
 
 def config_to_predict_func(config):
     circuit_type = config["circuit"]["type"]
