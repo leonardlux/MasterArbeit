@@ -1,9 +1,13 @@
 from tools.combined import generate_data_from_config
-from tools.circuits import generate_ft_surface_code_circuit
+from tools.circuits import generate_ft_surface_code_circuit, generate_steane_circuit
 from tools.error_models import add_noise, construct_circuit_noise_model
 from tools.graphics import save_circuit_diagram
 
+from tools.syndrome_prediction  import config_to_predict_func, sample_ciruit, calc_num_errors  
+
 import numpy as np
+import stim
+
 
 config = {
         "circuit": {
@@ -31,8 +35,14 @@ config = {
     }
 d=3
 rounds = 1
+noise = 0.1
+shots = 10
+
 circ = generate_ft_surface_code_circuit(d,rounds,)
+# circ = generate_steane_circuit(d,rounds)
 
-n_circ = add_noise(circ, construct_circuit_noise_model(0.1))
+n_circ = add_noise(circ, construct_circuit_noise_model(noise))
 
+synd, obs = sample_ciruit(n_circ,10)
+print(synd)
 save_circuit_diagram(n_circ,"/home/fu494742/MasterArbeit/images/test.svg")

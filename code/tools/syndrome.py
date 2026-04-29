@@ -51,7 +51,7 @@ def split_syndromes_rounds(d, rounds, syndromes):
     return x_syndromes, z_syndromes, ft_syndromes
 
 def xor_syndromes(rounds, syndromes):
-    # idea: xor all the syndrome with one another to track the acutal change
+    # idea: xor all the syndrome with one another to track the actual change
     xor_syndromes = np.zeros(np.array(syndromes).shape)
     xor_syndromes[0] = syndromes[0]
     for round in range(rounds-1):
@@ -77,14 +77,14 @@ def split_and_xor_syndrome(d, rounds, syndromes, ft_stab_z=True):
     pz_synd  = xor_syndromes(rounds,z_syndromes) 
     if ft_stab_z:
         # observable is measured in Z basis
-        pft_synt = xor_ft_syndrome(z_syndromes[-1],ft_syndromes)
+        pft_synd = xor_ft_syndrome(z_syndromes[-1],ft_syndromes)
     elif not ft_stab_z:
         # observable is measured in X basis
-        pft_synt = xor_ft_syndrome(x_syndromes[-1],ft_syndromes)
+        pft_synd = xor_ft_syndrome(x_syndromes[-1],ft_syndromes)
     else:
         raise ValueError("Unkown state")
     # Order of snydromes synd[round][shot][stab]
-    return px_synd, pz_synd, pft_synt
+    return px_synd, pz_synd, pft_synd
 
 def reorder_syndromes(old_order):
     new_order = old_order.swapaxes(0, 1)
@@ -92,14 +92,14 @@ def reorder_syndromes(old_order):
 
 
 # Surface code:
-def preprocess_surface_code_syndromes(d, rounds, syndromes, observable):
+def preprocess_surface_code_syndromes(d, rounds, syndromes):
     n_stab = d*(d-1)
     n_qec_round = 2*n_stab *d
 
     # split up and seperate each round
     qec_round_syndromes, ft_syndromes = np.split(syndromes,[rounds*n_qec_round],axis=1)
     qec_round_syndromes = qec_round_syndromes.reshape(syndromes.shape[0],rounds,n_qec_round)
-
+    # shape qec_round_syndromes[shots, rounds, detectors, per round]
     return qec_round_syndromes, ft_syndromes
     
     

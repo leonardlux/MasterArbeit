@@ -4,9 +4,8 @@ import numba
 
 from tools.error_models import add_noise
 from tools.ml_decoder import decode_half_syndrome,  decode_half_syndrome_aron
-from tools.mwpm_decoder import gen_mwpm_matcher, gen_mwpm_matcher_surface_code
+from tools.mwpm_decoder import gen_mwpm_matcher, gen_mwpm_matcher_surface_code, gen_mwpm_matcher_surface_code_with_FT
 from tools.syndrome import split_and_xor_syndrome, reorder_syndromes, preprocess_surface_code_syndromes
-from tools.pauli_frame_track import syndrome_to_pauli_flips 
 from tools.error_propagation import uncorr_eff_noise
 
 # General stuff
@@ -76,11 +75,15 @@ def predict_MWPM_surface_code(
     ):
     d = distance
     p = error_rate
+    # shortcut of complete circuit 1 round with FT
+    matcher = gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable=observable)
+    total_pred_whole = matcher.decode_batch(detection_events).flatten()
+
+    # propper disconnected implementation
     qec_round_syndromes, ft_synds = preprocess_surface_code_syndromes(
         d= d,
         rounds=rounds,
         syndromes=detection_events,
-        observable=observable,
     )
 
     # Actual Decoding:
@@ -91,17 +94,17 @@ def predict_MWPM_surface_code(
         predicitons[i_round] = matcher.decode_batch(qec_round_syndromes[:,i_round,:]).flatten()
         # .flatten() is needed because we always assume that only one observable is measured (in ML, and I wanted to adapt to this problem)
     # combine rounds together
-    multi_round_pred =np.sum(predicitons,axis=0)%2
+    multi_round_pred = np.sum(predicitons,axis=0)%2
 
     # FT Decoding (Same as usual)
     z_stab = True if observable == "Z" else False
-    matcher = gen_mwpm_matcher(d, p, z_stab, noise_model)
+    matcher = gen_mwpm_matcher(d, p, z_stab, noise_model="basic")
     ft_predictions = matcher.decode_batch(ft_synds).flatten()
 
     total_pred = (multi_round_pred + ft_predictions)%2
     total_pred = np.array(total_pred, dtype=bool)
 
-    return total_pred
+    return total_pred_whole
 
 
 # ML Decoding
