@@ -81,8 +81,6 @@ show more asymptotic behavior (and explain the exponents fucntion)
 02. TODO: implement switching of decoder method in config!
 
 
-
-
 # 23.04 Thursday
 
 01. meeting 
