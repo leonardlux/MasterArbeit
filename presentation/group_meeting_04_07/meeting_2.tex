@@ -12,10 +12,10 @@
 
 \usetheme{Antibes}
 
-\title{Steane Type Error Correction - Error Propagation}
+\title{Steane Type Error Correction - Some Results }
 \subtitle{Short Long Update}
 \author{Leonard Lux}
-\date{24.02.2026}
+\date{07.04.2026}
 
 \begin{document}
 
@@ -93,25 +93,25 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 % Slide  (Error Models)
 
 \section{Error Models}
-\begin{frame}{Circuit level noise model}
-    Probability of noise is of $\mathcal{O}(p)$
-    \begin{itemize}
-        \setlength{\itemsep}{6pt}
-        \item Depolarizing single qubit noise ($D1$) 
-        \begin{itemize}
-            \item After logical encoding of qubit (Assumption!) 
-        \end{itemize}
-        \item Depolarizing two qubit noise ($D2$) 
-        \begin{itemize}
-            \item After $\mathrm{CNOT}$ gates
-        \end{itemize}
-        \item Measurement errors
-        \begin{itemize}
-            \item Bit-flip before $Z$-Measurements
-            \item Phase-flip before $X$-Measurements
-        \end{itemize}
-    \end{itemize}
-\end{frame}
+% \begin{frame}{Circuit level noise model}
+%     Probability of noise is of $\mathcal{O}(p)$
+%     \begin{itemize}
+%         \setlength{\itemsep}{6pt}
+%         \item Depolarizing single qubit noise ($D1$) 
+%         \begin{itemize}
+%             \item After logical encoding of qubit (Assumption!) 
+%         \end{itemize}
+%         \item Depolarizing two qubit noise ($D2$) 
+%         \begin{itemize}
+%             \item After $\mathrm{CNOT}$ gates
+%         \end{itemize}
+%         \item Measurement errors
+%         \begin{itemize}
+%             \item Bit-flip before $Z$-Measurements
+%             \item Phase-flip before $X$-Measurements
+%         \end{itemize}
+%     \end{itemize}
+% \end{frame}
 
 
 % Slide: Circuit examples Errors
@@ -184,7 +184,7 @@ Luis Colmenarez, Maarten Wegewijs \& Markus Müller
 \begin{frame}{Detector Error Model}
     \begin{block}{Resulting Probabilities (correlated)}
         \begin{equation*}
-            p_{(i,j)}^{(MLD)} = \frac{1}{3}p_{D'^c} + (1- \frac{4}{3}p_{D'}^c)\cdot p_{x,i}^c \cdot p_{z,j}^c
+            p_{(i,j)}^{(MLD)} = \frac{1}{3}p_{D'}^c + (1- \frac{4}{3}p_{D'}^c)\cdot p_{x,i}^c \cdot p_{z,j}^c
         \end{equation*}
         \vspace{0.5cm}
         \begin{equation*}
@@ -240,26 +240,195 @@ with scaling function $f(x)$
 
 \section{Results}
 \subsection{Code Capacity}
-\begin{frame}{Code Capacity Noise Model}
-    show plots and results 
-        ml and mwpm
-    
-    compare to literature
+\begin{frame}{Code Capacity Model}
+\begin{itemize}
+    \item Code capacity model
+    \item 100k shots 
+    \item eff. ML Decoder
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.65\textwidth]{plots/code_capacity_ml_z_log_error_rate_complete.pdf}
+\end{figure}
+\begin{itemize}
+    \item Numeric stability problems visible
+\end{itemize}
+\end{frame}
 
-    discuss finite size effects
+\begin{frame}{Comparison MWPM Decoder}
+\begin{itemize}
+    \item Code capacity model
+    \item 100k shots 
+    \item MWPM Decoder
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{plots/code_capacity_mwpm_z_log_error_rate_complete.pdf}
+\end{figure}
+\begin{itemize}
+    \item Numeric stability problems not visible 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Code Capacity Model}
+\begin{itemize}
+    \item Data Collapse Method
+    \item for $p_{phy}$ around expected threshold
+    \item starting at minimum distance 5
+\end{itemize}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{plots/code_capacity_ml_z_fssa.pdf}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Code Capacity Model}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/code_capacity_ml_z_log_error_rate_zoom.pdf}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{Code Capacity Model - Results}
+\begin{table}
+\centering
+\begin{tabular}{lccc}
+\hline
+Decoder & Obs. & Threshold (\%) & Literature (\%) \\
+\hline
+ML   & Z & $10.849 \pm 0.083$ & 10.94 \\
+ML   & X & $10.857 \pm 0.051$ & 10.94 \\
+MWPM & Z & $10.266 \pm 0.061$ & 10.31 \\
+MWPM & X & $10.330 \pm 0.062$ & 10.31 \\
+\hline
+\end{tabular} 
+\end{table}
+
+\begin{itemize}
+    \item ML threshold might be smaller due to finite size effects
+\end{itemize}
+
 \end{frame}
 
 \subsection{Circuit Level}
-\begin{frame}{Circuit Level}
-    show results for one round
-    discuss effect of ordering 
+\begin{frame}{Circuit Level Noise}
+    \begin{itemize}
+        \item Circuit level noise
+        \item 100k shots
+        \item eff. ML Decoder
+    \end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.65\textwidth]{plots/circ_ml_z_log_error_rate_complete.pdf}
+\end{figure}
+\begin{itemize}
+    \item Numerical instability visible
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Circuit Level Noise - Results}
+\begin{itemize}
+    \item Using data collapse method 
+\end{itemize}
+\begin{table}
+\centering
+\begin{tabular}{lcc}
+\hline
+Decoder & Obs. & Threshold (\%) \\
+\hline
+ML   & Z & $2.933 \pm 0.030$  \\
+ML   & X & $3.330 \pm 0.025$  \\
+MWPM & Z & $2.741 \pm 0.026$  \\
+MWPM & X & $3.287 \pm 0.034$  \\
+\hline
+\end{tabular}
+\end{table}
+
+\begin{itemize}
+    \item $X$-Errors corrected last $\rightarrow$ lower threshold for $Z$ observable
+    \begin{itemize}
+        \item not symmetric!
+    \end{itemize}
+\end{itemize}
+
 \end{frame}
 
 \subsection{Multiple Rounds QEC}
 \begin{frame}{Multiple Rounds}
-    Multiple rounds 
+\begin{itemize}
+    \item Parameters:
+    \begin{itemize}
+        \item 100k shots
+        \item distances: $5,7,9$
+    \end{itemize}
+\end{itemize}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.7\textwidth]{plots/multi_round_Z_obs_log.pdf}
+\end{figure}
 \end{frame}
 
+\begin{frame}{Multiple Rounds}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/multi_round_ML_log.pdf}
+\end{figure}
+\begin{itemize}
+    \item Difference between $Z$ and $X$ becomes less significant 
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Multiple Rounds}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.8\textwidth]{plots/multi_round_MWPM_log.pdf}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Multiple Rounds}
+\begin{columns}
+    \begin{column}{0.5\textwidth}
+\begin{figure}
+    \centering
+    \includegraphics[width=0.9\textwidth]{plots/multi_round_all_log.pdf}
+\end{figure}
+    \end{column} 
+    \begin{column}{0.5\textwidth}
+       \begin{table}[h]
+\centering
+\begin{tabular}{lcc}
+\hline
+Decoder & Obs. & Threshold (\%) \\
+\hline
+ML   & Z & $1.988 \pm 0.041$ \\
+ML   & X & $1.982 \pm 0.038$ \\
+MWPM & Z & $1.854 \pm 0.031$ \\
+MWPM & X & $1.930 \pm 0.066$ \\
+\hline
+\end{tabular}
+\label{tab:final_results}
+\end{table} 
+    \end{column} 
+\end{columns}
+\end{frame}
+
+\section{Outlook}
+\begin{frame}{Outlook}
+    \begin{itemize}
+        \item Compare to repeated stabilizer readout
+        \begin{itemize}
+            \item MWPM decoder 
+            \item Compare multiround behaviour
+        \end{itemize}
+        \item Check out numerical instability problem
+        \item Try correlated decoder
+        \begin{itemize}
+            \item Also in eff. ML decoding paper 
+        \end{itemize}
+    \end{itemize}
+\end{frame}
 
 \begin{frame}
     \begin{center}
