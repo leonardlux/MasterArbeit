@@ -2,17 +2,13 @@ import numpy as np
 import scipy as sc
 import numba
 
-if __name__ == "__main__":
-    from aron_ml import * 
-    from pauli_frame_track import stabilizer_to_pauli, rotate_and_reorder_syndrome, format_syndrome_to_matrix
-else:
-    from tools.aron_ml import simulation_mld, error_converter
-    from tools.pauli_frame_track import stabilizer_to_pauli, rotate_and_reorder_syndrome, format_syndrome_to_matrix
+from tools.aron_ml import simulation_mld, error_converter
+from tools.pauli_frame_track import stabilizer_to_pauli, rotate_and_reorder_syndrome, format_syndrome_to_matrix
 
 ## ML Decoder 
 # Matrix M_0
 @numba.njit
-def gen_m0(d, dtype=np.float32):
+def gen_m0(d, dtype):
     m0=np.zeros((2*d,2*d), dtype=dtype)
     for i in range(d-1):
         m0[2*i+1,2*i+2]=1
@@ -29,7 +25,7 @@ def calc_weights(p,f):
 
 # normal probability 
 @numba.njit
-def simulate_horizontal(d, j, m, gamma, weights, dtype=np.float32):
+def simulate_horizontal(d, j, m, gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
 
@@ -48,14 +44,14 @@ def simulate_horizontal(d, j, m, gamma, weights, dtype=np.float32):
     gamma = gamma * np.sqrt(np.linalg.det(m + A))
     # Avoid using direct calculations of inverse, as it might be more unstable ... https://nhigham.com/2022/03/28/what-is-the-matrix-inverse/?utm_source=chatgpt.com
     # Step 1: Solve (M + A) * X = B for X
-    # x = np.linalg.solve(m + A, B)
+    x = np.linalg.solve(m + A, B)
     # Step 2: Compute B * X
-    # m = A - B @ x 
-    m = A - (B @ np.linalg.inv(m + A) @ B)
+    m = A - B @ x 
+    # m = A - (B @ np.linalg.inv(m + A) @ B)
     return m, gamma
 
 @numba.njit
-def simulate_vertical(d, j, m, gamma, weights, dtype=np.float32):
+def simulate_vertical(d, j, m, gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
     B[0,0] = 1
@@ -74,16 +70,16 @@ def simulate_vertical(d, j, m, gamma, weights, dtype=np.float32):
     gamma  = gamma * np.sqrt(np.linalg.det(m + A))
     # Avoid using direct calculations of inverse, as it might be more unstable ... https://nhigham.com/2022/03/28/what-is-the-matrix-inverse/?utm_source=chatgpt.com
     # Step 1: Solve (M + A) * X = B for X
-    # x = np.linalg.solve(m + A, B)
+    x = np.linalg.solve(m + A, B)
     # Step 2: Compute B * X
-    # m = A - B @ x
-    m = A - (B @ np.linalg.inv(m + A) @ B)
+    m = A - B @ x
+    # m = A - (B @ np.linalg.inv(m + A) @ B)
     return m, gamma
 
 @numba.njit
-def coset_probability(d,p,f, dtype=np.float32):
+def coset_probability(d,p,f, dtype):
     weights = calc_weights(p,f)
-    m = gen_m0(d)
+    m = gen_m0(d, dtype)
     gamma = 2**(d - 1)
     for j in range(d - 1):
         m, gamma = simulate_horizontal(d, j, m, gamma, weights, dtype=dtype)
@@ -96,7 +92,7 @@ def coset_probability(d,p,f, dtype=np.float32):
     pauli_error_prob = (1 - p)**(n - norm_f) * p**norm_f
 
     # calc coset
-    coset_prob = pauli_error_prob * np.sqrt(gamma / 2) * (np.linalg.det((m + gen_m0(d))))**(1/4)
+    coset_prob = pauli_error_prob * np.sqrt(gamma / 2) * (np.linalg.det((m + gen_m0(d, dtype))))**(1/4)
     return coset_prob 
 
 @numba.njit
@@ -121,7 +117,7 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",dtype=np.float32):
 
 # log prob
 @numba.njit
-def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype=np.float32):
+def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
 
@@ -137,7 +133,7 @@ def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype=np.float32):
         B[2*i,   2*i  ] = s
         B[2*i+1, 2*i+1] = s
     
-    gamma = gamma + np.log(np.sqrt(np.linalg.det(m + A)))
+    log_gamma = log_gamma + np.log(np.sqrt(np.linalg.det(m + A)))
     # Avoid using direct calculations of inverse, as it might be more unstable ... https://nhigham.com/2022/03/28/what-is-the-matrix-inverse/?utm_source=chatgpt.com
     # Step 1: Solve (M + A) * X = B for X
     x = np.linalg.solve(m + A, B)
@@ -147,9 +143,11 @@ def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype=np.float32):
     return m, log_gamma
 
 @numba.njit
-def simulate_vertical_log(d, j, m, log_gamma, weights, dtype=np.float32):
+def simulate_vertical_log(d, j, m, log_gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
+    B[0,0] = 1
+    B[2*d-1,2*d-1]=1
 
     for i in range(d-1):
         qubit_index = d + j + (2 * d - 1) * i 
@@ -171,10 +169,10 @@ def simulate_vertical_log(d, j, m, log_gamma, weights, dtype=np.float32):
     return m, log_gamma
 
 @numba.njit
-def coset_probability_log(d,p,f, dtype=np.float32):
+def coset_probability_log(d,p,f, dtype):
     weights = calc_weights(p,f)
 
-    m = gen_m0(d)
+    m = gen_m0(d, dtype)
     log_gamma = np.log(2**(d-1))
 
 
@@ -188,7 +186,7 @@ def coset_probability_log(d,p,f, dtype=np.float32):
     norm_f = np.sum(f)
     pauli_error_prob = (1 - p)**(n - norm_f) * p**norm_f
 
-    log_coset_prob = 1/2 * log_gamma - 1/2 * np.log(2) + np.log(pauli_error_prob)  + 1/4*np.log(np.linalg.det(m + gen_m_0(d)))
+    log_coset_prob = 1/2 * log_gamma - 1/2 * np.log(2) + np.log(pauli_error_prob)  + 1/4*np.log(np.linalg.det(m + gen_m0(d, dtype)))
     return log_coset_prob
 
 @numba.njit
@@ -213,7 +211,7 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float32):
 
 # arons code adapted 
 @numba.njit
-def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",):
+def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",dtype=None):
     if stab_type.upper() == "X":
         # need to rotate X stabilizer -> can be treated like Z stabilizer 
         h_syndrome = rotate_and_reorder_syndrome(d, h_syndrome)

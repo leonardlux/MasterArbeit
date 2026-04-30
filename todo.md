@@ -74,11 +74,21 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+
+# 30.04 Thursday
+
+00. wrote a bit of analysis to check how the decoder fails
+
+# 29.04 Wednesday 
+
+00. implemented test decoding case through config
+01. generated a bunch of data
+
+
 # 28.04 Tuesday 
 
 00. ML Decoder works on open boundary conditions
 01. finally jitted my ML implementation
-02. TODO: implement switching of decoder method in config!
 
 
 # 23.04 Thursday
