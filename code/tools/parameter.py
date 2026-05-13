@@ -8,6 +8,9 @@ PATH_TO_IMAGE_FOLDER = "/home/fu494742/MasterArbeit/images"
 
 DATA_BASE_NAME = "data"
 
+# Turned to generate 128, and 16 bit versions
+USE_JIT = True 
+
 # defines which dict parameters needs to be identical for two configs to add to the same data set
 # other parameters: num_shots, noise_rates, distances, qec_rounds are all given and sourced from data file
 # given parameters are examples

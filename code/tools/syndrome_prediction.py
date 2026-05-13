@@ -3,7 +3,7 @@ import numpy as np # type: ignore
 import numba 
 
 from tools.error_models import add_noise
-from tools.ml_decoder import decode_half_syndrome, decode_half_syndrome_log,  decode_half_syndrome_aron
+from tools.ml_decoder import decode_half_syndrome, decode_half_syndrome_log,  decode_half_syndrome_aron, maybe_jit
 from tools.mwpm_decoder import gen_mwpm_matcher, gen_mwpm_matcher_surface_code, gen_mwpm_matcher_surface_code_with_FT
 from tools.syndrome import split_and_xor_syndrome, reorder_syndromes, preprocess_surface_code_syndromes
 from tools.error_propagation import uncorr_eff_noise
@@ -107,7 +107,7 @@ def predict_MWPM_surface_code(
 
 # ML Decoding
 
-@numba.njit
+@maybe_jit
 def decoding(d,p,observable,rel_synd, decode_half_syndrome_func, dtype):    
     num_shots, rounds, _ = rel_synd.shape
     predicitons = np.zeros((num_shots,rounds))

@@ -4,10 +4,17 @@ import numba
 
 from tools.aron_ml import simulation_mld, error_converter
 from tools.pauli_frame_track import stabilizer_to_pauli, rotate_and_reorder_syndrome, format_syndrome_to_matrix
+from tools.parameter import USE_JIT
+
+def maybe_jit(func):
+    # jit depended on global parameter
+    if USE_JIT:
+        return numba.njit(func) 
+    return func
 
 ## ML Decoder 
 # Matrix M_0
-@numba.njit
+@maybe_jit
 def gen_m0(d, dtype):
     m0=np.zeros((2*d,2*d), dtype=dtype)
     for i in range(d-1):
@@ -18,13 +25,13 @@ def gen_m0(d, dtype):
     m0[2*d-1,0]=-1
     return m0
 
-@numba.njit
+@maybe_jit
 def calc_weights(p,f):
     weights = p**(1 - 2 * f) * (1 - p)**(-1 + 2 * f) 
     return weights
 
 # normal probability 
-@numba.njit
+@maybe_jit
 def simulate_horizontal(d, j, m, gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
@@ -50,7 +57,7 @@ def simulate_horizontal(d, j, m, gamma, weights, dtype):
     # m = A - (B @ np.linalg.inv(m + A) @ B)
     return m, gamma
 
-@numba.njit
+@maybe_jit
 def simulate_vertical(d, j, m, gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
@@ -76,7 +83,7 @@ def simulate_vertical(d, j, m, gamma, weights, dtype):
     # m = A - (B @ np.linalg.inv(m + A) @ B)
     return m, gamma
 
-@numba.njit
+@maybe_jit
 def coset_probability(d,p,f, dtype):
     weights = calc_weights(p,f)
     m = gen_m0(d, dtype)
@@ -95,7 +102,7 @@ def coset_probability(d,p,f, dtype):
     coset_prob = pauli_error_prob * np.sqrt(gamma / 2) * (np.linalg.det((m + gen_m0(d, dtype))))**(1/4)
     return coset_prob 
 
-@numba.njit
+@maybe_jit
 def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",dtype=np.float32):
     if stab_type.upper() == "Z":
         stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
@@ -116,7 +123,7 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",dtype=np.float32):
     return obs_flip, c_f
 
 # log prob
-@numba.njit
+@maybe_jit
 def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
@@ -142,7 +149,7 @@ def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype):
     # m = a - (b @ np.linalg.inv(m + a) @ b)
     return m, log_gamma
 
-@numba.njit
+@maybe_jit
 def simulate_vertical_log(d, j, m, log_gamma, weights, dtype):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
@@ -168,7 +175,7 @@ def simulate_vertical_log(d, j, m, log_gamma, weights, dtype):
     # m=a - (b @ np.linalg.inv(m + a) @ b)
     return m, log_gamma
 
-@numba.njit
+@maybe_jit
 def coset_probability_log(d,p,f, dtype):
     weights = calc_weights(p,f)
 
@@ -189,7 +196,7 @@ def coset_probability_log(d,p,f, dtype):
     log_coset_prob = 1/2 * log_gamma - 1/2 * np.log(2) + np.log(pauli_error_prob)  + 1/4*np.log(np.linalg.det(m + gen_m0(d, dtype)))
     return log_coset_prob
 
-@numba.njit
+@maybe_jit
 def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float32):
     if stab_type.upper() == "Z":
         stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
@@ -210,7 +217,7 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float32):
     return obs_flip, c_f
 
 # arons code adapted 
-@numba.njit
+@maybe_jit
 def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",dtype=None):
     if stab_type.upper() == "X":
         # need to rotate X stabilizer -> can be treated like Z stabilizer 
