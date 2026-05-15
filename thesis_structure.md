@@ -2,24 +2,41 @@
 
 # Title: Circuit Level Characterization of Steane Type Error Correction
 
-
 # Abstract
 
+Fault-tolerant quantum computing relies on quantum error correction (QEC) schemes whose performance can be characterized by a threshold: a critical physical error rate below which logical errors can be suppressed by increasing the code distance. In this thesis, we investigate the threshold for Steane type error correction circuits which perform syndrome extraction by logical encoded ancillas in a fault-tolerant and single-shot setting.
+We determine the logical error rate under circuit-level noise model with faults in both gate operations and measurements, assuming access to fault tolerant logical ancilla preparations. Decoding is performed using an efficient maximum likelihood decoder designed for the surface code and compared to minimum weight perfect matching. 
+We find that the threshold are beautiful and amazing ... as compared to ...
+We investigate single shot properties of steane type syndrome extraction by computing the threshold as function of the number of rounds and compare with standard repeated surface code syndrome extraction under circuit level noise, using the same decoders (ML, MWPM).
+We find ....
 
-# Introduction
+Topic XY require further investgation
 
-Eplain the title of parts
+# Introduction & Overview
+
+With rapidly increasing number of qubit in QC platform ...
+We can pay the tradeoff of more physical qubit for a faster operation.
+Constant (in time) overhead ft qec (Gottesmann paper)
+
+The performs of a code is charactized by the threshold, ...,
+and to calculate this under realistic conditions we have to take into account that errors occur in every part in the circuit even in the QEC, so called circuit level noise.
+
+## Overview of the thesis
+
+The thesis is organized as follows:
+
+1. describe each chapter and what can be found there, what is interesting for the reader 
 
 
-# Theoretical Basics/Fundamentals
 
-## Quantum Memory
 
-### Quantum Circuits
+# Quantum Memories 
+
+## ideal Quantum Circuits
 
 0. concept of quantum memory experiments
 
-### Pauli Error 
+## Pauli Error 
 
 0. What are real world physical noise process (some examples)
 1. How to find a good theoretical approach to model those
@@ -28,14 +45,14 @@ Eplain the title of parts
     + bit-/phase- flip noise
     + introduce depolirizing noise
 
-#### Code Capacity Model
+### Code Capacity Model
 
 0. Just errors on data qubits
 1. Simplest model
     + Surface code is designed for this model 
 2. describe the resulting error model
 
-#### Circuit Level Noise
+### Circuit Level Noise
 
 0. Ancilla qubits and gates are faulty 
     + more realworld like
@@ -46,14 +63,14 @@ Eplain the title of parts
 2. Add two qubit depolirizing noise 
 3. describe the resulting full error model
 
-##### Phenomological Noise Model
+#### Phenomological Noise Model
 
 0. Defintion
 1. Why useful?
 
 
 
-## Quantum Error Correction (QEC)
+# Quantum Error Correction (QEC)
 
 Motivation: Why is it needed, and what are the basic prinicples
     + Example
@@ -65,6 +82,7 @@ Motivation: Why is it needed, and what are the basic prinicples
     + (no clone theorem) find better arguments xD
     + measurements collapse quantum states 
 2. What is the definition of a successful recovery
+    + -> concept of FT recovery/residual error
 
 
 ### Threshold Theorem
@@ -101,14 +119,24 @@ Meaning of threshold vs distance for the capacity of a code (maybe a bit to earl
     + and some scientific consensus
 2. Existence of Rotated Surface code and reasons why we did not choose this one
 
-## Syndrome Extraction
+#### Logical State prepartion/Preparation of Logical States (ToDo)
+
+0. Important for steane type error correction
+0. How are we preparing a logical |0> / |+> state,
+    + show that they are logical 0 or +
+    + talk about pauli frame tracking -> random coset of centralizer 
+    + still observable fixed to be correct 
+        + tricial but not that trivial
+        
+
+# Syndrome Extraction
 
 0. talk about influence of circuit level noise 
     + -> need to think about a smart way of syndrome extraction
 1. ToDo: How does the group picture change?
     + can we find a nice way to express this?
 
-### 'Basic' Surface code ancilla syndrome extraction ciruit
+## 'Basic' Surface code ancilla syndrome extraction ciruit
 
 0. Talk about basic layout
     + for code capcity case
@@ -117,7 +145,7 @@ Meaning of threshold vs distance for the capacity of a code (maybe a bit to earl
     + -> not fault tolerant
     + -> d repeated measurements needed (ToDo find good paper)
 
-### Steane Type Syndrome Extraction = Steane Type Error Correction
+## Steane Type Syndrome Extraction = Steane Type Error Correction
 
 0. Log trival operations
 1. Error Propagations through CNOTs
@@ -131,10 +159,13 @@ Properties:
 1. Discuss how to treat residual error and why it is still correctable
 2. Discuss trade offs 
     + change more space requirement for less time requirement
-3. Discuss encoding problem?
+    + Footnote: Discuss One Shot
+3. Discuss State Preparation problem?
+    + TODO!
+    + Aware that is a weak point
 
 
-## Decoding 
+# Decoding 
 
 0. From Syndrome to Correction
     + Explain in Group picture image
@@ -143,16 +174,19 @@ Properties:
 2. definiton of logical error rate 
     + how to count logical errors
 
-### ML Decoding
+## ML Decoding
+
++ First for code capacity noise
 
 0. Definiton using group structure
     + show to be optimal decoding strategy
 1. Why is it hard?
-2. How much detail for the Method used (?)
-    + Mapping to RBIM  
-    + Mapping to those circuits (TODO: properly understand all of this)
+    + scaling
+2. Note the 1-px pz, mistake 
 
-### MWPM Decoding
+## MWPM Decoding
+
++ keep short/appendix
 
 0. Definiton: Perfect Matching on the Matching graphs 
     + uniform p -> shortest error chain -> cyclic in p
@@ -160,7 +194,6 @@ Properties:
 2. Describe benefits and disadvantages in relation to ML 
 3. Talk about time correlated MWPM?
     + this is needed for Multi Round experiments 
-
 
 ## Pauli Frame Tracking
 
@@ -172,37 +205,18 @@ Properties:
 2. Relevance in this work 
     + given that all operations are non clifford
 
+# Propagated/Effective Error Model  
 
-## Logical Encoding/Preparation of Logical States (ToDo)
++ Put details here
 
-0. Important for steane type error correction
-0. How are we preparing a logical |0> / |+> state,
-    + show that they are logical 0 or +
-    + talk about pauli frame tracking -> random coset of centralizer 
-    + still observable fixed to be correct 
-        + tricial but not that trivial
-
-## Finit Size Scaling analysis aka. how to determine threshold (Move to a different point in the thesis)
-
-0. Motivate on why we need this:
-    + determine thershold
-    + threshold beeing a oder/unorder transition as described in ML chapter
-0. explain how this methods works 
-0. show assumptions 
-
-
-# Methodology
-
-
-## The Circuits 
-
-### Steane Type Error Correction 
+# Implementing Steane Type Syndrome Extraction 
 
 + generate Syndrome and Observable
 
 0. Stim
 Describe Circuit:
 1. Encode surface code qubits:
+    + State prepartion Circuits and their variants
     1. starts in arbitrary Coset -> Pauli Frame Tracking
     2. ToDo: different ways of simulating FT log prepared states
 
@@ -234,21 +248,11 @@ Modifiable parameters of Circuit
 3. Noise Model
     + Code capcity
     + Circuit Level Noise
-4. Encoding Circuit (ToDo)
+4. State Preparation (ToDo)
 5. Order 
     + not implemented for reasons -> symmtry (ToDo, just to show)
 
-### Surface Code repated measurements (standard way)
-
-0. shortly describe the difference
-1. find good argumenation why we need d rounds of measurement readout for ft
-
-### ToDo: Encoding Circuits
-
-+ Describe the functioning of different encoding circuits
-
-
-## Decoding (Predictions)
+## Implementation of Decodings
 
 0. given Syndrome -> determines correct Prediction
 1. all assume independet X and Z noise (could implement for correlated noise (TODO?))
@@ -262,9 +266,6 @@ Modifiable parameters of Circuit
 3. Discuss numerical imprecission Problems
     + quantify those (TODO)
 
-#### Short Tangent: Effective Error model(?)
-
-+ (?) not well structured
 
 ### MWPM Implementation:
 
@@ -278,6 +279,13 @@ Modifiable parameters of Circuit
     + TODO acutally implement this
 
 
+## Comparison: Surface Code repated measurements (standard way)
+
+0. shortly describe the difference
+1. find good argumenation why we need d rounds of measurement readout for ft
+
+
+((einordnen in das übrige))
 ## Different Runs
 
 ### Single Round
@@ -298,26 +306,44 @@ Modifiable parameters of Circuit
 0. describe implementation
 1. argue why per round is not needed 
 
+((end))
+
+## Finit Size Scaling analysis aka. how to determine threshold (Move to a different point in the thesis)
+
+0. Motivate on why we need this:
+    + determine thershold
+    + threshold beeing a oder/unorder transition as described in ML chapter
+0. explain how this methods works 
+0. show assumptions 
+
 
 # Results
 
-## Code capacity case
+## Code capacity Setting  (may move to implementation)
 
++ benchmarking
 0. show basic curves, show threshold and determined threshold and fssa results
 1. compare to literatur values to determined threshold
-2. discuss difference to literatur (smal scale effects)
+2. discuss difference to literatur (small scale effects)
 
-## Single Round 
+## Single Round Steane Type Error Correction
 
 1. Compare different decoding strategies 
 2. compare different observables -> show difference in order
 
-## Mutli Round
+## Mutli Round Steane Type Error Correction
 
 1. Show threshold develops over multiple rounds
     + compare decoder
     + compare observable
 
-## Different Encodings
+## Different State Preparations 
+
 
 # Conclusion
+
+## Outlook
+
+Replacing Surface code with other codes is not interesting in the context of steane type error correction.
+
+FT State preparation investigation arbitrary distances and so
