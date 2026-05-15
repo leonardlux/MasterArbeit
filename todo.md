@@ -3,9 +3,6 @@
 
 Title: Characterization of Steane Type Error Correction
 
-+ Presentation:
-    + Last weeks of July 
-    + Second half of August
 
 # Thematischer Bezug
 
@@ -26,6 +23,7 @@ Write a lot of stuff into my latex overview file
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
 02. win or lose beeing local in time (MWPM for multiple QEC)
+    + implement parity check matrix
 
 03. state preparation of ancilla qubit
 
@@ -55,7 +53,6 @@ Write a lot of stuff into my latex overview file
 
 # this week meeting: (toDos) 
 
-2. data qubit correlation
 3. qubit init as function and use different methods, compare 
 4. numerical problmes 
 5. update notes, add questions and answers -> what is really relevant
