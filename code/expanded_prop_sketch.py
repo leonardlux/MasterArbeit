@@ -52,6 +52,7 @@ def pdc_ps(p_sp_psi, p_sp_0, p_D2_0):
     return (a + b + c) - (4/3)*(a*b + a*c + b*c) + (16/9)*(a*b*c)
 
 if False:
+    # composite channels
     ps = np.linspace(0,1)
     plt.figure()
     plt.title("Composition")
@@ -66,7 +67,8 @@ if False:
     plt.ylabel("prob. of composition")
     plt.show()
 
-if True:
+if False:
+    # Syndrome Channel
     ps = np.linspace(0,1.5,1000)
     plt.figure()
     plt.title("Syndrome channel")
@@ -103,3 +105,76 @@ if True:
     plt.legend()
     plt.show()
 
+
+# Correlated channels
+
+def p_corr(i_s,i_psi, 
+           p_sp_psi, p_sp_0, p_sp_p,
+           p_d2_0, p_d2_p,
+           p_m0, p_mp,
+           ):
+        """
+        return probabilities for p_{i_s,i_psi}, so for the correlated error channel at the end of the circuit. 
+        """
+        # 1_s
+        if i_s == 0:
+            if i_psi == 0:
+                # 1_s 1_psi
+                return 1 - p_sp_psi - p_sp_0 - p_sp_p - 14/15* (p_d2_0 + p_d2_p) - p_m0 - p_mp 
+            elif i_psi == 1:
+                # 1_s X_psi
+                return 2/15* p_d2_p
+            elif i_psi == 2:
+                # 1_s Z_psi
+                return 1/3* p_sp_p + 2/15 * (p_d2_0 + p_d2_p) 
+            elif i_psi == 3:
+                # 1_s Y_psi 
+                return 2/15*p_d2_p
+        # X_s
+        elif i_s == 1:
+            if i_psi == 0:
+                # X_s 1_psi
+                return 1/3 * p_sp_p + p_m0 + 2/15*(p_d2_p)
+            elif i_psi == 1:
+                # X_s X_psi
+                return 1/3 * (p_sp_psi + p_sp_0) + 2/15*(p_d2_0 + p_d2_p)
+            elif i_psi == 2:
+                # X_s Z_psi
+                return 1/3 * p_sp_p + 2/15*(p_d2_p)
+            elif i_psi == 3:
+                # X_s Y_psi
+                return 2/15*(p_d2_0 + p_d2_p)
+        # Z_s 
+        elif i_s == 2:
+            if i_psi == 0:
+                # Z_s 1_psi
+                return 1/3 * p_sp_0 + p_mp + 2/15*(p_d2_0)
+            elif i_psi == 1:
+                # Z_s X_psi
+                return 0 # O(p^2)
+            elif i_psi == 2:
+                # Z_s Z_psi
+                return 1/3 * p_sp_psi + 2/15*(p_d2_0)
+            elif i_psi == 3:
+                # Z_s Y_psi
+                return 0 # O(p^2)
+        # Y_s
+        elif i_s == 3:
+            if i_psi == 0:
+                # Y_s 1_psi
+                return 0 # O(p^2)
+            elif i_psi == 1:
+                # Y_s X_psi
+                return 1/3 * p_sp_0 + 2/15 * p_d2_0
+            elif i_psi == 2:
+                # Y_s Z_psi
+                return 0 # O(p^2)
+            elif i_psi == 3:
+                # Y_s Y_psi
+                return 1/3* p_sp_psi + 2/15* p_d2_0
+
+def p_corr_simplified(i_s, i_psi, p):
+    """ 
+    just all p equal 
+    """
+    return p_corr(i_s, i_psi, p, p, p, p, p, p, p,)

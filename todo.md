@@ -75,6 +75,11 @@ show more asymptotic behavior (and explain the exponents fucntion)
 # 30.04 Thursday
 
 00. wrote a bit of analysis to check how the decoder fails
+talk:
+todo
+- plot linearistion and compare to results without linearisation (is linearisation a good approx?)
+- discuss a bit the syndrome channel symmetry points in realtion to the correlated channel
+    + optimizing the decoder ? is there any point of interest there?
 
 # 29.04 Wednesday 
 
