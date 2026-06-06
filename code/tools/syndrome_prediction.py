@@ -244,14 +244,14 @@ def config_to_predict_func(config):
             elif decode_func_str == "aron":
                 decode_func = decode_half_syndrome_aron
             else:
-                raise ValueError
+                raise ValueError()
             return factory_predict_func_ML(
                 decoding_func=decode_func,
                 dtype=dtype,
             )
 
         else:
-            raise ValueError()
+            raise ValueError("Unknwon Decoder Type")
 
     elif circuit_type == "surface":
         if value == "mwpm":
@@ -259,6 +259,6 @@ def config_to_predict_func(config):
         elif value == "mwpm_full_info":
             return predict_MWPM_rep_surface_code_full_info
         else:
-            raise ValueError()
+            raise ValueError("Unknown Decoder Type")
     else:
-        raise ValueError()
+        raise ValueError("Unkown Circuit Type")
