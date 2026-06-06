@@ -282,13 +282,36 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
         # each round
         for i_d in range(distance):
             # in each rounds we need to measure the stabilizer d-times
-            # measure stabilizer 
+            # measure stabilizers d times
+
             surface_code_circ = measure_surface_code_stabilizer(
                 distance,
                 surface_code_circ,
-                tag="faulty"
+                tag="faulty",
             ) 
-    # Measure observable by measuremnt of logical data from main qubit |Psi>
+            # following is just an for test cases
+            if False: # check if last one of each round is not faulty
+                if i_d != distance-1:
+                    # not last syndrome extraction 
+                    surface_code_circ = measure_surface_code_stabilizer(
+                        distance,
+                        surface_code_circ,
+                        tag="faulty",
+                    ) 
+                else:
+                    surface_code_circ = measure_surface_code_stabilizer(
+                        distance,
+                        surface_code_circ,
+                        tag="faultless",
+                    ) 
+            
+            if False: # used to place qubit errors after each round of syndrome extraction 
+                surface_code_circ.append(
+                    "I",
+                    index_physical,
+                    tag="psi_data",
+                    )
+    # Measure observable by measurement of logical data from main qubit |Psi>
     if observable == "X":
         surface_code_circ.append("H",index_physical, tag="obs_change_of_basis")
     surface_code_circ.append("M",index_physical,tag="obs_flip_measure") 
@@ -323,7 +346,7 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
     prev_offset_ancilla_X = offset_ancilla_psi_X_pf
     prev_offset_ancilla_Z = offset_ancilla_psi_Z_pf
     for i_r in range(rounds):
-        for i_d in range(distance):
+        for i_d in range(distance): # d-time repeated each round
             current_offset_due_to_loop = i_r * n_round + i_d * 2 * n_stab  
             # X-stabilizer
             surface_code_circ = add_detectors(

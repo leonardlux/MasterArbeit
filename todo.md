@@ -1,3 +1,24 @@
++ numerical precision 
+    - just try with half precision, on code capacity model
+    - show that the threshold does not change
+    -> that is the easy way, hope that is way ()
+
+
++ repeated syndrome extraction:
+    + check if it works with only qubit errors -> works 
+    + check if it works if everything expect the last syndrome extration is noisy -> works
+    + check if luis code works, luis code works but uses steane type syndrome extraction
+    + enable full knowledge decoder and compare to steane code (would be great if better)
+
++ writing
+
++ ancilla qubit init  
+    + ignore and just name it is breaking if not fully transversal
+
++ presentation for tuesday:
+    + include error propagation last part
+    + numerical precision -> show arguments that it is due to that 
+    + repeated measurements, hopefully some results 
 
 # current questions
 
@@ -23,21 +44,9 @@ Write a lot of stuff into my latex overview file
     + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
 
 02. win or lose beeing local in time (MWPM for multiple QEC)
-    + implement parity check matrix
 
 03. state preparation of ancilla qubit
-
-## Simple stuff for breaks
-
-4. save a circuit diagram for distance 3 as a result file 
-    + automate the saving process more (as a result file!)
-
-12. enable different order
-
-12. p_window in analysis -> from single value to list each entry is for one round
-
-1. solve overwriting problem somehow: 
-    either raise error, or do something else.... otherwise that is an big fault waiting to happen!
+    + maybe just name in text
 
 ## Orderd ToDo List
 
@@ -45,23 +54,6 @@ Write a lot of stuff into my latex overview file
     + get syndrome from matching graph result unsing parity matrix and then do correct error corrections
 
 8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
-
-13. enable bell state as inital state + different logic measurement 
-
-14. combine data sets with different distances and different noise rates
-
-
-# this week meeting: (toDos) 
-
-3. qubit init as function and use different methods, compare 
-4. numerical problmes 
-5. update notes, add questions and answers -> what is really relevant
-
-
-## Other ToDos
-0. 2 obs will be a problem for my current count logical implementation!
-2. enable complex error models (yes!)
-15. simplfy the file.py file and how it handles stuff.
 
 ## Question from midterm
 

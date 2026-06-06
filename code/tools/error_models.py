@@ -15,6 +15,7 @@ def add_noise(
     faultless_tags = {
         "l_qubit_init",
         "obs_flip_measure",
+        "faultless",
     }
 
     # Split up all cnots! in time seperate steps, sucht that errors can be added after each

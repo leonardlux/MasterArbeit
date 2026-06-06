@@ -64,7 +64,7 @@ def xor_ft_syndrome(ft_synd, stab_synd):
 
 def split_and_xor_syndrome(d, rounds, syndromes, ft_stab_z=True):
     """
-    reps: number of repetions 
+    reps: number of repetitions 
     syndrome: output of stim 
     ft_stab_z: determines which syndrome is used to construct pauli frame FT
         -> True <=> z_stab
@@ -82,8 +82,8 @@ def split_and_xor_syndrome(d, rounds, syndromes, ft_stab_z=True):
         # observable is measured in X basis
         pft_synd = xor_ft_syndrome(x_syndromes[-1],ft_syndromes)
     else:
-        raise ValueError("Unkown state")
-    # Order of snydromes synd[round][shot][stab]
+        raise ValueError("Unknown state")
+    # Order of syndromes synd[round][shot][stab]
     return px_synd, pz_synd, pft_synd
 
 def reorder_syndromes(old_order):
@@ -91,15 +91,15 @@ def reorder_syndromes(old_order):
     return new_order
 
 
-# Surface code:
+# repeated surface code syndrome extraction:
 def preprocess_surface_code_syndromes(d, rounds, syndromes):
     n_stab = d*(d-1)
     n_qec_round = 2*n_stab *d
 
-    # split up and seperate each round
+    # split up and separate each round
     qec_round_syndromes, ft_syndromes = np.split(syndromes,[rounds*n_qec_round],axis=1)
     qec_round_syndromes = qec_round_syndromes.reshape(syndromes.shape[0],rounds,n_qec_round)
-    # shape qec_round_syndromes[shots, rounds, detectors, per round]
+    # shape qec_round_syndromes[shots, rounds, detectors per round]
     return qec_round_syndromes, ft_syndromes
     
     

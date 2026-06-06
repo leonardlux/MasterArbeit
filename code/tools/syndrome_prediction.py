@@ -1,10 +1,9 @@
-import pymatching # type: ignore
 import numpy as np # type: ignore
 import numba 
 
 from tools.error_models import add_noise
 from tools.ml_decoder import decode_half_syndrome, decode_half_syndrome_log,  decode_half_syndrome_aron, maybe_jit
-from tools.mwpm_decoder import gen_mwpm_matcher, gen_mwpm_matcher_surface_code, gen_mwpm_matcher_surface_code_with_FT
+from tools.mwpm_decoder import gen_mwpm_matcher, gen_mwpm_matcher_surface_code, gen_mwpm_matcher_surface_code_with_FT, pred_pauli_frame_track_repeated_surface_code
 from tools.syndrome import split_and_xor_syndrome, reorder_syndromes, preprocess_surface_code_syndromes
 from tools.error_propagation import uncorr_eff_noise
 
@@ -32,6 +31,8 @@ def calc_num_errors(pred,obs):
     num_errors = np.sum(mismatch)  
     return num_errors
 
+# MWPM prediction for Steane Type error correction 
+# Assumes syndrome are extracted faultless and then corrects them based on the DEM of a code capacity surface code with standard syndrome extraction
 def predict_MWPM(
         detection_events, 
         distance: int, 
@@ -46,16 +47,16 @@ def predict_MWPM(
 
     # Actual Decoding:
     rounds, num_shots, _ = rel_synd.shape
-    predicitons = np.zeros((rounds, num_shots))
+    predictions = np.zeros((rounds, num_shots))
     z_stab = True if observable == "Z" else False
     matcher = gen_mwpm_matcher(d, p, z_stab, noise_model)
     for i_round in range(rounds):
-        predicitons[i_round] = matcher.decode_batch(rel_synd[i_round]).flatten()
+        predictions[i_round] = matcher.decode_batch(rel_synd[i_round]).flatten()
         # .flatten() is needed because we always assume that only one observable is measured (in ML, and I wanted to adapt to this problem)
     # combine rounds together
-    multi_round_pred =np.sum(predicitons,axis=0)%2
+    multi_round_pred =np.sum(predictions,axis=0)%2
     # FT Decoding 
-    # we use the same matcher because the exact error value is irrelvant for MWPM (cyclic/symmetric in it)
+    # we use the same matcher because the exact error value is irrelevant for MWPM (cyclic/symmetric in it)
     ft_predictions = matcher.decode_batch(ft_synds).flatten()
 
     total_pred = (multi_round_pred + ft_predictions)%2
@@ -63,8 +64,12 @@ def predict_MWPM(
 
     return total_pred
 
-# Surface code:
-def predict_MWPM_surface_code(
+"""
+MWPM for REPEATED (standard) SYNDROME READOUT
+"""
+# TODO something is wrong, last measurement error is at fault
+# The equations are at the moment not fully correct, here I use s_i = sum D_i, which is only true if the last measurement error is included 
+def predict_MWPM_rep_surface_code(
         detection_events, 
         distance: int, 
         error_rate: float, 
@@ -74,54 +79,91 @@ def predict_MWPM_surface_code(
     ):
     d = distance
     p = error_rate
-    # shortcut of complete circuit 1 round with FT
-    matcher = gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable=observable)
-    total_pred_whole = matcher.decode_batch(detection_events).flatten()
+    z_stab = True if observable == "Z" else False
 
-    # propper disconnected implementation
+    # proper disconnected implementation
     qec_round_syndromes, ft_synds = preprocess_surface_code_syndromes(
         d= d,
         rounds=rounds,
         syndromes=detection_events,
     )
+    num_shots, rounds, detectors_per_round = qec_round_syndromes.shape
+
+    if detectors_per_round != 2*d*d*(d-1):
+        # this is not happening, just here to test for possible errors
+        print("Something wrong, unexpected amount of detectors for repeated syndrome readout")
 
     # Actual Decoding:
-    num_shots, rounds, _ = qec_round_syndromes.shape
-    predicitons = np.zeros((rounds, num_shots))
     matcher = gen_mwpm_matcher_surface_code(d, p, noise_model, observable=observable)
-    for i_round in range(rounds):
-        predicitons[i_round] = matcher.decode_batch(qec_round_syndromes[:,i_round,:]).flatten()
-        # .flatten() is needed because we always assume that only one observable is measured (in ML, and I wanted to adapt to this problem)
+    predictions = np.zeros((rounds, num_shots))
+    for i_shot in range(num_shots):
+        num_detectors_simple_surface_code = 2*d*(d-1)
+        pauli_tracking_syndrome = np.zeros(num_detectors_simple_surface_code,dtype=bool)
+        for i_round in range(rounds):
+            predictions[i_round,i_shot], pauli_tracking_syndrome = pred_pauli_frame_track_repeated_surface_code(
+                d=d,
+                matcher=matcher,
+                syndrome=qec_round_syndromes[i_shot,i_round,:],
+                pauli_tracking_syndrome=pauli_tracking_syndrome,
+            )  
+        # Pauli frame tracking applied to FT check -> syndrome of residual error
+        # if z_stab: 
+        #     # last d*(d-1) detectors are z stabilizers
+        #     ft_synds[i_round] ^= pauli_tracking_syndrome[-d*(d-1):]
+        # else:
+        #     # first d*(d-1) detectors are x stabilizers
+        #     ft_synds[i_round] ^= pauli_tracking_syndrome[:d*(d-1)]
+
     # combine rounds together
-    multi_round_pred = np.sum(predicitons,axis=0)%2
+    multi_round_pred = np.sum(predictions,axis=0)%2
 
     # FT Decoding (Same as usual)
-    z_stab = True if observable == "Z" else False
     matcher = gen_mwpm_matcher(d, p, z_stab, noise_model="basic")
     ft_predictions = matcher.decode_batch(ft_synds).flatten()
 
     total_pred = (multi_round_pred + ft_predictions)%2
     total_pred = np.array(total_pred, dtype=bool)
 
-    return total_pred_whole
+    return total_pred 
 
-# ML Decoding
+# decoding of repeated syndrome extraction with FULL INFO (decoding including FT)
+def predict_MWPM_rep_surface_code_full_info(
+        detection_events, 
+        distance: int, 
+        error_rate: float, 
+        rounds: int,
+        observable: str = "Z",
+        noise_model: str = "circ",
+    ):
+    d = distance
+    p = error_rate
+
+    # shortcut of complete circuit 1 round with FT
+    matcher = gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable=observable, rounds=rounds)
+    total_pred = matcher.decode_batch(detection_events).flatten()
+
+    return total_pred 
+
+
+"""
+ML Decoding (for Steane code/assuming no measurement errors)
+"""
 
 @maybe_jit
 def decoding(d,p,observable,rel_synd, decode_half_syndrome_func, dtype):    
     num_shots, rounds, _ = rel_synd.shape
-    predicitons = np.zeros((num_shots,rounds))
+    predictions = np.zeros((num_shots,rounds))
     pauli_repr_flips = np.zeros((num_shots,rounds))
     for i_round in numba.prange(rounds):
         for i_shot in range(num_shots): 
-            predicitons[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_func(
+            predictions[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_func(
                 d,
                 p,
                 rel_synd[i_shot,i_round],
                 stab_type=observable, # the observable determines which stabilizers we need to decode
                 dtype=dtype,
             )
-    multi_round_pred = np.sum(predicitons,axis=1)%2
+    multi_round_pred = np.sum(predictions,axis=1)%2
     multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
     return multi_round_pred, multi_round_pauli_flip
 
@@ -213,7 +255,9 @@ def config_to_predict_func(config):
 
     elif circuit_type == "surface":
         if value == "mwpm":
-            return predict_MWPM_surface_code
+            return predict_MWPM_rep_surface_code
+        elif value == "mwpm_full_info":
+            return predict_MWPM_rep_surface_code_full_info
         else:
             raise ValueError()
     else:

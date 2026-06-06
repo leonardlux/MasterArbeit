@@ -59,12 +59,15 @@ def gen_mwpm_matcher_shared_info(d, p, rounds, noise_model, observable):
 
 # FT Surface code
 def gen_mwpm_matcher_surface_code(d, p, noise_model, observable):
+    """
+    matcher for repeated syndrome readout (only 1 round) and not including FT! 
+    """
     # generate noise model
     circ = generate_ft_surface_code_circuit(
         d,
         rounds=1,
         observable=observable,
-        ft_stab=False, # FT stabilizer are not included, treated seperatly
+        ft_stab=False, # FT stabilizer are not included, treated separately
         )
     noise_model_func = config_to_noise_model_func({"noise_model": {"type": noise_model}}) # a bit cheaty...
     noisy_circ = add_noise(circ, noise_model_func(p))
@@ -72,11 +75,13 @@ def gen_mwpm_matcher_surface_code(d, p, noise_model, observable):
     matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
     return matcher
 
-def gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable):
-    # generate noise model
+def gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable, rounds):
+    """
+    matcher for repeated syndrome readout (multiple rounds and FT!) 
+    """
     circ = generate_ft_surface_code_circuit(
         d,
-        rounds=1,
+        rounds=rounds,
         observable=observable,
         ft_stab=True, 
         )
@@ -85,3 +90,44 @@ def gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable):
     detector_error_model = noisy_circ.detector_error_model(decompose_errors=True)
     matcher = pymatching.Matching.from_detector_error_model(detector_error_model)
     return matcher
+
+## True FT Surface code
+def pred_pauli_frame_track_repeated_surface_code(d, matcher, syndrome, pauli_tracking_syndrome):
+    """
+    this functions decodes the syndrome for the repeated measurement readout 
+    and updates the pauli_tracking syndrome to include the latest correction
+
+    pauli tracking syndrome is just 1 standard syndrome long (2*d*(d-1))
+    """
+    synd_std_length = (2*d*(d-1))
+
+    syndromes_rep_array = np.reshape(syndrome,(d,2*d*(d-1)))
+    syndromes_xored = np.logical_xor.reduce(syndromes_rep_array) # = sum D_i
+    # same as just looking at space like errors
+
+    pft_syndrome = syndrome ^ np.append(pauli_tracking_syndrome,np.zeros(synd_std_length*(d-1),bool)) # only xor the first syndrome with the pauli track frame
+
+    edges = matcher.decode_to_edges_array(pft_syndrome)
+    pf_correction = np.zeros(synd_std_length,dtype=bool) # syndrome part of the correction
+    # decoding edges to recover syndrome
+    for edge in edges:
+        # only consider space like errors
+        if edge[1] == -1: 
+            # 1. cond: connection to boundary 
+            pf_correction[edge[0] % synd_std_length] ^= True 
+        elif abs(edge[0]-edge[1]) < 2*d*(d-1):
+            # 2. cond: space like error 
+            pf_correction[edge[0] % synd_std_length] ^= True 
+            pf_correction[edge[1] % synd_std_length] ^= True
+        else:
+            # time like errors
+            if abs(edge[0]-edge[1]) != 2*d*(d-1):
+                # never happens, just here to check
+                print("unexpected distance in time like errors")
+                print(edge)
+                print("time-like",abs(edge[0]-edge[1]),2*d*(d-1))
+
+    pauli_tracking_syndrome = pauli_tracking_syndrome ^ pf_correction ^ syndromes_xored
+
+    pred = matcher.decode(pft_syndrome)[0] # decode to get the commutation relation of the observable with both R_s and R_L
+    return pred, pauli_tracking_syndrome
