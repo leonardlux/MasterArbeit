@@ -257,8 +257,6 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
     This functions generates a surface code ciruit with d-times stabilizer readout for each round.
     Note that Z_stab, and X_stab only switch the detectors on or off, the ciruit layout is unchanged.
     """
-    new_round_tag = "new_round"
-    new_round_tag = "new_stab"
     d = distance
     if observable == "Z":
         init_log_state = "0" 
@@ -274,7 +272,7 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
         state=init_log_state,
         final_tag="psi_data",
         )
-    index_physical, _, _ = index_qubits_surface_code(distance)
+    index_physical, index_X_ancilla, index_Z_ancilla = index_qubits_surface_code(distance)
     for i_r in range(rounds):
         if i_r != 0:
             pass 
@@ -282,8 +280,16 @@ def generate_ft_surface_code_circuit(distance: int = 3, rounds: int = 1, observa
         # each round
         for i_d in range(distance):
             # in each rounds we need to measure the stabilizer d-times
-            # measure stabilizers d times
 
+            if True:
+                # enables noise on each initalized ancilla qubit (depo 1)
+                surface_code_circ.append(
+                    "I",
+                    np.concat([index_X_ancilla,index_Z_ancilla]),
+                    tag="faulty",
+                )
+
+            # measure stabilizers d times
             surface_code_circ = measure_surface_code_stabilizer(
                 distance,
                 surface_code_circ,
