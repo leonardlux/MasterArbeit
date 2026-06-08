@@ -1,7 +1,7 @@
 #!/usr/bin/zsh 
 
 ### Job Parameters 
-#SBATCH --time=02:10:00         
+#SBATCH --time=03:30:00         
 #SBATCH --job-name=reference
 
 ### %J ist der JobName
@@ -14,15 +14,15 @@ cd /home/fu494742/MasterArbeit/code
 ### Load Virtual Python
 source /home/fu494742/MasterArbeit/.venv/bin/activate 
 
-# short (not all d)
-# 2k shots each
+# short (not all d) (outdated)
+# 10k shots each TODO: Check Time
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference_short/MWPM_X.yaml"
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference_short/MWPM_Z.yaml"
-# output_folder="md_mr_mp_reference_short" # take about 10 min with 2k shots
+# output_folder="md_mr_mp_reference_short_v2" 
 
-# more d (assume 2:00:00)
-output_folder="md_mr_mp_reference"
+# more d (assume 3:30:00) need 40 sets each (2.5k shots)
+# output_folder="md_mr_mp_reference_v2"
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference/MWPM_Z.yaml"
-config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference/MWPM_X.yaml"
+# config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference/MWPM_X.yaml"
 
 python slurm_wrapper.py -c $config_path -o $output_folder -u ${SLURM_ARRAY_TASK_ID}
