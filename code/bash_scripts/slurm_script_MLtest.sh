@@ -18,12 +18,18 @@ source /home/fu494742/MasterArbeit/.venv/bin/activate
 # config_path="/home/fu494742/MasterArbeit/code/configs/ml_test_basic_32/config.yaml" 
 # config_path="/home/fu494742/MasterArbeit/code/configs/ml_test_basic_64/config.yaml" 
 # config_path="/home/fu494742/MasterArbeit/code/configs/ml_test_log_32/config.yaml" 
-config_path="/home/fu494742/MasterArbeit/code/configs/ml_test_log_64/config.yaml" 
+# config_path="/home/fu494742/MasterArbeit/code/configs/ml_test_log_64/config.yaml" 
 
 # output_folder="ml_test_aron_64"
 # output_folder="ml_test_basic_32"
 # output_folder="ml_test_basic_64"
 # output_folder="ml_test_log_32"
-output_folder="ml_test_log_64"
+# output_folder="ml_test_log_64"
+
+# config_path="/home/fu494742/MasterArbeit/code/configs/test_ml_circ_basic_64/config.yaml" 
+# output_folder="test_ml_64"
+
+config_path="/home/fu494742/MasterArbeit/code/configs/test_ml_circ_basic_32/config.yaml" 
+output_folder="test_ml_32"
 
 python slurm_wrapper.py -c $config_path -o $output_folder -u ${SLURM_ARRAY_TASK_ID}
