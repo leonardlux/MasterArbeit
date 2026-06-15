@@ -66,6 +66,7 @@ def plot_diff_noise_level(
         prelabel="",
         p_th = None,
         err_p_th = None,
+        rejection_rates = None,
     ):
     cm = 1/2.54 # to convert inches to cm
     if seperate_figure:
@@ -74,6 +75,9 @@ def plot_diff_noise_level(
         plt.loglog()
         plt.xlabel("$p_{phy}$")
         plt.ylabel("$p_{log}$")
+
+    if not rejection_rates is None:
+        plt.plot(noise_set,np.max(rejection_rates,axis=0),label="Max. rejection rate",alpha=0.5) 
 
     for i, log_error_prob in enumerate(log_error_rates):
 

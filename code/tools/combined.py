@@ -23,6 +23,8 @@ def generate_data_from_config(config: dict):
     ps = config["noise_model"]["noise_rates"]
 
     num_errors = np.zeros((len(ds),len(n_rounds),len(ps)))
+    num_faults = np.zeros((len(ds),len(n_rounds),len(ps)))
+    num_errors_faulty = np.zeros((len(ds),len(n_rounds),len(ps)))
     total_time = time.time()
     for i_d, d in enumerate(ds):
         for i_r, rounds in enumerate(n_rounds):
@@ -43,7 +45,7 @@ def generate_data_from_config(config: dict):
                 # sample circuit 
                 detection_events, observable_flips = sample_ciruit(circ_d_r_p, num_shots) 
                 # decode syndromes
-                predictions = predict_func(
+                predictions, fault_flags = predict_func(
                     detection_events,
                     distance=d,
                     error_rate=p,
@@ -52,7 +54,17 @@ def generate_data_from_config(config: dict):
                     noise_model=noise_model_type,
                 )
                 # compare predicitons and obs
-                num_errors[i_d,i_r,i_p] = calc_num_errors(predictions,observable_flips)
+                num_errors[i_d,i_r,i_p] = calc_num_errors(
+                    predictions[~fault_flags],
+                    observable_flips[~fault_flags],
+                    )
+                num_faults[i_d,i_r,i_p] = np.sum(fault_flags) 
+
+                # including faulty ones
+                num_errors_faulty[i_d,i_r,i_p] = calc_num_errors(
+                    predictions,
+                    observable_flips,
+                    )
                 print(f"done. took: {str(datetime.timedelta(seconds=time.time()-p_time))}")
 
     print(f"Completly done: {str(datetime.timedelta(seconds=time.time()-total_time))}")
@@ -63,6 +75,8 @@ def generate_data_from_config(config: dict):
         "rounds": n_rounds,
         "noise_rates": ps,
         "num_errors": num_errors,
+        "num_faults": num_faults,
+        "num_errors_faulty": num_errors_faulty,
         "num_shots": num_shots,
     }
     return data 

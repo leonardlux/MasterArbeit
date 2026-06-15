@@ -34,6 +34,8 @@ COMPATIBLE_DICT_PARAMETER = {
 DATA_SET_ADDITIVE_KEYS = [
     "num_shots",
     "num_errors",
+    "num_faults",
+    "num_errors_faulty"
 ]
 
 DATA_SET_PARAMETER_KEYS = [
