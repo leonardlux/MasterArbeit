@@ -74,4 +74,4 @@ noise_model:
   special_parameter: {}
   type: circ
 sampling:
-  num_shots: 1000
+  num_shots: 2000
