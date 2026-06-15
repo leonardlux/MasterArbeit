@@ -217,7 +217,6 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float64):
         stabilizer_matrix = format_syndrome_to_matrix(d, rot_synd)
     else:
         raise ValueError("unexpected detector")
-    
     # prob of coset without logical error 
     f, c_f = stabilizer_to_pauli(d, stabilizer_matrix)
     log_p_I, fault = coset_probability_log(d, p, f, dtype=dtype)

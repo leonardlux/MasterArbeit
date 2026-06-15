@@ -220,20 +220,31 @@ def factory_predict_func_ML(
         # Actual Decoding: 
         multi_round_pred, multi_round_pauli_flip, fault_flags = decoding(d, p, observable, rel_synd, decoding_func, dtype)
 
-        # FT Decoding (MWPM) # TODO: implement this without errors!
+        # FT Decoding 
         if ft_mwpm:
             # MWPM
             z_stab = True if observable == "Z" else False
             matcher = gen_mwpm_matcher(d, p, z_stab, noise_model)
             ft_predictions = matcher.decode_batch(ft_synds).flatten()
         else:
-            # TODO!!!
             # ML
-            multi_round_pred_FT, multi_round_pauli_flip_FT = decoding(d, p, observable, 
-                                                                      np.expand_dims(ft_synds,axis=1).astype(np.float64), # only 1 round, has to be explicit!
-                                                                      decoding_func, dtype)
-            ft_predictions = (multi_round_pred_FT, multi_round_pauli_flip_FT) # somehow %2 work not here... but should be consistent with next line
+            num_shots, _, _ = rel_synd.shape
+            predictions_FT = np.zeros(num_shots)
+            pauli_repr_flips_FT= np.zeros(num_shots)
+            for i_shot in range(num_shots): 
+                predictions_FT[i_shot], pauli_repr_flips_FT[i_shot], faults_FT = decoding_func(
+                    d,
+                    p,
+                    ft_synds[i_shot],
+                    stab_type=observable, # the observable determines which stabilizers we need to decode
+                    dtype=dtype,
+                )
+                if faults_FT:
+                    fault_flags[i_shot] = faults_FT
+            ft_predictions = (predictions_FT + pauli_repr_flips_FT)%2
 
+            #modify fault flags
+            
         total_pred = (multi_round_pred + multi_round_pauli_flip + ft_predictions)%2
         total_pred = np.array(total_pred, dtype=bool) # convert to boolean values
         return total_pred, fault_flags

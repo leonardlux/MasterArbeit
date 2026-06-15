@@ -29,7 +29,11 @@ source /home/fu494742/MasterArbeit/.venv/bin/activate
 # config_path="/home/fu494742/MasterArbeit/code/configs/test_ml_circ_basic_64/config.yaml" 
 # output_folder="test_ml_64"
 
-config_path="/home/fu494742/MasterArbeit/code/configs/test_ml_circ_basic_32/config.yaml" 
-output_folder="test_ml_32"
+# config_path="/home/fu494742/MasterArbeit/code/configs/test_ml_circ_basic_32/config.yaml" 
+# output_folder="test_ml_32"
+
+# uint8 test
+config_path="/home/fu494742/MasterArbeit/code/configs/test_ml_code_capacity_aron_64/config.yaml"
+output_folder="test_aron_unit8test_aron_unit8"
 
 python slurm_wrapper.py -c $config_path -o $output_folder -u ${SLURM_ARRAY_TASK_ID}
