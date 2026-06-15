@@ -1,7 +1,7 @@
 #!/usr/bin/zsh 
 
 ### Job Parameters 
-#SBATCH --time=00:10:00         
+#SBATCH --time=00:15:00         
 #SBATCH --job-name=circ_noise
 
 ### %J ist der JobName
@@ -14,11 +14,18 @@ cd /home/fu494742/MasterArbeit/code
 ### Load Virtual Python
 source /home/fu494742/MasterArbeit/.venv/bin/activate 
 
+# normal (MWPM as FT check)
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_1r_mp_CN/ML_Z.yaml" # 3:40 min # num shots 1k 
-config_path="/home/fu494742/MasterArbeit/code/configs/md_1r_mp_CN/ML_X.yaml" # 4:00 min # num_shots 1k 
+# config_path="/home/fu494742/MasterArbeit/code/configs/md_1r_mp_CN/ML_X.yaml" # 4:00 min # num_shots 1k 
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_1r_mp_CN/MWPM_Z.yaml" # 2:00 min # num_shots 10k 
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_1r_mp_CN/MWPM_X.yaml" # 1:40min # num_shots 10k  
+# output_folder="md_1r_mp_CN_v2_fault_det"
 
-output_folder="md_1r_mp_CN_v2_fault_det"
+# ML as FT check
+# config_path="/home/fu494742/MasterArbeit/code/configs/test_ft_ml/ML_Z.yaml" # 3:40 min # num shots 1k 
+# config_path="/home/fu494742/MasterArbeit/code/configs/test_ft_ml/ML_X.yaml" # 4:00 min # num_shots 1k 
+# config_path="/home/fu494742/MasterArbeit/code/configs/test_ft_ml/MWPM_Z.yaml" # 2:00 min # num_shots 10k 
+# config_path="/home/fu494742/MasterArbeit/code/configs/test_ft_ml/MWPM_X.yaml" # 1:40min # num_shots 10k  
+# output_folder="test_ft_ml"
 
 python slurm_wrapper.py -c $config_path -o $output_folder -u ${SLURM_ARRAY_TASK_ID}
