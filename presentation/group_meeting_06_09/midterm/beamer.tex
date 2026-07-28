@@ -1,0 +1,411 @@
+\documentclass{beamer}
+\usepackage{amsmath}
+\usepackage{braket}
+\usepackage{color}
+\usepackage{bbold}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{ amssymb } % for check marks
+\usepackage{svg}
+\usepackage{tikz}
+
+\usetikzlibrary{quantikz2}
+
+\usetheme{Antibes}
+
+\title{Finding Thresholds for Steane Type Error Correction}
+\subtitle{Midterm Talk}
+\author{Leonard Lux}
+\date{05.02.2026}
+
+\begin{document}
+
+\tikzset{ noisy/.style={fill=red!20}}
+
+% Title page
+\begin{frame}
+\titlepage
+\begin{center}
+Supervised by:\newline 
+\end{center}
+\begin{center}
+Luis Colmenarez, Maarten Wegewijs \& Markus Müller
+\end{center}
+\end{frame}
+
+% Table of Contents
+\begin{frame}
+\frametitle{Outline}
+\tableofcontents
+\end{frame}
+
+
+% Error Correction
+\section{Error Correction}
+\begin{frame}{Basics of \textbf{Error Correction} (EC)}
+    \begin{block}{Quantum Memory - perfect QEC}
+        \begin{center}
+            \begin{quantikz}
+                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[]{QEC}&\rstick{$\ket{\Psi }_L$}
+            \end{quantikz}
+        \end{center}
+    \end{block}
+    \begin{itemize}
+        \item encode $1$ logical qubit
+        \item $n$ physical qubits
+    \end{itemize}
+\end{frame}
+
+% Slide: Stabilizer Codes
+% Definitions 
+\subsection{Stabilizer Codes}
+\begin{frame}{Definitions of \textbf{Stabilizer Codes}}
+    \begin{itemize}
+        \item Stabilizer group: 
+            $ \mathcal{G} = \langle g^{(1)},...,g^{(m)}\rangle \subset \mathcal{P}_n$
+    \end{itemize}
+    \begin{block}{Stabilizer \& Syndrome}
+          \begin{equation*}
+                 g^{(i)} \ket{\Psi}_L= (-1)^{s^{(i)}} \ket{\Psi}_L
+          \end{equation*}
+          defines syndrome:
+          \begin{equation*}
+                s = \left(s^{(1)}, s^{(2)}, ..., s^{(m)} \right)
+          \end{equation*}
+    \end{block}
+    \begin{itemize}
+        \item Codespace:  $\mathcal{H}_{0} \subset \mathcal{H}_n$
+        \item Error subspaces: $\mathcal{H}_s$
+                % = \{ \ket{\Psi}_L \in \mathcal{H} \ |\ g^{(i)}\ket{\Psi} = (-1)^{s_i} \ket{\Psi}_L \}$ \\
+    \end{itemize} 
+\end{frame}
+
+\subsection{Surface Code}
+\begin{frame}{Encoding: \textbf{Surface Code}}
+    \begin{columns}
+    \begin{column}{0.5\textwidth}
+        \begin{itemize}
+            \setlength{\itemsep}{8pt}
+            \item Stabilizer code
+            \item Transversal $\overline{\mathrm{CNOT}}$ 
+            \item $[[d^2 + (d-1)^2,1,d]]$
+            \vspace{0.2cm}
+            \begin{itemize}
+                \item  $\#s = 2^m =2^{2d\cdot(d-1)}$
+            \end{itemize}
+        \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}  
+        \begin{center}
+        \includegraphics[width=0.9\textwidth]{sketch_surface_code.png}
+        \end{center}
+    \end{column}
+    \end{columns}
+\end{frame}
+
+\subsection{Maximum Likelihood Decoder}
+\begin{frame}{Decoder Task}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{decoder.pdf}
+    \end{center}
+    \begin{itemize}
+        \item Decoder: given syndrome $s$ $\rightarrow$ returns recovery operation  $f_R$
+        \item Maximum Likelihood Decoder 
+        \begin{itemize}
+            \item returns most propable recovery op. for a given syndrome 
+        \end{itemize}
+    \end{itemize}
+    
+\end{frame}
+
+\begin{frame}{\textbf{Maximum Likelihood Decoder} (MLD)}
+    \begin{itemize}
+        \item Cosets:       $f\mathcal{G}$ 
+        \item Centralizer:  $\mathcal{C}(\mathcal{G})$ (= aka Commutant) 
+    \end{itemize}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{ml_decoder.pdf}
+    \end{center}
+    \onslide<2->{
+    \begin{itemize}
+        \item MLD: Determine coset with highest prob. of occuring for given $s$
+    \end{itemize}
+    }
+
+\end{frame}
+
+
+\subsection{Efficient MLD for Surface Code}
+\begin{frame}{\textbf{Efficient} MLD for Surface Code}
+    \begin{center}
+        \includegraphics[width=0.7\textwidth]{eff_ml_decoder_paper.png}
+    \end{center}
+    \begin{itemize}
+        \setlength{\itemsep}{6pt}
+        \item Designed for surface codes 
+        \item Assumes* independent bit- \& phase-flip noise 
+        \item Mapping:
+        \begin{enumerate}
+            \setlength{\itemsep}{6pt}
+            \item MLD problem 
+            \item Partition function of $2d$ Ising model 
+            \item Matchgate quantum circuits 
+            \begin{itemize}
+                \item Classically efficiently computable ($\mathcal{O}(n^3)$)
+            \end{itemize}
+        \end{enumerate}
+   \end{itemize}
+\end{frame}
+
+\section{Steane Type Error Correction}
+\subsection{Fault Tolerance}
+\begin{frame}{\textbf{Fault Tolerance}}
+    \begin{block}{Quantum Memory Circuit: Circuit Level Noise}
+        \begin{center}
+            \begin{quantikz}
+                \lstick{$\ket{\Psi}_L$}&\gate[style={noisy}]{Noise}&\gate[style={noisy}]{Noisy\ QEC}&\rstick{$\ket{\Psi '}_L$}
+            \end{quantikz}
+        \end{center}
+    \end{block}
+    \begin{itemize}
+        \item Circuit level noise: All gates can have faults
+        \item $\ket{\Psi'}$ with correctable residual error
+    \end{itemize} 
+\end{frame}
+
+\begin{frame}{Error Propagation - \textbf{Bug} ...}
+        \begin{center}
+        \begin{quantikz}
+            &\gate[1,style={noisy},]{E_X}&\ctrl{1}&& \\
+            &\ghost{E_X}&\targ{}&&
+        \end{quantikz}$\rightarrow$\begin{quantikz}
+            &&\ctrl{1}&\gate[1,style={noisy},]{E_X}& \\
+            &&\targ{}&\gate[1,style={noisy},]{E_X}&
+        \end{quantikz}
+
+        \vspace{1cm}
+
+        \begin{quantikz}
+            &\ghost{E_X}&\ctrl{1}&& \\
+            &\gate[1,style={noisy},]{E_X}&\targ{}&&
+        \end{quantikz}$\rightarrow$\begin{quantikz}
+            &&\ctrl{1}&\ghost[1,]{E_X}& \\
+            &&\targ{}&\gate[1,style={noisy},]{E_X}&
+        \end{quantikz}
+
+        \end{center}
+\end{frame}
+
+\subsection{Steane Type Error Correction}
+
+\begin{frame}{Error Propagation - Bug or \textbf{Feature}}
+    \begin{itemize}
+        \item Feature:
+    \end{itemize}
+    \begin{center}
+    % \vspace{0.5cm}
+    \begin{quantikz}
+        &\gate[style={noisy}]{E_X}&\ctrl{1}&&\\
+        &&\targ{}&\meter{Z}&\setwiretype{c}
+    \end{quantikz}$\rightarrow$ \begin{quantikz}
+        &&\ctrl{1}&\gate[style={noisy}]{E_X}&&\\
+        &&\targ{}&\gate[style={noisy}]{E_X}&\meter{Z}&\setwiretype{c}
+    \end{quantikz}
+
+    \vspace{0.5cm} 
+
+    \onslide<2->{
+    \begin{itemize}
+        \item and Bug:
+    \end{itemize}
+    \begin{quantikz}
+        &\ghost{E_X}&\ctrl{1}&&\\
+        &\gate[style={noisy}]{E_Z}&\targ{}&\meter{Z}&\setwiretype{c}
+    \end{quantikz}$\rightarrow$ \begin{quantikz}
+        &&\ctrl{1}&\gate[style={noisy}]{E_Z}&&\\
+        &&\targ{}&\gate[style={noisy}]{E_Z}&\meter{Z}&\setwiretype{c}
+    \end{quantikz}
+    }
+    \end{center}
+\end{frame}
+
+\begin{frame}{Stabilizer Measurements}
+    \only<1->{
+    \begin{block}{The $Z-$Stabilizer Gadget}
+    \begin{center}
+    \begin{quantikz}
+        \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\ghost{E_X}&\ctrl{1}&&\\
+        \lstick{$\ket{+}_L$}&\qwbundle{n}&\ghost{E_X}&\targ{}&\meter{Z}&\setwiretype{c}
+    \end{quantikz}
+    \end{center}
+    \end{block}
+    }
+    \onslide<1->{
+        \begin{itemize}
+            \item logical trivial:
+        \end{itemize}
+        \begin{equation*}
+            C^{\ket{\Psi}}NOT^{\ket{+}} \left(\ket{\Psi}_L \otimes \ket{+}_L \right)  = \ket{\Psi}_L \otimes \ket{+}_L
+        \end{equation*}
+    }
+
+\end{frame}
+
+\begin{frame}{Steane Type Error Correction}
+    \begin{columns}
+    \begin{column}{0.6\textwidth}
+    \begin{block}{The Circuit}
+        % Simple Steane Type EC
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}_L$}&\qwbundle{n}&\targ{}&&\ctrl{2}&&\\%&&\gate{Z_R}&\gate{X_R}&\\
+            \lstick{$\ket{0}_L$}&\qwbundle{n}&\ctrl{-1}&\meter{X}&\setwiretype{c}&&\\%\gate{Decoder}\wire[u][1]{c}\\
+            \lstick{$\ket{+}_L$}&\qwbundle{n}&&&\targ{}&\meter{Z}&\setwiretype{c}%&\gate{Decoder}\wire[u][2]{c}
+        \end{quantikz}
+    \end{block} 
+    \end{column}
+    \begin{column}{0.4\textwidth}
+    \begin{itemize}
+        \onslide<1->{
+        \item Fault-tolerant  
+        \item Single-shot 
+        }
+        \onslide<2->{
+        \item More qubits 
+        \item More than NN interaction
+        }
+        \onslide<3->{
+        \item Not symmetric 
+        }
+    \end{itemize} 
+    \end{column}    
+    \end{columns}
+\end{frame}
+
+
+% Slide  (Error Models)
+
+\subsection{Error Models}
+\begin{frame}{Circuit level noise model}
+    Probability of noise is of $\mathcal{O}(p)$
+    \begin{itemize}
+        \setlength{\itemsep}{6pt}
+        \item Depolarizing single qubit noise ($Depo1$) 
+        \begin{itemize}
+            \item After single qubit gates 
+            \item After logical encoding of qubit (Assumption!) 
+        \end{itemize}
+        \item Depolarizing two qubit noise ($Depo2$) 
+        \begin{itemize}
+            \item After $\mathrm{CNOT}$ gates
+        \end{itemize}
+        \item $X$-Errors ($E_X$) 
+        \begin{itemize}
+            \item Before $Z$-Measurements
+        \end{itemize}
+    \end{itemize}
+\end{frame}
+
+
+% Slide: Circuit examples Errors
+\begin{frame}{Example Quantum Circuits - Circuit Level Noise}
+
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\\
+            \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}$}&\gate[1,style={noisy},]{Dep_1}&\ctrl{1}&\gate[1,style={noisy}]{Dep_2}\wire[d][1]{q}&&&&&\\
+            \lstick{$\ket{\Phi}$}&\gate[1,style={noisy},]{Dep_1}&\targ{}&\gate[1,style={noisy}]{Dep_2}&\gate[]{H}&\gate[1,style={noisy},]{Dep_1}&\gate[1,style={noisy},]{X}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+        \onslide<2->{
+        \begin{quantikz}
+            \lstick{$\ket{\Psi}$}&\ctrl{1}&&&\gate[style={noisy}]{.}&\\
+            \lstick{$\ket{\Phi}$}&\targ{}&\gate[]{H}&\gate[style={noisy}]{Effective\ Noise}&\meter{$Z$}&\setwiretype{c}\\
+        \end{quantikz}
+        }
+
+\end{frame}
+
+\subsection{Threshold}
+\begin{frame}{\textbf{Threshold}}    
+     \begin{itemize}
+        \item Determine $p_{th}$:
+        \begin{itemize}
+            \item Monte Carlo simulations $\rightarrow p_{L}(p_{phy})$  
+            \item Find intersection of $p_{L}(p_{phy})$ of different distances $d$
+        \end{itemize} 
+        \onslide<2->{
+        \item Test: MWPM - Circuit Level Noise: }
+     \end{itemize}
+    \onslide<2->{
+    \begin{center}
+        \includegraphics[width=0.8\textwidth]{circuit_noise_MWPM.pdf}
+    \end{center}  
+    }
+        
+\end{frame}
+
+\section{Progress}
+\begin{frame}{\textbf{Progress}}
+    \begin{itemize}
+        \setlength{\itemsep}{6pt}
+        \item Implement Steane Type EC stim \checkmark
+        \begin{itemize}
+            \item Monte Carlo simulation for different distances
+            \item Checked working using MWPM Decoder
+        \end{itemize}
+        \item Propagate noise model to ancillas for decoder error model \checkmark
+        \item Implement efficient MLD 
+        \begin{itemize}
+            \item First version for indepenent $X-$ and $Z-$errors
+            \item Determine threshold 
+        \end{itemize}
+        \item Upgrade to correlated $X$- and $Z-$error MLD 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Stim implementation}
+    \begin{center}
+        \includegraphics[width=1\textwidth]{circuit_noisy_test.pdf}
+    \end{center}  
+\end{frame}
+
+
+
+\begin{frame}
+    \begin{center}
+        Thanks for listening!
+    \end{center}  
+\end{frame}
+
+
+% Appendix
+
+% Slide: Error Equations
+\begin{frame}
+    \begin{block}{$X$-Errors}
+        \begin{equation}
+            \varepsilon_{E_X}(\rho) = (1-p) \rho + p \cdot X \rho X
+        \end{equation}
+    \end{block}
+    
+    % Depo 1
+    \begin{block}{Depolarizing Errors}
+        \begin{equation}
+            \varepsilon_{Depo1}(\rho) = (1-p) \rho + \frac{p}{3} \sum^3_{i=1} E_i \rho E_i
+        \end{equation}
+        \begin{equation*}
+            E_i \in \{ X, Y, Z \}
+        \end{equation*}
+
+    % Depo 2
+        \begin{equation}
+            \varepsilon_{Depo 2}(\rho) = (1-p) \rho + \frac{p}{15} \sum_{i=1}^{15} E_i \rho E_i,
+        \end{equation}
+        \begin{equation*}
+            E_i \in \{E_k \otimes E_l | E_k,E_l \in \{\mathbb{1},X,Y,Z\} \} \setminus \{\mathbb{1}\otimes\mathbb{1} \}
+        \end{equation*}
+    \end{block}
+\end{frame}
+
+\end{document}

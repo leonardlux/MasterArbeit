@@ -72,7 +72,7 @@ def compute_error_bar(xs_list, ys_list, errs_list, Ls, guess_xc, guess_nu, deriv
         result = compute_critical_exponents(xs_list, ys_sampled, errs_list, Ls, guess_xc, guess_nu, derivative)
         pcs[i], inv_nus[i] = result.x
 
-    xc_err = np.percentile(pcs, 97.5) - np.percentile(pcs, 2.5)
-    inv_nu_err = np.percentile(inv_nus, 97.5) - np.percentile(inv_nus, 2.5)
+    xc_err = (np.percentile(pcs, 97.5) - np.percentile(pcs, 2.5))/2
+    inv_nu_err = (np.percentile(inv_nus, 97.5) - np.percentile(inv_nus, 2.5))/2
 
     return xc_err, inv_nu_err
