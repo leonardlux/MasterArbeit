@@ -4,6 +4,11 @@ from tools.fssa import compute_critical_exponents, compute_error_bar
 from tools.graphics import plot_diff_noise_level, plot_fssa_results, overlay_different_slopes
 
 # data anaylsis
+def calc_log_error_rate(num_errors,num_shots):
+    log_error_prob = num_errors/num_shots
+    err_log_error_rates = (log_error_prob*(1-log_error_prob)/num_shots)**(1/2)
+    return log_error_prob, err_log_error_rates
+
 def data_pre_processing(data: dict) -> dict:
     """
     This function:
@@ -14,18 +19,34 @@ def data_pre_processing(data: dict) -> dict:
     n_d, n_r, n_p = len(data["distances"]), len(data["rounds"]), len(data["noise_rates"])
     num_shots = int(data["num_shots"])
     num_errors = data["num_errors"]
+    num_faults = data["num_faults"]
+    num_errors_faulty = data["num_errors_faulty"]
 
-    log_error_rates = np.zeros((n_d,n_r,n_p))
-    err_log_error_rates = np.zeros((n_d,n_r,n_p))
+    shape = (n_d,n_r,n_p)
+    log_error_rates = np.zeros(shape)
+    err_log_error_rates = np.zeros(shape)
+    log_error_rates_faulty = np.zeros(shape)
+    err_log_error_rates_faulty = np.zeros(shape)
+    rejection_rates = np.zeros(shape)
     for i_d in range(n_d):
         for i_r in range(n_r):
             for i_p in range(n_p):
-                log_error_prob = num_errors[i_d,i_r,i_p]/num_shots
-                log_error_rates[i_d,i_r,i_p] = log_error_prob 
-                err_log_error_rates[i_d,i_r,i_p] = (log_error_prob*(1-log_error_prob)/num_shots)**(1/2)
+                log_error_rates[i_d,i_r,i_p], err_log_error_rates[i_d,i_r,i_p] = calc_log_error_rate(
+                    num_errors = num_errors[i_d,i_r,i_p],
+                    num_shots = num_shots - num_faults[i_d,i_r,i_p],
+                ) 
+                rejection_rates[i_d,i_r,i_p] = num_faults[i_d,i_r,i_p]/num_shots
+                log_error_rates_faulty[i_d,i_r,i_p], err_log_error_rates_faulty[i_d,i_r,i_p] = calc_log_error_rate(
+                    num_errors = num_errors_faulty[i_d,i_r,i_p],
+                    num_shots = num_shots,
+                ) 
 
     data["log_error_rates"] = log_error_rates # [distance][round][prob]
     data["err_log_error_rates"] = err_log_error_rates
+    data["rejection_rates"] = rejection_rates
+    # those faulty ones include the resutls where we detected faults in the decoding process
+    data["log_error_rates_faulty"] = log_error_rates_faulty # [distance][round][prob]
+    data["err_log_error_rates_faulty"] = err_log_error_rates_faulty
     return data
 
 def determine_threshold(
@@ -153,6 +174,7 @@ def data_plot_log_error_rates(
     ps = data["noise_rates"]
     log_error_rates = data["log_error_rates"]
     err_log_error_rates = data["err_log_error_rates"]
+    rejection_rates = data["rejection_rates"]
 
     # initalize proper standard values
     if min_distance is None:
@@ -191,6 +213,7 @@ def data_plot_log_error_rates(
             filename=filename,
             title=title,
             reference_lines=reference_lines,
+            rejection_rates=rejection_rates[d_mask,i_r][:,p_mask],
             )
     pass
 

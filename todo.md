@@ -1,60 +1,19 @@
+Question?
 + numerical precision 
-    - just try with half precision, on code capacity model
-    - show that the threshold does not change
-    -> that is the easy way, hope that is way ()
-
-
-+ repeated syndrome extraction:
-    + check if it works with only qubit errors -> works 
-    + check if it works if everything expect the last syndrome extration is noisy -> works
-    + check if luis code works, luis code works but uses steane type syndrome extraction
-    + enable full knowledge decoder and compare to steane code (would be great if better)
-
-+ writing
-
-+ ancilla qubit init  
-    + ignore and just name it is breaking if not fully transversal
-
-+ presentation for tuesday:
-    + include error propagation last part
-    + numerical precision -> show arguments that it is due to that 
-    + repeated measurements, hopefully some results 
-
-# current questions
-
-Title: Characterization of Steane Type Error Correction
-
-
-# Thematischer Bezug
-
-Read more:
-    Nielsen and Chuang 
-    Gottesmann 
-
-# Anders
-Formalismus vereinheitlichen!
-Write a lot of stuff into my latex overview file 
+    + should I implement mwpm as input to ML decoding (as pauli frame)
 
 # ToDos 
 
+## Open Todos in case of extra time
+
+0. FT decoding using ML <- implement!
+
+1. qubit init: basic approach show that this breaks
+    + just as intuition
+    + otherwise put in writing 
+
+2. win or lose beeing local in time (MWPM for multiple rounds of Steane Type QEC)
         
-## This week!
-
-00. Solve precision problem: 
-    + Luis: I agree that looks like precision problems, can you check the values of matrix elements of the A matrix ?  There one can see roughly how they decrease with p and anticipate when one runs into these problems
-
-02. win or lose beeing local in time (MWPM for multiple QEC)
-
-03. state preparation of ancilla qubit
-    + maybe just name in text
-
-## Orderd ToDo List
-
-10. compare to d rounds stabilizer measurement as one QEC cycle
-    + get syndrome from matching graph result unsing parity matrix and then do correct error corrections
-
-8. reread fundamental threshold (understand how to figure out the fundamental threshold for models with Y-errors)
-
 ## Question from midterm
 
 Why does CSS always has transversal CNOT
@@ -62,6 +21,9 @@ Quantum memory under circuit noise use density matrix operations
 
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
+
+
+
 
 
 # 30.04 Thursday

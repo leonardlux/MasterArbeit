@@ -13,6 +13,7 @@ def format_syndrome_to_matrix(d, syndrome):
     """
     syndrome = np.multiply(syndrome,1) # Boolean to int
     stabilizer_matrix = np.reshape(syndrome, (d, d-1))
+    stabilizer_matrix = stabilizer_matrix.astype(np.int64)
     return stabilizer_matrix
 
 @numba.njit
@@ -52,7 +53,7 @@ def stabilizer_to_pauli(d, syndrome_matrix, add_logical: bool = False):
     # flatten so that we can refer to them by index of qubit/edge location!
     f = f.flatten()
     f = f[:-(d-1)] # last row of verticals does not exists!
-
+    f = f.astype(np.bool)
     # determine p for Z * f = p * f * Z
     # determines if log, measured observable should be flipped to account for coset pauli
     pauli_flip = bool(np.sum(f[index_log_Z(d)])%2)

@@ -18,7 +18,7 @@ circuit:
   special_parameter: {}
   type: steane
 decoder:
-  type: ml
+  type: mwpm
 noise_model:
   noise_rates:
   - 0.006309573444801929
@@ -74,4 +74,4 @@ noise_model:
   special_parameter: {}
   type: circ
 sampling:
-  num_shots: 2000
+  num_shots: 10000

@@ -1,7 +1,7 @@
 #!/usr/bin/zsh 
 
 ### Job Parameters 
-#SBATCH --time=03:30:00         
+#SBATCH --time=01:30:00         
 #SBATCH --job-name=reference
 
 ### %J ist der JobName
@@ -14,13 +14,7 @@ cd /home/fu494742/MasterArbeit/code
 ### Load Virtual Python
 source /home/fu494742/MasterArbeit/.venv/bin/activate 
 
-# short (not all d) (outdated)
-# 10k shots each TODO: Check Time
-# config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference_short/MWPM_X.yaml"
-# config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference_short/MWPM_Z.yaml"
-# output_folder="md_mr_mp_reference_short_v2" 
-
-# more d (assume 3:30:00) need 40 sets each (2.5k shots)
+# d [3,5,7,9] (0:32:00 last time) need 40 sets each (2.5k shots)
 # output_folder="md_mr_mp_reference_v2"
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference/MWPM_Z.yaml"
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_reference/MWPM_X.yaml"

@@ -1,6 +1,7 @@
 import numpy as np
 import numba 
 
+# 1-to-1 the same
 
 @numba.njit
 def error_converter(d,E):
@@ -10,10 +11,8 @@ def error_converter(d,E):
     f=np.zeros((2,d,d))
     for i in range(d-1):
         for j in range(d):
-            # 0 is horzitontal
             f[0,j,i] = E[i*(2*d-1)+j]
         for j in range(d-1):
-            # 1 is vertical
             f[1,j,i] = E[i*(2*d-1)+d+j]
     for j in range(d):
         f[0,j,d-1] = E[(d-1)*(2*d-1)+j]
@@ -56,7 +55,8 @@ def simulate_H_columns(M,j,log_gamma,f,p,d):
         B[2*i,2*i]=s[i]
         B[2*i+1,2*i+1]=s[i]
     log_gamma=log_gamma+np.log(np.sqrt(np.linalg.det(M+A)))
-    log_gamma=log_gamma+np.log(((1-p)**(d-np.sum(f[0,j,:]))*p**np.sum(f[0,j,:]))**2)
+    # log_gamma=log_gamma+np.log(((1-p)**(d-np.sum(f[0,j,:]))*p**np.sum(f[0,j,:]))**2)  # this line is dangerous 
+    log_gamma = log_gamma + 2 * (np.log(1-p)*(d-np.sum(f[0,j,:])) + np.log(p)*np.sum(f[0,j,:]))  
     M=A-(B@np.linalg.inv(M+A)@B)
     return M,log_gamma
 

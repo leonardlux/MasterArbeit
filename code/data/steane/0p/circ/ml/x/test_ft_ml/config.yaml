@@ -4,20 +4,19 @@ circuit:
   - 5
   - 7
   - 9
-  inital_state: '0'
-  observable: Z
+  - 11
+  - 13
+  - 15
+  inital_state: p
+  observable: X
   order: 0p
   qec_rounds:
   - 1
-  - 2
-  - 3
-  - 4
-  - 6
-  - 8
-  - 10
   special_parameter: {}
   type: steane
 decoder:
+  special_parameter:
+    ft_mwpm: false
   type: ml
 noise_model:
   noise_rates:
@@ -74,4 +73,4 @@ noise_model:
   special_parameter: {}
   type: circ
 sampling:
-  num_shots: 2000
+  num_shots: 1000

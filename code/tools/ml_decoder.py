@@ -103,7 +103,7 @@ def coset_probability(d,p,f, dtype):
     return coset_prob 
 
 @maybe_jit
-def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",dtype=np.float32):
+def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",dtype=np.float64):
     if stab_type.upper() == "Z":
         stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
     elif stab_type.upper() == "X": 
@@ -120,11 +120,12 @@ def decode_half_syndrome(d, p, h_syndrome, stab_type="Z",dtype=np.float32):
     p_L = coset_probability(d, p, f, dtype=dtype)
     obs_flip = True if p_I < p_L else False
     # c_f is the sign if we commute the logical with the pauli
-    return obs_flip, c_f
+    fault = False
+    return obs_flip, c_f, fault
 
 # log prob
 @maybe_jit
-def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype):
+def simulate_horizontal_log(d, j, M, log_gamma, weights, dtype, fault):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
 
@@ -132,72 +133,83 @@ def simulate_horizontal_log(d, j, m, log_gamma, weights, dtype):
     for i in range(d):
         qubit_index = j + (2 * d - 1) * i
         w = weights[qubit_index] 
-        log_gamma = log_gamma + np.log((1 + w**2) / 2)
+        log_gamma = log_gamma + np.log1p(w**2) - np.log(2)
         t = (1 - w**2) / (1 + w**2) 
         s = (2 * w)    / (1 + w**2) 
         A[2*i,   2*i+1] = t
         A[2*i+1, 2*i  ] =-t
         B[2*i,   2*i  ] = s
         B[2*i+1, 2*i+1] = s
-    
-    log_gamma = log_gamma + np.log(np.sqrt(np.linalg.det(m + A)))
+  
+    sgn, log_det = np.linalg.slogdet(M+A)
+    if sgn < 0:
+        fault = True
+    log_gamma = log_gamma + 0.5 * log_det
+
     # Avoid using direct calculations of inverse, as it might be more unstable ... https://nhigham.com/2022/03/28/what-is-the-matrix-inverse/?utm_source=chatgpt.com
     # Step 1: Solve (M + A) * X = B for X
-    x = np.linalg.solve(m + A, B)
+    x = np.linalg.solve(M + A, B)
     # Step 2: Compute B * X
-    m = A - B @ x 
+    M = A - B @ x 
     # m = a - (b @ np.linalg.inv(m + a) @ b)
-    return m, log_gamma
+    return M, log_gamma,fault
 
 @maybe_jit
-def simulate_vertical_log(d, j, m, log_gamma, weights, dtype):
+def simulate_vertical_log(d, j, M, log_gamma, weights, dtype, fault):
     A = np.zeros((2*d,2*d), dtype=dtype)
     B = np.zeros((2*d,2*d), dtype=dtype)
     B[0,0] = 1
-    B[2*d-1,2*d-1]=1
+    B[2*d-1,2*d-1] = 1
 
     for i in range(d-1):
         qubit_index = d + j + (2 * d - 1) * i 
         w = weights[qubit_index] 
-        log_gamma = log_gamma + np.log(1 + w**2)
+        log_gamma = log_gamma + np.log1p(w**2)
         t = (2 * w)    / (1 + w**2) 
         s = (1 - w**2) / (1 + w**2)
         A[2*i+1, 2*i+2] = t
         A[2*i+2, 2*i+1] =-t
         B[2*i+1, 2*i+1] = s
         B[2*i+2, 2*i+2] = s
-    log_gamma  = log_gamma +  np.log(np.sqrt(np.linalg.det(m + A)))
+    sgn, log_det = np.linalg.slogdet(M+A)
+    if sgn < 0:
+        fault = True
+    log_gamma = log_gamma + 0.5 * log_det
     # Avoid using direct calculations of inverse, as it might be more unstable ... https://nhigham.com/2022/03/28/what-is-the-matrix-inverse/?utm_source=chatgpt.com
     # Step 1: Solve (M + A) * X = B for X
-    x = np.linalg.solve(m + A, B)
+    x = np.linalg.solve(M + A, B)
     # Step 2: Compute B * X
-    m = A - B @ x
+    M = A - B @ x
     # m=a - (b @ np.linalg.inv(m + a) @ b)
-    return m, log_gamma
+    return M, log_gamma, fault
 
 @maybe_jit
 def coset_probability_log(d,p,f, dtype):
+    fault = False # keep track if possible faults appeared
+
     weights = calc_weights(p,f)
-
-    m = gen_m0(d, dtype)
-    log_gamma = np.log(2**(d-1))
-
+    M = gen_m0(d, dtype)
+    log_gamma = np.log(2)*(d-1)
 
     for j in range(d - 1):
-        m, log_gamma = simulate_horizontal_log(d, j, m, log_gamma, weights, dtype=dtype)
-        m, log_gamma = simulate_vertical_log(d, j, m, log_gamma, weights, dtype=dtype)
-    m, log_gamma = simulate_horizontal_log(d, d-1, m, log_gamma, weights, dtype=dtype) # d-1 due to 0 <= i < d and not 1<=i<=d
+        M, log_gamma, fault = simulate_horizontal_log(d, j, M, log_gamma, weights, dtype=dtype, fault=fault)
+        M, log_gamma, fault = simulate_vertical_log(d, j, M, log_gamma, weights, dtype=dtype, fault=fault)
+    M, log_gamma, fault = simulate_horizontal_log(d, d-1, M, log_gamma, weights, dtype=dtype, fault=fault) # d-1 due to 0 <= i < d and not 1<=i<=d
 
     # repr error prob
     n = d**2 + (d - 1)**2
     norm_f = np.sum(f)
-    pauli_error_prob = (1 - p)**(n - norm_f) * p**norm_f
+    log_pauli_error_prob = np.log1p(-p)*(n - norm_f) + np.log(p) * norm_f
 
-    log_coset_prob = 1/2 * log_gamma - 1/2 * np.log(2) + np.log(pauli_error_prob)  + 1/4*np.log(np.linalg.det(m + gen_m0(d, dtype)))
-    return log_coset_prob
+    sgn, log_det = np.linalg.slogdet(M+gen_m0(d,dtype))
+    if sgn < 0:
+        fault = True
+
+    log_coset_prob = 1/2 * log_gamma - 1/2 * np.log(2) + log_pauli_error_prob  + 1/4 * log_det
+    return log_coset_prob, fault
 
 @maybe_jit
-def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float32):
+def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float64):
     if stab_type.upper() == "Z":
         stabilizer_matrix = format_syndrome_to_matrix(d, h_syndrome)
     elif stab_type.upper() == "X":
@@ -205,16 +217,15 @@ def decode_half_syndrome_log(d, p, h_syndrome, stab_type="Z", dtype=np.float32):
         stabilizer_matrix = format_syndrome_to_matrix(d, rot_synd)
     else:
         raise ValueError("unexpected detector")
-    
     # prob of coset without logical error 
     f, c_f = stabilizer_to_pauli(d, stabilizer_matrix)
-    log_p_I = coset_probability_log(d, p, f, dtype=dtype)
+    log_p_I, fault = coset_probability_log(d, p, f, dtype=dtype)
     # prob of coset with logical error 
     f, _ = stabilizer_to_pauli(d, stabilizer_matrix, add_logical=True)
-    log_p_L = coset_probability_log(d, p, f, dtype=dtype)
+    log_p_L, fault = coset_probability_log(d, p, f, dtype=dtype)
 
     obs_flip = True if log_p_I < log_p_L else False
-    return obs_flip, c_f
+    return obs_flip, c_f, fault
 
 # arons code adapted 
 @maybe_jit
@@ -237,4 +248,6 @@ def decode_half_syndrome_aron(d, p, h_syndrome, stab_type="Z",dtype=None):
         error_converter(int(d), f_L),
         )
     obs_flip = True if p_I < p_L else False 
-    return obs_flip, c_f
+
+    fault = False # hardcoded because I do not check for this!
+    return obs_flip, c_f, fault 

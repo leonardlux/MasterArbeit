@@ -61,6 +61,7 @@ def gen_mwpm_matcher_shared_info(d, p, rounds, noise_model, observable):
 def gen_mwpm_matcher_surface_code(d, p, noise_model, observable):
     """
     matcher for repeated syndrome readout (only 1 round) and not including FT! 
+    NOT USED!
     """
     # generate noise model
     circ = generate_ft_surface_code_circuit(

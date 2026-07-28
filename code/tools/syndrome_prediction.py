@@ -62,12 +62,13 @@ def predict_MWPM(
     total_pred = (multi_round_pred + ft_predictions)%2
     total_pred = np.array(total_pred, dtype=bool)
 
-    return total_pred
+    fault_flags = np.zeros(detection_events.shape[0],dtype=np.bool) 
+    return total_pred, fault_flags
 
 """
 MWPM for REPEATED (standard) SYNDROME READOUT
 """
-# TODO something is wrong, last measurement error is at fault
+# TODO: DOES NOT WORK! Last measurement error is not fixed. One would need sliding window approach or similiar -> for upper bound, use full info version! 
 # The equations are at the moment not fully correct, here I use s_i = sum D_i, which is only true if the last measurement error is included 
 def predict_MWPM_rep_surface_code(
         detection_events, 
@@ -138,11 +139,13 @@ def predict_MWPM_rep_surface_code_full_info(
     d = distance
     p = error_rate
 
-    # shortcut of complete circuit 1 round with FT
+    # complete circuit and FT measurement is feed into decoder
     matcher = gen_mwpm_matcher_surface_code_with_FT(d, p, noise_model, observable=observable, rounds=rounds)
     total_pred = matcher.decode_batch(detection_events).flatten()
 
-    return total_pred 
+    # no faulty decoding -> trivial array
+    fault_flags = np.zeros(detection_events.shape[0],dtype=np.bool) 
+    return total_pred, fault_flags
 
 
 """
@@ -152,11 +155,13 @@ ML Decoding (for Steane code/assuming no measurement errors)
 @maybe_jit
 def decoding(d,p,observable,rel_synd, decode_half_syndrome_func, dtype):    
     num_shots, rounds, _ = rel_synd.shape
-    predictions = np.zeros((num_shots,rounds))
-    pauli_repr_flips = np.zeros((num_shots,rounds))
+    matrix_shape = (num_shots,rounds)
+    predictions = np.zeros(matrix_shape)
+    pauli_repr_flips = np.zeros(matrix_shape)
+    faults = np.zeros(matrix_shape)
     for i_round in numba.prange(rounds):
         for i_shot in range(num_shots): 
-            predictions[i_shot, i_round], pauli_repr_flips[i_shot,i_round] = decode_half_syndrome_func(
+            predictions[i_shot, i_round], pauli_repr_flips[i_shot,i_round], faults[i_shot,i_round] = decode_half_syndrome_func(
                 d,
                 p,
                 rel_synd[i_shot,i_round],
@@ -165,11 +170,22 @@ def decoding(d,p,observable,rel_synd, decode_half_syndrome_func, dtype):
             )
     multi_round_pred = np.sum(predictions,axis=1)%2
     multi_round_pauli_flip = np.sum(pauli_repr_flips, axis=1)%2
-    return multi_round_pred, multi_round_pauli_flip
+    # fault_flags = faults.any(axis=1) # not supported in numba, therefore done manually
+    fault_flags = np.zeros(faults.shape[0],dtype=np.bool)
+    for i in range(faults.shape[0]): # shots
+        flag = False
+        for j in range(faults.shape[1]): # rounds
+            if faults[i, j]:
+                flag = True
+                break
+        fault_flags[i] = flag
+
+    return multi_round_pred, multi_round_pauli_flip, fault_flags
 
 def factory_predict_func_ML(
-        decoding_func = decode_half_syndrome,
+        decoding_func = decode_half_syndrome_log,
         dtype = np.float64, # standard from numpy
+        ft_mwpm = True,
 ):
     def predict_ML(
             detection_events, 
@@ -202,16 +218,36 @@ def factory_predict_func_ML(
         # rel_synd[shot][round][i_stab]
 
         # Actual Decoding: 
-        multi_round_pred, multi_round_pauli_flip = decoding(d, p, observable, rel_synd,decoding_func, dtype)
+        multi_round_pred, multi_round_pauli_flip, fault_flags = decoding(d, p, observable, rel_synd, decoding_func, dtype)
 
-        # FT Decoding (MWPM)
-        z_stab = True if observable == "Z" else False
-        matcher = gen_mwpm_matcher(d, p, z_stab, noise_model)
-        ft_predictions = matcher.decode_batch(ft_synds).flatten()
+        # FT Decoding 
+        if ft_mwpm:
+            # MWPM
+            z_stab = True if observable == "Z" else False
+            matcher = gen_mwpm_matcher(d, p, z_stab, noise_model)
+            ft_predictions = matcher.decode_batch(ft_synds).flatten()
+        else:
+            # ML
+            num_shots, _, _ = rel_synd.shape
+            predictions_FT = np.zeros(num_shots)
+            pauli_repr_flips_FT= np.zeros(num_shots)
+            for i_shot in range(num_shots): 
+                predictions_FT[i_shot], pauli_repr_flips_FT[i_shot], faults_FT = decoding_func(
+                    d,
+                    p,
+                    ft_synds[i_shot],
+                    stab_type=observable, # the observable determines which stabilizers we need to decode
+                    dtype=dtype,
+                )
+                if faults_FT:
+                    fault_flags[i_shot] = faults_FT
+            ft_predictions = (predictions_FT + pauli_repr_flips_FT)%2
 
+            #modify fault flags
+            
         total_pred = (multi_round_pred + multi_round_pauli_flip + ft_predictions)%2
         total_pred = np.array(total_pred, dtype=bool) # convert to boolean values
-        return total_pred 
+        return total_pred, fault_flags
     return predict_ML
 
 
@@ -220,21 +256,26 @@ def config_to_predict_func(config):
     value = config["decoder"]["type"]
     if circuit_type == "steane":
         if value == "ml":
-            return factory_predict_func_ML()  # basic configuration
+            if  "special_parameter" in config["decoder"] and "ft_mwpm" in config["decoder"]["special_parameter"]:
+                return factory_predict_func_ML(
+                    ft_mwpm = config["decoder"]["special_parameter"]["ft_mwpm"],
+                )
+            else:
+                return factory_predict_func_ML()  # basic configuration
         elif value == "mwpm":
             return predict_MWPM
         elif value == "ml_test":
-            # test cases for ML decoding  
+            # test cases for ML decoding (check num. precission) 
             # Data Type options
             data_type = config["decoder"]["special_parameter"]["data_type"]
             if data_type == 16:
-                dtype = np.float16
+                dtype = np.float16 # not completly implemented
             elif data_type == 32:
                 dtype = np.float32
             elif data_type == 64:
                 dtype = np.float64
             elif data_type == 128:
-                dtype = np.float128
+                dtype = np.float128 # not completly implemented
             # Log or not (and aron or not?)
             decode_func_str = config["decoder"]["special_parameter"]["decode_str"]
             if decode_func_str == "log":
@@ -255,6 +296,7 @@ def config_to_predict_func(config):
 
     elif circuit_type == "surface":
         if value == "mwpm":
+            print("This Function is not working!")
             return predict_MWPM_rep_surface_code
         elif value == "mwpm_full_info":
             return predict_MWPM_rep_surface_code_full_info

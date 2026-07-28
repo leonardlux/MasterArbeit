@@ -1,12 +1,12 @@
 #!/usr/bin/zsh 
 
 ### Job Parameters 
-#SBATCH --time=00:22:00         
+#SBATCH --time=01:45:00         
 #SBATCH --job-name=multi_round
 
 ### %J ist der JobName
 #SBATCH --output=/home/fu494742/MasterArbeit/slum_outputs/output_MR_%j.txt    
-#SBATCH --array=1-27
+#SBATCH --array=1-50
 
 ### Program Code
 cd /home/fu494742/MasterArbeit/code
@@ -14,11 +14,11 @@ cd /home/fu494742/MasterArbeit/code
 ### Load Virtual Python
 source /home/fu494742/MasterArbeit/.venv/bin/activate 
 
-# config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_MR/ML_Z.yaml" # num_shots: 1k # 19:00 min
+# config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_MR/ML_Z.yaml" # num_shots: 2k # 40:00 min
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_MR/ML_X.yaml"  # 
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_MR/MWPM_Z.yaml" # 10 started num_shots: 10k # 6:20 
 # config_path="/home/fu494742/MasterArbeit/code/configs/md_mr_mp_MR/MWPM_X.yaml" # 10 started
 
-output_folder="md_1r_mp_MR"
+# output_folder="md_1r_mp_MR_v2_fault_det"
 
 python slurm_wrapper.py -c $config_path -o $output_folder -u ${SLURM_ARRAY_TASK_ID}

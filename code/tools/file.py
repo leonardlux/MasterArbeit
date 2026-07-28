@@ -64,7 +64,9 @@ def check_keys(data):
         "rounds",
         "noise_rates",
         "num_errors",
+        "num_faults",
         "num_shots",
+        "num_errors_faulty",
     ]
     if not all(key in necessary_keys for key in data.keys()):
         print(data.keys())
