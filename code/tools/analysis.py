@@ -160,6 +160,7 @@ def data_plot_log_error_rates(
         filename: str = "",
         title: str = "",
         reference_lines: bool = False,
+        plot_rejection_rate: bool = True,
         ):
     """
     This function plots all log errrot rates against the physical noise rate.
@@ -203,17 +204,30 @@ def data_plot_log_error_rates(
         # probability mask
         p_mask = (ps >= min_noise_rate[i_r]) & (ps <= max_noise_rate[i_r])
 
-        plot_diff_noise_level(
-            log_error_rates = log_error_rates[d_mask, i_r][:,p_mask],
-            y_errs = err_log_error_rates[d_mask, i_r][:,p_mask],
-            distances = distances[d_mask],
-            noise_set = ps[p_mask],
-            p_th=p_th[i_r],
-            err_p_th=err_p_th[i_r],
-            filename=filename,
-            title=title,
-            reference_lines=reference_lines,
-            rejection_rates=rejection_rates[d_mask,i_r][:,p_mask],
+        if plot_rejection_rate:
+            plot_diff_noise_level(
+                log_error_rates = log_error_rates[d_mask, i_r][:,p_mask],
+                y_errs = err_log_error_rates[d_mask, i_r][:,p_mask],
+                distances = distances[d_mask],
+                noise_set = ps[p_mask],
+                p_th=p_th[i_r],
+                err_p_th=err_p_th[i_r],
+                filename=filename,
+                title=title,
+                reference_lines=reference_lines,
+                rejection_rates=rejection_rates[d_mask,i_r][:,p_mask],
+                )
+        else: 
+            plot_diff_noise_level(
+                log_error_rates = log_error_rates[d_mask, i_r][:,p_mask],
+                y_errs = err_log_error_rates[d_mask, i_r][:,p_mask],
+                distances = distances[d_mask],
+                noise_set = ps[p_mask],
+                p_th=p_th[i_r],
+                err_p_th=err_p_th[i_r],
+                filename=filename,
+                title=title,
+                reference_lines=reference_lines,
             )
     pass
 

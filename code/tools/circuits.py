@@ -453,6 +453,7 @@ def generate_steane_circuit(distance: int = 3, rounds: int = 1, observable: str 
         circuit = circuit + circuit_aux_0 + circuit_aux_p  
         # Steane Connections/Entanglement! 
         index_physical, _, _ = index_qubits_surface_code(distance)
+        # X-stab
         # entangle C|0>NOT|Psi> 
         for i in index_physical:
             # CxNOTy: "CNOT",[x,y]
@@ -462,6 +463,7 @@ def generate_steane_circuit(distance: int = 3, rounds: int = 1, observable: str 
         # note the Hadamard is NOT! a log. Hadamard (not transversal)
         circuit.append("MR",index_physical + offset_per_log_qubit) 
 
+        # Z-stab
         # entangle C|Psi>NOT|p> 
         for i in index_physical:
             # CxNOTy: "CNOT",[x,y]

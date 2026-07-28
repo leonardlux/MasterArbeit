@@ -1,18 +1,22 @@
-Question?
-+ numerical precision 
-    + should I implement mwpm as input to ML decoding (as pauli frame)
-
 # ToDos 
+More measurements
+    + setup proper configs 100k shots at once -> 1 day calculating time? (check time limit)
+0. smaller p windows with larger distances
+    + into shifting distance window
+
+1. multi round higher distances
+    
 
 ## Open Todos in case of extra time
-
-0. FT decoding using ML <- implement!
 
 1. qubit init: basic approach show that this breaks
     + just as intuition
     + otherwise put in writing 
 
 2. win or lose beeing local in time (MWPM for multiple rounds of Steane Type QEC)
+
++ numerical precision 
+    + should I implement mwpm as input to ML decoding (as pauli frame)
         
 ## Question from midterm
 
@@ -22,9 +26,11 @@ Quantum memory under circuit noise use density matrix operations
 sub set sampling might be valid as a sampling method for low error prob
 show more asymptotic behavior (and explain the exponents fucntion)
 
+# Questions
 
+shor code, is this standard syndrome extraction?
 
-
+does unroateted surface code actually has hook errors?
 
 # 30.04 Thursday
 
