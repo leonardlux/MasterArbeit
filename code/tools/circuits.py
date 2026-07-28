@@ -95,7 +95,7 @@ def index_log_X(d, multi_row_logical:bool = False):
 
 # Stim only support relative measurement references  
 def rel_meas(circuit, meas):
-    # get relative inxex by absolute measurement index
+    # get relative index by absolute measurement index
     return meas - circuit.num_measurements
 
 def add_detectors(circuit, targets, offsets_stabilizer_measurements:list, offsets_measurements_to_be_stabilizer:list):
@@ -115,7 +115,7 @@ def add_detectors(circuit, targets, offsets_stabilizer_measurements:list, offset
 def measure_surface_code_stabilizer(distance, circuit, offset=0, tag=""):
 
     _, index_X_ancilla, index_Z_ancilla = index_qubits_surface_code(distance, offset)
-    # Initalize all physical qubits into a log. state by measurement of stabilizer
+    # Initialize all physical qubits into a log. state by measurement of stabilizer
     targets_X, targets_Z = index_stab_targets(distance, offset)
     # Site-/X-stabilizers
     circuit.append("H", index_X_ancilla, tag=tag)
@@ -150,7 +150,7 @@ def generate_surface_code_log_qubit_circuit(distance: int = 3, offset=0, state: 
     circuit = stim.Circuit()
 
     index_physical, index_X_ancilla, index_Z_ancilla = index_qubits_surface_code(distance, offset)
-    # init qubits by resetting them to 0 (technicly useless, but goal here is to do the implicit obvious)
+    # init qubits by resetting them to 0 (technically useless, but goal here is to do the implicit obvious)
     if state == "0": # |0>
         circuit.append("R", index_physical, tag=marker_tag)
     elif state == "p": # |+>
